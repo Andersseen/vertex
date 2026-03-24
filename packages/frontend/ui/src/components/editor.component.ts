@@ -22,18 +22,26 @@ import { VertexFile } from '@vertex/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="editor-container h-full w-full flex flex-col bg-[var(--p-surface-950)]">
-      <!-- Editor Header -->
-      <div class="editor-header flex items-center justify-between px-4 h-9 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-900)] select-none shrink-0" *ngIf="showHeader">
-        <div class="file-info flex items-center gap-2">
-          <i class="pi pi-file text-[11px] text-[var(--p-primary-500)]"></i>
-          <span class="file-name text-[11px] font-medium text-[var(--p-surface-100)]">{{ file?.name || 'Untitled' }}</span>
-          <span class="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-[var(--p-surface-800)] text-[var(--p-surface-400)] font-bold uppercase tracking-tighter">{{ file?.language || 'text' }}</span>
-          <span class="w-2 h-2 rounded-full bg-[var(--p-primary-500)] ml-1 animate-pulse" *ngIf="isDirty" title="Modified"></span>
+    <div class="editor-container h-full w-full flex flex-col bg-[var(--p-surface-950)] font-inter">
+      <!-- Editor Header / Tabs -->
+      <div class="editor-header flex items-center h-9 bg-[var(--p-surface-900)] select-none shrink-0 border-b border-[var(--p-surface-800)] shadow-sm" *ngIf="showHeader">
+        <div class="active-tab flex items-center gap-2 px-4 h-full bg-[var(--p-surface-950)] border-r border-[var(--p-surface-800)] relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--p-primary-500)]">
+          <i [class]="getFileIcon(file?.language) + ' text-[12px] opacity-80'"></i>
+          <span class="file-name text-[11px] font-semibold text-[var(--p-surface-100)] tracking-tight antialiased">{{ file?.name || 'Untitled' }}</span>
+          <div class="w-2 h-2 rounded-full border border-[var(--p-primary-500)] flex items-center justify-center ml-1 group cursor-pointer" *ngIf="isDirty" title="Modified">
+            <span class="w-1 h-1 rounded-full bg-[var(--p-primary-500)] animate-pulse"></span>
+          </div>
+          <button class="ml-2 p-0.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all">
+            <i class="pi pi-times text-[9px]"></i>
+          </button>
         </div>
-        <div class="editor-actions">
+        
+        <div class="flex-1"></div>
+        
+        <div class="editor-actions flex items-center gap-2 pr-3">
+          <span class="text-[9px] text-[var(--p-surface-500)] font-bold uppercase tracking-widest mr-2 opacity-50">{{ file?.language || 'text' }}</span>
           <button 
-            class="flex items-center gap-2 px-2.5 py-1 rounded text-[10px] bg-[var(--p-primary-600)] hover:bg-[var(--p-primary-500)] text-white transition-all duration-200 disabled:opacity-30 disabled:grayscale font-bold uppercase tracking-wide" 
+            class="flex items-center gap-2 px-3 py-1 rounded text-[10px] bg-[var(--p-surface-800)] hover:bg-[var(--p-surface-700)] text-[var(--p-surface-200)] border border-[var(--p-surface-700)] transition-all duration-200 disabled:opacity-30 font-bold uppercase tracking-wide active:scale-95" 
             (click)="onSave()" 
             [disabled]="!isDirty">
             <i class="pi pi-save text-[10px]"></i>
@@ -47,12 +55,13 @@ import { VertexFile } from '@vertex/types';
     </div>
   `,
   styles: [`
-    :host { display: block; height: 100%; width: 100%; }
+    :host { display: block; height: 100%; width: 100%; font-family: 'Inter', sans-serif; }
     .editor-host ::ng-deep .cm-editor { height: 100%; outline: none !important; background: transparent !important; }
-    .editor-host ::ng-deep .cm-scroller { font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace !important; font-size: 13px; line-height: 1.6; }
+    .editor-host ::ng-deep .cm-scroller { font-family: 'JetBrains Mono', monospace !important; font-size: 13px; line-height: 1.6; }
     .editor-host ::ng-deep .cm-gutters { background-color: var(--p-surface-950) !important; color: var(--p-surface-600) !important; border-right: 1px solid var(--p-surface-800) !important; }
     .editor-host ::ng-deep .cm-activeLineGutter { background-color: var(--p-surface-800) !important; color: var(--p-surface-100) !important; }
-    .editor-host ::ng-deep .cm-activeLine { background-color: rgba(255, 255, 255, 0.03) !important; }
+    .editor-host ::ng-deep .cm-activeLine { background-color: rgba(255, 255, 255, 0.02) !important; }
+    .editor-host ::ng-deep .cm-foldPlaceholder { background: var(--p-surface-800) !important; border: none !important; color: var(--p-surface-400) !important; }
   `]
 })
 export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
@@ -162,6 +171,20 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
       });
       this.isDirty = false;
     }
+  }
+
+  public getFileIcon(language?: string): string {
+    const iconMap: Record<string, string> = {
+      'typescript': 'pi pi-file-edit text-blue-400',
+      'javascript': 'pi pi-file-edit text-yellow-400',
+      'html': 'pi pi-code text-orange-500',
+      'css': 'pi pi-palette text-blue-500',
+      'json': 'pi pi-info-circle text-green-400',
+      'md': 'pi pi-file text-slate-400',
+      'rust': 'pi pi-cog text-orange-700',
+      'python': 'pi pi-bolt text-blue-300'
+    };
+    return iconMap[language?.toLowerCase() || ''] || 'pi pi-file text-slate-500';
   }
 
   focus(): void {

@@ -45,6 +45,7 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
+    "@angular/animations": "^21.2.5",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-css": "^6.3.1",
