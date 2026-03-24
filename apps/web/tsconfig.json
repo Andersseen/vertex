@@ -13,7 +13,13 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@vertex/ui": ["../../packages/frontend/ui/src/index.ts"],
+      "@vertex/core": ["../../packages/frontend/core/src/index.ts"],
+      "@vertex/types": ["../../packages/frontend/types/src/index.ts"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

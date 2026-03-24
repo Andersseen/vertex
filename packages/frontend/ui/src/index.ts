@@ -93,3 +93,6 @@ export {
   SidebarComponent,
   FolderTreeComponent,
 } from "./components/sidebar.component";
+export {
+  MainLayoutComponent
+} from './lib/layouts/main-layout.component';

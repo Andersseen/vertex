@@ -3,115 +3,6 @@ import { CommonModule } from '@angular/common';
 import { VertexFile, VertexFolder } from '@vertex/types';
 
 @Component({
-  selector: 'v-sidebar',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h3>Explorer</h3>
-        <div class="sidebar-actions">
-          <button class="action-btn" (click)="onNewFile()" title="New File">📄</button>
-          <button class="action-btn" (click)="onNewFolder()" title="New Folder">📁</button>
-        </div>
-      </div>
-      <div class="sidebar-content">
-        <div class="tree-view">
-          <v-folder-tree 
-            [folder]="workspaceFolder"
-            [activeFileId]="activeFileId"
-            (fileSelect)="onFileSelect($event)"
-            (folderToggle)="onFolderToggle($event)">
-          </v-folder-tree>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .sidebar {
-      width: 250px;
-      height: 100%;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .sidebar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-hover);
-      min-height: 36px;
-    }
-    
-    .sidebar-header h3 {
-      margin: 0;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    
-    .sidebar-actions {
-      display: flex;
-      gap: 4px;
-    }
-    
-    .action-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 2px;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    
-    .action-btn:hover {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
-    
-    .sidebar-content {
-      flex: 1;
-      overflow: auto;
-      padding: 4px 0;
-    }
-    
-    .tree-view {
-      padding: 0 4px;
-    }
-  `]
-})
-export class SidebarComponent {
-  @Input() workspaceFolder: VertexFolder | null = null;
-  @Input() activeFileId: string | null = null;
-  @Output() fileSelect = new EventEmitter<VertexFile>();
-  @Output() newFile = new EventEmitter<void>();
-  @Output() newFolder = new EventEmitter<void>();
-  @Output() folderToggle = new EventEmitter<VertexFolder>();
-
-  onFileSelect(file: VertexFile): void {
-    this.fileSelect.emit(file);
-  }
-
-  onNewFile(): void {
-    this.newFile.emit();
-  }
-
-  onNewFolder(): void {
-    this.newFolder.emit();
-  }
-
-  onFolderToggle(folder: VertexFolder): void {
-    this.folderToggle.emit(folder);
-  }
-}
-
-@Component({
   selector: 'v-folder-tree',
   standalone: true,
   imports: [CommonModule],
@@ -129,83 +20,46 @@ export class SidebarComponent {
           <span class="tree-name">{{ folder.name }}</span>
         </div>
         <div class="tree-children" *ngIf="folder.isExpanded">
-          <v-folder-tree
-            *ngFor="let child of folder.children"
-            [folder]="child"
-            [activeFileId]="activeFileId"
-            (fileSelect)="fileSelect.emit($event)"
-            (folderToggle)="folderToggle.emit($event)">
-          </v-folder-tree>
-          <div 
-            class="tree-item file-item"
-            *ngFor="let file of folder.children"
-            [class.active]="file.id === activeFileId"
-            (click)="onFileClick(file)">
-            <span class="tree-arrow"></span>
-            <span class="tree-icon">{{ getFileIcon(file.language) }}</span>
-            <span class="tree-name">{{ file.name }}</span>
-          </div>
+          <!-- Render sub-folders -->
+          <ng-container *ngFor="let child of folder.children">
+            <v-folder-tree
+              *ngIf="isFolder(child)"
+              [folder]="asFolder(child)"
+              [activeFileId]="activeFileId"
+              (fileSelect)="fileSelect.emit($event)"
+              (folderToggle)="folderToggle.emit($event)">
+            </v-folder-tree>
+          </ng-container>
+          
+          <!-- Render files -->
+          <ng-container *ngFor="let child of folder.children">
+            <div 
+              class="tree-item file-item"
+              *ngIf="isFile(child)"
+              [class.active]="child.id === activeFileId"
+              (click)="onFileClick(asFile(child))">
+              <span class="tree-arrow"></span>
+              <span class="tree-icon">{{ getFileIcon(asFile(child).language) }}</span>
+              <span class="tree-name">{{ child.name }}</span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .folder-tree {
-      user-select: none;
-    }
-    
-    .tree-item {
-      margin: 1px 0;
-    }
-    
-    .tree-content {
-      display: flex;
-      align-items: center;
-      padding: 2px 8px;
-      cursor: pointer;
-      border-radius: 2px;
-      gap: 4px;
-    }
-    
-    .tree-content:hover {
-      background: var(--surface-hover);
-    }
-    
-    .tree-arrow {
-      width: 12px;
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-    
-    .tree-icon {
-      font-size: 14px;
-    }
-    
-    .tree-name {
-      font-size: 13px;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    
-    .tree-children {
-      margin-left: 12px;
-    }
-    
-    .file-item .tree-content {
-      cursor: pointer;
-    }
-    
-    .file-item.active .tree-content {
-      background: var(--primary);
-      color: white;
-    }
-    
-    .file-item.active .tree-icon,
-    .file-item.active .tree-name {
-      color: white;
-    }
+    .folder-tree { user-select: none; }
+    .tree-item { margin: 1px 0; }
+    .tree-content { display: flex; align-items: center; padding: 2px 8px; cursor: pointer; border-radius: 2px; gap: 4px; }
+    .tree-content:hover { background: var(--p-surface-800); }
+    .tree-arrow { width: 12px; font-size: 10px; color: var(--p-surface-400); }
+    .tree-icon { font-size: 14px; }
+    .tree-name { font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--p-surface-100); }
+    .tree-children { margin-left: 12px; }
+    .file-item { display: flex; align-items: center; padding: 2px 8px; cursor: pointer; border-radius: 2px; gap: 4px; }
+    .file-item:hover { background: var(--p-surface-800); }
+    .file-item.active { background: var(--p-primary-600); }
+    .file-item.active .tree-name, .file-item.active .tree-icon { color: white; }
   `]
 })
 export class FolderTreeComponent {
@@ -224,26 +78,72 @@ export class FolderTreeComponent {
     this.fileSelect.emit(file);
   }
 
-  getFileIcon(language: string): string {
+  isFolder(item: VertexFile | VertexFolder): item is VertexFolder {
+    return (item as any).children !== undefined;
+  }
+
+  isFile(item: VertexFile | VertexFolder): item is VertexFile {
+    return (item as any).content !== undefined;
+  }
+
+  asFolder(item: VertexFile | VertexFolder): VertexFolder {
+    return item as VertexFolder;
+  }
+
+  asFile(item: VertexFile | VertexFolder): VertexFile {
+    return item as VertexFile;
+  }
+
+  getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
-      'typescript': '📘',
-      'javascript': '📜',
-      'html': '🌐',
-      'css': '🎨',
-      'json': '📋',
-      'md': '📝',
-      'txt': '📄',
-      'xml': '🏷️',
-      'yaml': '⚙️',
-      'sql': '🗄️',
-      'python': '🐍',
-      'rust': '🦀',
-      'go': '🐹',
-      'java': '☕',
-      'c': '⚙️',
-      'cpp': '⚙️',
-      'csharp': '💎'
+      'typescript': '📘', 'javascript': '📜', 'html': '🌐', 'css': '🎨',
+      'json': '📋', 'md': '📝', 'txt': '📄', 'python': '🐍', 'rust': '🦀'
     };
-    return iconMap[language.toLowerCase()] || '📄';
+    return iconMap[language?.toLowerCase() || ''] || '📄';
+  }
+}
+
+@Component({
+  selector: 'v-sidebar',
+  standalone: true,
+  imports: [CommonModule, FolderTreeComponent],
+  template: `
+    <div class="h-full flex flex-col bg-[var(--p-surface-900)] border-r border-[var(--p-surface-800)]">
+      <div class="flex items-center justify-between px-4 py-2 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-950)]">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-[var(--p-surface-400)]">Explorer</span>
+        <div class="flex gap-1">
+          <button class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] transition-colors" (click)="newFile.emit()">
+            <i class="pi pi-file-plus text-xs"></i>
+          </button>
+          <button class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] transition-colors" (click)="newFolder.emit()">
+            <i class="pi pi-folder-plus text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-auto p-2">
+        <v-folder-tree 
+          [folder]="workspaceFolder"
+          [activeFileId]="activeFileId"
+          (fileSelect)="onFileSelect($event)"
+          (folderToggle)="onFolderToggle($event)">
+        </v-folder-tree>
+      </div>
+    </div>
+  `
+})
+export class SidebarComponent {
+  @Input() workspaceFolder: VertexFolder | null = null;
+  @Input() activeFileId: string | null = null;
+  @Output() fileSelect = new EventEmitter<VertexFile>();
+  @Output() newFile = new EventEmitter<void>();
+  @Output() newFolder = new EventEmitter<void>();
+  @Output() folderToggle = new EventEmitter<VertexFolder>();
+
+  onFileSelect(file: VertexFile): void {
+    this.fileSelect.emit(file);
+  }
+
+  onFolderToggle(folder: VertexFolder): void {
+    this.folderToggle.emit(folder);
   }
 }

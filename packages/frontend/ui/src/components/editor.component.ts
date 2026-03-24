@@ -1,13 +1,20 @@
-import { Component, Input, Output, EventEmitter, AfterViewInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterViewInit, ViewChild, ElementRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EditorState, Extension } from '@codemirror/state';
-import { EditorView, basicSetup } from '@codemirror/view';
+import { EditorView, basicSetup } from 'codemirror';
 import { keymap } from '@codemirror/view';
-import { defaultKeymap } from '@codemirror/commands';
-import { searchKeymap } from '@codemirror/search';
-import { historyKeymap } from '@codemirror/commands';
-import { autocompletion } from '@codemirror/autocomplete';
-import { bracketMatching } from '@codemirror/language';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
+import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput } from '@codemirror/language';
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+import { json } from '@codemirror/lang-json';
+import { rust } from '@codemirror/lang-rust';
+import { python } from '@codemirror/lang-python';
+import { markdown } from '@codemirror/lang-markdown';
+import { oneDark } from '@codemirror/theme-one-dark';
 import { VertexFile } from '@vertex/types';
 
 @Component({
@@ -15,121 +22,40 @@ import { VertexFile } from '@vertex/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="editor-container">
-      <div class="editor-header" *ngIf="showHeader">
-        <div class="file-info">
-          <span class="file-name">{{ file?.name || 'Untitled' }}</span>
-          <span class="file-language">{{ file?.language || 'text' }}</span>
+    <div class="editor-container h-full w-full flex flex-col bg-[var(--p-surface-950)]">
+      <!-- Editor Header -->
+      <div class="editor-header flex items-center justify-between px-4 h-9 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-900)] select-none shrink-0" *ngIf="showHeader">
+        <div class="file-info flex items-center gap-2">
+          <i class="pi pi-file text-[11px] text-[var(--p-primary-500)]"></i>
+          <span class="file-name text-[11px] font-medium text-[var(--p-surface-100)]">{{ file?.name || 'Untitled' }}</span>
+          <span class="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-[var(--p-surface-800)] text-[var(--p-surface-400)] font-bold uppercase tracking-tighter">{{ file?.language || 'text' }}</span>
+          <span class="w-2 h-2 rounded-full bg-[var(--p-primary-500)] ml-1 animate-pulse" *ngIf="isDirty" title="Modified"></span>
         </div>
         <div class="editor-actions">
-          <button class="action-btn" (click)="save()" [disabled]="!isDirty">
-            💾 Save
+          <button 
+            class="flex items-center gap-2 px-2.5 py-1 rounded text-[10px] bg-[var(--p-primary-600)] hover:bg-[var(--p-primary-500)] text-white transition-all duration-200 disabled:opacity-30 disabled:grayscale font-bold uppercase tracking-wide" 
+            (click)="onSave()" 
+            [disabled]="!isDirty">
+            <i class="pi pi-save text-[10px]"></i>
+            <span>Save</span>
           </button>
         </div>
       </div>
-      <div #editorHost class="editor-host"></div>
+      
+      <!-- Editor View -->
+      <div #editorHost class="editor-host flex-1 overflow-hidden"></div>
     </div>
   `,
   styles: [`
-    .editor-container {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: var(--surface);
-    }
-    
-    .editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-hover);
-      min-height: 40px;
-    }
-    
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .file-name {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 14px;
-    }
-    
-    .file-language {
-      background: var(--primary);
-      color: white;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-    
-    .editor-actions {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .action-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .action-btn:hover:not(:disabled) {
-      background: var(--primary-hover);
-    }
-    
-    .action-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .editor-host {
-      flex: 1;
-      overflow: auto;
-    }
-    
-    .editor-host .cm-editor {
-      height: 100%;
-    }
-    
-    .editor-host .cm-focused {
-      outline: none;
-    }
-    
-    .editor-host .cm-content {
-      padding: 16px;
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    
-    .editor-host .cm-line {
-      padding: 0 0 0 4px;
-    }
-    
-    .editor-host .cm-gutter {
-      background: var(--surface-hover);
-      border-right: 1px solid var(--border);
-    }
-    
-    .editor-host .cm-gutterElement {
-      padding: 0 8px 0 16px;
-      color: var(--text-muted);
-    }
+    :host { display: block; height: 100%; width: 100%; }
+    .editor-host ::ng-deep .cm-editor { height: 100%; outline: none !important; background: transparent !important; }
+    .editor-host ::ng-deep .cm-scroller { font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace !important; font-size: 13px; line-height: 1.6; }
+    .editor-host ::ng-deep .cm-gutters { background-color: var(--p-surface-950) !important; color: var(--p-surface-600) !important; border-right: 1px solid var(--p-surface-800) !important; }
+    .editor-host ::ng-deep .cm-activeLineGutter { background-color: var(--p-surface-800) !important; color: var(--p-surface-100) !important; }
+    .editor-host ::ng-deep .cm-activeLine { background-color: rgba(255, 255, 255, 0.03) !important; }
   `]
 })
-export class EditorComponent implements AfterViewInit, OnDestroy {
+export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() file: VertexFile | null = null;
   @Input() showHeader = true;
   @Input() extensions: Extension[] = [];
@@ -139,14 +65,39 @@ export class EditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editorHost', { static: true }) editorHost!: ElementRef<HTMLDivElement>;
 
   private editorView: EditorView | null = null;
-  private isDirty = false;
+  public isDirty = false;
 
   ngAfterViewInit(): void {
     this.initializeEditor();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['file'] && !changes['file'].firstChange && this.editorView) {
+      this.updateContent(this.file?.content || '');
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroyEditor();
+  }
+
+  private getLanguageExtension(lang?: string): Extension {
+    switch (lang?.toLowerCase()) {
+      case 'javascript':
+      case 'typescript':
+      case 'ts':
+      case 'js':
+        return javascript({ typescript: true });
+      case 'html': return html();
+      case 'css': return css();
+      case 'json': return json();
+      case 'rust': return rust();
+      case 'python': return python();
+      case 'markdown':
+      case 'md':
+        return markdown();
+      default: return [];
+    }
   }
 
   private initializeEditor(): void {
@@ -154,42 +105,27 @@ export class EditorComponent implements AfterViewInit, OnDestroy {
       doc: this.file?.content || '',
       extensions: [
         basicSetup,
-        keymap.of([...defaultKeymap, ...searchKeymap, ...historyKeymap]),
-        autocompletion(),
+        history(),
+        foldGutter(),
+        indentOnInput(),
         bracketMatching(),
+        closeBrackets(),
+        autocompletion(),
+        highlightSelectionMatches(),
+        keymap.of([
+          ...closeBracketsKeymap,
+          ...defaultKeymap,
+          ...searchKeymap,
+          ...historyKeymap,
+          ...foldKeymap,
+          ...completionKeymap,
+        ]),
+        oneDark,
+        this.getLanguageExtension(this.file?.language),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             this.isDirty = true;
             this.contentChange.emit(update.state.doc.toString());
-          }
-        }),
-        EditorView.theme({
-          '&': {
-            color: 'var(--text)',
-            backgroundColor: 'var(--surface)'
-          },
-          '.cm-content': {
-            caretColor: 'var(--text)'
-          },
-          '.cm-cursor, .cm-dropCursor': {
-            borderLeftColor: 'var(--text)'
-          },
-          '.cm-selectionBackground, ::selection': {
-            backgroundColor: 'var(--selection)'
-          },
-          '.cm-focused .cm-selectionBackground': {
-            backgroundColor: 'var(--selection-focused)'
-          },
-          '.cm-gutters': {
-            backgroundColor: 'var(--surface-hover)',
-            color: 'var(--text-muted)',
-            border: 'none'
-          },
-          '.cm-activeLineGutter': {
-            backgroundColor: 'var(--surface-hover)'
-          },
-          '.cm-activeLine': {
-            backgroundColor: 'var(--surface-hover)'
           }
         }),
         ...this.extensions
@@ -229,8 +165,6 @@ export class EditorComponent implements AfterViewInit, OnDestroy {
   }
 
   focus(): void {
-    if (this.editorView) {
-      this.editorView.focus();
-    }
+    this.editorView?.focus();
   }
 }

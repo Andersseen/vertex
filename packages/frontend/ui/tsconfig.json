@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@vertex/types": ["../types/src/index.ts"],
+      "@vertex/core": ["../core/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

@@ -9,7 +9,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@vertex/types": "workspace:*"
+    "@vertex/types": "workspace:*",
+    "@angular/core": "^21.2.0",
+    "rxjs": "~7.8.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
