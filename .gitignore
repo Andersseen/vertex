@@ -4,6 +4,14 @@
 node_modules
 .pnp
 .pnp.js
+bun.lockb
+
+# Package managers
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Local env files
 .env
@@ -14,6 +22,7 @@ node_modules
 
 # Testing
 coverage
+.nyc_output
 
 # Turbo
 .turbo
@@ -24,6 +33,51 @@ coverage
 # Build Outputs
 .next/
 out/
+dist/
+build/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Tauri specific
+**/src-tauri/target/
+**/src-tauri/Cargo.lock
+
+# Sidecar binaries
+**/sidecar-bin*
+**/sidecar-bin-*
+
+# Angular specific
+.angular/
+.next/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
 build
 dist
 

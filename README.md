@@ -1,159 +1,77 @@
-# Turborepo starter
+# Vertex IDE
 
-This Turborepo starter is maintained by the Turborepo core team.
+Un IDE ligero construido con Tauri, Angular, CodeMirror y Bun.
 
-## Using this example
+## Arquitectura
 
-Run the following command:
+- **Frontend**: Angular + CodeMirror
+- **Backend**: Bun + Hono (sidecar)
+- **Desktop**: Tauri (Rust)
+- **Monorepo**: Turborepo
+- **Package Manager**: Bun
 
-```sh
-npx create-turbo@latest
+## Scripts disponibles
+
+### Desarrollo
+
+```bash
+# Frontend (Angular) - puerto 4200
+bun ui:dev
+
+# Backend (Sidecar API) - puerto 3001
+bun sidecar:dev
+
+# App de escritorio completa (Tauri + Angular)
+bun tauri:dev
+
+# Todo junto (Backend + App Desktop)
+bun dev:all
 ```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
 
 ### Build
 
-To build all apps and packages, run the following command:
+```bash
+# Frontend
+bun ui:build
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+# Backend
+bun sidecar:build
 
-```sh
-cd my-turborepo
-turbo build
+# Todo el proyecto
+bun build
 ```
 
-Without global `turbo`, use your package manager:
+## Arquitectura de Sidecar
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+El sidecar es un servidor API ligero que corre en Bun + Hono:
+
+- Puerto: 3001 (configurable via PORT)
+- Endpoints:
+  - `GET /` - Información del servicio
+  - `GET /health` - Health check
+
+## Estructura
+
+```
+vertex/
+├── apps/
+│   └── vertex-ui/          # Frontend Angular + Tauri
+├── packages/
+│   └── vertex-sidecar/     # Backend API con Bun + Hono
+└── turbo.json              # Configuración de Turborepo
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Desarrollo
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+1. Instalar dependencias: `bun install`
+2. Iniciar frontend: `bun ui:dev`
+3. Iniciar backend: `bun sidecar:dev`
+4. Iniciar app completa: `bun app:dev`
 
-```sh
-turbo build --filter=docs
-```
+## Por qué esta arquitectura?
 
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **Tauri vs Electron**: Más ligero, mejor rendimiento, menos consumo de RAM
+- **CodeMirror vs Monaco**: Más modular, mejor para personalización
+- **Bun vs Node**: Más rápido, bundler integrado
+- **Angular**: Ecosistema maduro, TypeScript first
+- **Hono**: Framework web minimalista y rápido para Bun
