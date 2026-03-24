@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "identifier": "com.vertex.ide",
   "build": {
-    "frontendDist": "../dist/vertex-ui/browser",
-    "devUrl": "http://localhost:4200",
+    "frontendDist": "../dist/desktop/browser",
+    "devUrl": "http://localhost:4201",
     "beforeDevCommand": "bun run start",
     "beforeBuildCommand": "bun run build"
   },

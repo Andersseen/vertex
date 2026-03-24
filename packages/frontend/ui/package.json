@@ -1,0 +1,27 @@
+{
+  "name": "@vertex/ui",
+  "version": "0.1.0",
+  "description": "Vertex IDE - UI Components",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "ng build",
+    "test": "ng test"
+  },
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@vertex/types": "workspace:*",
+    "@vertex/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.2.3",
+    "@angular/cli": "^21.2.3",
+    "@angular/compiler-cli": "^21.2.0",
+    "typescript": "~5.9.2"
+  },
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0"
+  }
+}

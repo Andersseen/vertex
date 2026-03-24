@@ -1,0 +1,16 @@
+{
+  "name": "@vertex/types",
+  "version": "0.1.0",
+  "description": "Vertex IDE - Shared TypeScript types",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

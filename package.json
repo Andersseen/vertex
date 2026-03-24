@@ -7,13 +7,18 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "ui:dev": "cd apps/vertex-ui && bun run start",
-    "ui:build": "cd apps/vertex-ui && bun run build",
-    "tauri:dev": "cd apps/vertex-ui && source ~/.cargo/env && bun run tauri dev",
-    "sidecar:dev": "cd packages/vertex-sidecar && bun run dev",
-    "sidecar:build": "cd packages/vertex-sidecar && bun run build",
-    "app:dev": "bunx turbo run tauri:dev",
-    "dev:all": "concurrently \"bun sidecar:dev\" \"bun tauri:dev\""
+    "test": "turbo run test",
+    "test:e2e": "cd apps/web && bun run test:e2e",
+    "test:e2e:ui": "cd apps/web && bun run test:e2e:ui",
+    "web:dev": "cd apps/web && bun run start",
+    "web:build": "cd apps/web && bun run build",
+    "web:test": "cd apps/web && bun run test",
+    "desktop:dev": "cd apps/desktop && source ~/.cargo/env && bun run tauri:dev",
+    "desktop:build": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
+    "sidecar:dev": "cd packages/backend/sidecar && bun run dev",
+    "sidecar:build": "cd packages/backend/sidecar && bun run build",
+    "dev:all": "concurrently \"bun sidecar:dev\" \"bun web:dev\"",
+    "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -28,7 +33,8 @@
   "packageManager": "bun@1.3.11",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/frontend/*",
+    "packages/backend/*"
   ],
   "module": "index.ts",
   "type": "module"

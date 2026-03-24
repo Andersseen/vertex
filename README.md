@@ -10,29 +10,65 @@ Un IDE ligero construido con Tauri, Angular, CodeMirror y Bun.
 - **Monorepo**: Turborepo
 - **Package Manager**: Bun
 
+## Estructura del Proyecto
+
+```
+vertex/
+├── apps/
+│   ├── web/              # Angular web app
+│   └── desktop/          # Tauri desktop app
+├── packages/
+│   ├── frontend/         # Shared frontend libs
+│   │   ├── types/        # TypeScript types
+│   │   ├── core/         # Core services
+│   │   └── ui/           # UI components
+│   └── backend/
+│       └── sidecar/      # Bun + Hono API
+└── turbo.json            # Configuración de Turborepo
+```
+
 ## Scripts disponibles
 
 ### Desarrollo
 
 ```bash
-# Frontend (Angular) - puerto 4200
-bun ui:dev
+# Web frontend (Angular) - puerto 4200
+bun web:dev
 
-# Backend (Sidecar API) - puerto 3001
+# Desktop app (Tauri + Angular)
+bun desktop:dev
+
+# Backend API (Sidecar) - puerto 3001
 bun sidecar:dev
 
-# App de escritorio completa (Tauri + Angular)
-bun tauri:dev
-
-# Todo junto (Backend + App Desktop)
+# Todo junto (Backend + Web)
 bun dev:all
+
+# Todo junto (Backend + Desktop)
+bun dev:desktop
+```
+
+### Testing
+
+```bash
+# Unit tests
+bun test
+
+# E2E tests (solo web)
+bun test:e2e
+
+# E2E con UI
+bun test:e2e:ui
 ```
 
 ### Build
 
 ```bash
-# Frontend
-bun ui:build
+# Web
+bun web:build
+
+# Desktop
+bun desktop:build
 
 # Backend
 bun sidecar:build
@@ -50,27 +86,32 @@ El sidecar es un servidor API ligero que corre en Bun + Hono:
   - `GET /` - Información del servicio
   - `GET /health` - Health check
 
-## Estructura
-
-```
-vertex/
-├── apps/
-│   └── vertex-ui/          # Frontend Angular + Tauri
-├── packages/
-│   └── vertex-sidecar/     # Backend API con Bun + Hono
-└── turbo.json              # Configuración de Turborepo
-```
-
 ## Desarrollo
 
 1. Instalar dependencias: `bun install`
-2. Iniciar frontend: `bun ui:dev`
+2. Iniciar frontend: `bun web:dev`
 3. Iniciar backend: `bun sidecar:dev`
-4. Iniciar app completa: `bun app:dev`
+4. Iniciar app completa: `bun desktop:dev`
+
+## Testing Strategy
+
+### Unit Tests
+
+- Vitest para packages
+- Angular CLI testing para apps
+
+### E2E Tests
+
+- Playwright para web app
+- Tests corren solo en web (misma UI que desktop)
+- Multi-browser: Chromium, Firefox, Safari
 
 ## Por qué esta arquitectura?
 
-- **Tauri vs Electron**: Más ligero, mejor rendimiento, menos consumo de RAM
+- **Apps separadas**: Web independiente vs Desktop con APIs nativas
+- **Packages compartidos**: Sin duplicación de código
+- **Testing eficiente**: E2E solo en web, misma UI en desktop
+- **Tauri vs Electron**: Más ligero, mejor rendimiento
 - **CodeMirror vs Monaco**: Más modular, mejor para personalización
 - **Bun vs Node**: Más rápido, bundler integrado
 - **Angular**: Ecosistema maduro, TypeScript first
