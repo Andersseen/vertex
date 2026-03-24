@@ -15,8 +15,12 @@
     "web:test": "cd apps/web && bun run test",
     "desktop:dev": "cd apps/desktop && source ~/.cargo/env && bun run tauri:dev",
     "desktop:build": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
+    "desktop:build:debug": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build --debug",
+    "desktop:build:release": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
     "sidecar:dev": "cd packages/backend/sidecar && bun run dev",
     "sidecar:build": "cd packages/backend/sidecar && bun run build",
+    "package:desktop": "bun sidecar:build && bun desktop:build:release",
+    "package:desktop:debug": "bun sidecar:build && bun desktop:build:debug",
     "dev:all": "concurrently \"bun sidecar:dev\" \"bun web:dev\"",
     "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
   },
