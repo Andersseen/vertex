@@ -1,0 +1,91 @@
+@use "../../styles/theme" as *;
+
+.bottom-panel {
+  background-color: $surface-950;
+  color: $surface-100;
+  border-top: 1px solid $surface-800;
+  font-family: $font-mono;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+  position: relative;
+  box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bottom-panel-header {
+  background-color: $surface-900;
+  border-bottom: 1px solid $surface-800;
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 32px;
+  user-select: none;
+}
+
+.tab-item {
+  padding: 0 1.25rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: $surface-400;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-right: 1px solid $surface-800;
+  border-left: none;
+  border-top: none;
+  border-bottom: none;
+  background: none;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+
+  &:hover {
+    color: $surface-100;
+    background-color: $surface-800;
+  }
+
+  &.active {
+    color: $surface-0;
+    background-color: $surface-950;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: $primary-500;
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+    }
+  }
+}
+
+.console-content-vx {
+  font-family: $font-mono;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 1rem;
+  color: $surface-300;
+  white-space: pre-wrap;
+  display: block;
+}
+
+.prob-item:hover {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.05), transparent);
+}
+
+// Utility classes for template
+.text-red-400 { color: #f87171 !important; }
+.text-amber-400 { color: #fbbf24 !important; }
+.text-green-400 { color: #4ade80 !important; }
+.text-blue-400 { color: #60a5fa !important; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}

@@ -1,26 +1,44 @@
 {
   "name": "vertex",
-  "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "ui:dev": "cd apps/vertex-ui && bun run start",
-    "ui:build": "cd apps/vertex-ui && bun run build",
-    "tauri:dev": "cd apps/vertex-ui && source ~/.cargo/env && bun run tauri dev",
-    "sidecar:dev": "cd packages/vertex-sidecar && bun run dev",
-    "sidecar:build": "cd packages/vertex-sidecar && bun run build",
-    "app:dev": "bunx turbo run tauri:dev",
-    "dev:all": "concurrently \"bun sidecar:dev\" \"bun tauri:dev\""
+    "typecheck": "turbo run check-types",
+    "test": "turbo run test",
+    "test:e2e": "cd apps/web && bun run test:e2e",
+    "test:e2e:ui": "cd apps/web && bun run test:e2e:ui",
+    "web:dev": "cd apps/web && bun run start",
+    "web:build": "cd apps/web && bun run build",
+    "web:test": "cd apps/web && bun run test",
+    "web:deploy": "cd apps/web && bun run deploy",
+    "desktop:dev": "cd apps/desktop && source ~/.cargo/env && bun run tauri:dev",
+    "desktop:build": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
+    "desktop:build:debug": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build --debug",
+    "desktop:build:release": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
+    "sidecar:dev": "cd packages/backend/sidecar && bun run dev",
+    "sidecar:build": "cd packages/backend/sidecar && bun run build",
+    "package:desktop": "bun sidecar:build && bun desktop:build:release",
+    "package:desktop:debug": "bun sidecar:build && bun desktop:build:debug",
+    "dev:all": "concurrently \"bun sidecar:dev\" \"bun web:dev\"",
+    "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
+    "@angular-eslint/eslint-plugin": "^21.3.1",
+    "@angular-eslint/template-parser": "^21.3.1",
+    "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "concurrently": "^9.1.0",
+    "eslint": "^10.1.0",
     "prettier": "^3.7.4",
     "turbo": "^2.8.20",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.57.2"
   },
   "engines": {
     "node": ">=18"
@@ -28,8 +46,30 @@
   "packageManager": "bun@1.3.11",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/frontend/*",
+    "packages/backend/*"
   ],
   "module": "index.ts",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@angular/animations": "^21.2.5",
+    "@codemirror/autocomplete": "^6.20.1",
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lang-rust": "^6.0.2",
+    "@codemirror/language": "^6.12.2",
+    "@codemirror/search": "^6.6.0",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@codemirror/view": "^6.40.0",
+    "@primeng/themes": "^21.0.4",
+    "codemirror": "^6.0.2",
+    "primeicons": "^7.0.0",
+    "primeng": "^21.1.3"
+  }
 }

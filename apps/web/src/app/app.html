@@ -1,0 +1,28 @@
+<v-main-layout>
+  <!-- Left Sidebar: File Explorer -->
+  <v-sidebar
+    sidebar
+    [workspaceFolder]="rootFolder()"
+    [activeFileId]="activeFileId()"
+    (fileSelect)="onFileSelect($event)"
+  ></v-sidebar>
+
+  <!-- Main Editor Area -->
+  <div editor class="vx-flex vx-flex-col vx-h-full vx-overflow-hidden vx-bg-950">
+    <!-- Tab Bar -->
+    <v-tabs
+      [files]="openFiles()"
+      [activeFileId]="activeFileId()"
+      (tabSelect)="onTabSelect($event)"
+      (tabClose)="onTabClose($event)"
+    ></v-tabs>
+
+    <!-- Code Editor -->
+    <div class="vx-flex-1 vx-overflow-hidden">
+      <v-editor [file]="getActiveFile() || null" [showHeader]="false"></v-editor>
+    </div>
+  </div>
+
+  <!-- Bottom Panel Slot -->
+  <v-bottom-panel bottom></v-bottom-panel>
+</v-main-layout>

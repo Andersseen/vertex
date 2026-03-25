@@ -1,0 +1,13 @@
+<v-main-layout>
+  <v-sidebar
+    sidebar
+    [workspaceFolder]="rootFolder()"
+    [activeFileId]="activeFile().id"
+    (fileSelect)="onFileSelect($event)"
+  >
+  </v-sidebar>
+
+  <v-editor editor [file]="activeFile()" [showHeader]="true"> </v-editor>
+
+  <v-bottom-panel bottom></v-bottom-panel>
+</v-main-layout>

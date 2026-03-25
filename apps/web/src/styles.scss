@@ -1,0 +1,55 @@
+@use "../../../packages/frontend/ui/src/styles/theme" as *;
+@use "../../../packages/frontend/ui/src/styles/layout" as *;
+
+html, body {
+  @include full-screen;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: $surface-950;
+  color: $surface-0;
+  font-family: $font-inter;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Animations using SCSS variables */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.vx-animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.vx-animate-fade-in { animation: fadeIn 0.4s ease-out; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $surface-700;
+  border-radius: 10px;
+  &:hover { background: $surface-600; }
+}
+
+.font-mono { font-family: $font-mono; }
+.font-inter { font-family: $font-inter; }
+
+:root {
+  --p-primary-500: #6366f1;
+  --p-primary-600: #4f46e5;
+  --p-primary-700: #4338ca;
+  --p-surface-0: #ffffff;
+  --p-surface-950: #020617;
+  color-scheme: dark;
+}

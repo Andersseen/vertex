@@ -1,0 +1,72 @@
+@use "theme" as *;
+
+// Global Layout Classes (replaces -vx system with standardized SCSS)
+.vx-layout {
+  @include full-screen;
+  display: flex;
+  flex-direction: column;
+  background-color: $surface-950;
+  color: $surface-0;
+  overflow: hidden;
+  font-family: $font-inter;
+}
+
+.vx-flex { display: flex; }
+.vx-flex-col { flex-direction: column; }
+.vx-flex-row { flex-direction: row; }
+.vx-items-center { align-items: center; }
+.vx-items-start { align-items: flex-start; }
+.vx-justify-between { justify-content: space-between; }
+.vx-justify-center { justify-content: center; }
+.vx-flex-1 { flex: 1 1 0%; }
+.vx-h-full { height: 100%; }
+.vx-w-full { width: 100%; }
+.vx-overflow-hidden { overflow: hidden; }
+.vx-relative { position: relative; }
+
+// Utility Gaps
+.vx-gap-0 { gap: 0; }
+.vx-gap-1 { gap: 0.25rem; }
+.vx-gap-2 { gap: 0.5rem; }
+.vx-gap-3 { gap: 0.75rem; }
+.vx-gap-4 { gap: 1rem; }
+
+// Utility Backgrounds
+.vx-bg-950 { background-color: $surface-950; }
+.vx-bg-900 { background-color: $surface-900; }
+.vx-bg-800 { background-color: $surface-800; }
+
+// Utility Borders
+.vx-border-b { border-bottom: 1px solid $surface-800; }
+.vx-border-t { border-top: 1px solid $surface-800; }
+.vx-border-r { border-right: 1px solid $surface-800; }
+.vx-border-l { border-left: 1px solid $surface-800; }
+
+// Status Bar
+.vx-statusbar {
+  font-family: $font-mono;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100%;
+  padding: 0 1rem;
+  height: 1.75rem !important;
+  background-color: $surface-900;
+  border-top: 1px solid $surface-800;
+  font-size: 11px;
+}
+
+.vx-divider {
+  display: inline-block;
+  width: 1px;
+  height: 1.1rem;
+  background-color: $surface-800;
+  margin: 0 0.5rem;
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+.vx-text-success { color: $success !important; }
+.vx-text-warning { color: $warning !important; }
+.vx-text-error { color: $error !important; }
+.vx-text-info { color: $info !important; }

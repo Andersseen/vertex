@@ -1,0 +1,133 @@
+<div class="vx-layout">
+  <!-- Top Toolbar -->
+  <p-toolbar class="vx-toolbar">
+    <ng-template pTemplate="start">
+      <div class="vx-flex vx-items-center vx-gap-2 pl-3">
+        <div class="vx-logo-container">
+          <span class="vx-logo-text">V</span>
+        </div>
+        <span class="text-[11px] font-bold tracking-[0.2em] text-[var(--p-surface-300)] uppercase antialiased">
+          Vertex <span class="vx-text-info">IDE</span>
+        </span>
+        <div class="vx-divider"></div>
+        <div class="vx-flex vx-items-center vx-gap-2">
+          <button class="vx-menu-btn">File</button>
+          <button class="vx-menu-btn">Edit</button>
+          <button class="vx-menu-btn">Selection</button>
+          <button class="vx-menu-btn">View</button>
+          <button class="vx-menu-btn">Go</button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="center">
+      <div class="vx-search-container group shadow-sm">
+        <i class="pi pi-search text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)]"></i>
+        <span class="text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)] vx-flex-1">
+          Search components, files, actions...
+        </span>
+        <span class="text-[9px] text-[var(--p-surface-600)] vx-bg-800 px-1.5 py-0.5 rounded border border-[var(--p-surface-700)]">
+          ⌘K
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <div class="vx-flex vx-items-center vx-gap-2 pr-3">
+        <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
+          <i class="pi pi-bell text-[12px]"></i>
+        </button>
+        <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
+          <i class="pi pi-cog text-[12px]"></i>
+        </button>
+        <div class="w-7 h-7 rounded-full vx-bg-800 vx-flex vx-items-center vx-justify-center border border-[var(--p-surface-600)] cursor-pointer hover:border-[var(--p-primary-500)] transition-all ml-1 shadow-sm">
+          <i class="pi pi-user text-[11px] text-[var(--p-surface-300)]"></i>
+        </div>
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <!-- Main Body -->
+  <main class="vx-main-content">
+    <p-splitter
+      [style]="{ height: '100%', border: 'none', background: 'transparent' }"
+      [panelSizes]="[18, 82]"
+      [minSizes]="[10, 30]"
+      gutterSize="4"
+    >
+      <!-- Sidebar Panel -->
+      <ng-template pTemplate="content">
+        <div class="vx-h-full vx-w-full vx-flex vx-flex-col vx-bg-900 vx-border-r">
+          <ng-content select="[sidebar]"></ng-content>
+        </div>
+      </ng-template>
+
+      <!-- Editor & Bottom Panel -->
+      <ng-template pTemplate="content">
+        <p-splitter
+          layout="vertical"
+          [style]="{ height: '100%', border: 'none', background: 'transparent' }"
+          [panelSizes]="[72, 28]"
+          [minSizes]="[40, 10]"
+          gutterSize="4"
+        >
+          <ng-template pTemplate="content">
+            <div class="vx-h-full vx-flex vx-flex-col vx-bg-950">
+              <ng-content select="[editor]"></ng-content>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="content">
+            <div class="vx-h-full vx-bg-900 vx-overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]">
+              <ng-content select="[bottom]"></ng-content>
+            </div>
+          </ng-template>
+        </p-splitter>
+      </ng-template>
+    </p-splitter>
+  </main>
+
+  <footer class="vx-statusbar">
+    <div class="vx-flex vx-items-center vx-gap-4 vx-h-full">
+      <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
+        <i class="pi pi-sync text-[10px] animate-spin-slow opacity-70"></i>
+        <span class="antialiased">Ready</span>
+      </div>
+      <span class="vx-divider"></span>
+      <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
+        <i class="pi pi-github text-[12px] opacity-70"></i>
+        <span class="antialiased font-semibold tracking-tight">main</span>
+        <span class="text-[var(--p-surface-500)] font-normal">*</span>
+      </div>
+      <span class="vx-divider"></span>
+      <div class="vx-flex vx-items-center vx-gap-4 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
+        <div class="vx-flex vx-items-center vx-gap-2">
+          <i class="pi pi-exclamation-triangle text-[10px] vx-text-warning"></i>
+          <span>0</span>
+        </div>
+        <div class="vx-flex vx-items-center vx-gap-2">
+          <i class="pi pi-times-circle text-[10px] vx-text-error"></i>
+          <span>0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vx-flex vx-items-center vx-gap-4 vx-h-full">
+      <div class="vx-flex vx-items-center px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full">
+        Spaces: 2
+      </div>
+      <span class="vx-divider"></span>
+      <div class="vx-flex vx-items-center px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full">
+        UTF-8
+      </div>
+      <span class="vx-divider"></span>
+      <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full font-bold">
+        <i class="pi pi-code text-[12px] opacity-70"></i>
+        <span>TypeScript</span>
+      </div>
+      <span class="vx-divider"></span>
+      <div class="vx-flex vx-items-center vx-justify-center w-8 vx-h-full rounded hover:vx-bg-800 cursor-pointer transition-all">
+        <i class="pi pi-bell text-[11px] opacity-70"></i>
+      </div>
+    </div>
+  </footer>
+</div>

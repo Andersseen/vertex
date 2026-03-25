@@ -1,0 +1,47 @@
+// Vertex IDE Design System - Core Variables
+// This file replaces Tailwind 4 utility tokens with robust SCSS variables
+
+$surface-0: #ffffff;
+$surface-50: #f8fafc;
+$surface-100: #f1f5f9;
+$surface-200: #e2e8f0;
+$surface-300: #cbd5e1;
+$surface-400: #94a3b8;
+$surface-500: #64748b;
+$surface-600: #475569;
+$surface-700: #334155;
+$surface-800: #1e293b;
+$surface-900: #0f172a;
+$surface-950: #020617;
+
+$primary-500: #6366f1;
+$primary-600: #4f46e5;
+$primary-700: #4338ca;
+
+$success: #4ade80;
+$warning: #fbbf24;
+$error: #f87171;
+$info: #60a5fa;
+
+$font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+$font-mono: 'JetBrains Mono', monospace;
+
+// Layout Helpers
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin full-screen {
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
+}
