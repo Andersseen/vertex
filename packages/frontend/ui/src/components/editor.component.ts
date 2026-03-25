@@ -22,26 +22,24 @@ import { VertexFile } from '@vertex/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="editor-container h-full w-full flex flex-col bg-[var(--p-surface-950)] font-inter">
+    <div class="editor-container">
       <!-- Editor Header / Tabs -->
-      <div class="editor-header-vx flex-vx items-center-vx justify-between-vx" *ngIf="showHeader">
-        <div class="flex-vx items-center-vx h-full-vx">
-          <div class="active-tab flex-vx items-center-vx gap-vx px-4 h-full-vx bg-[var(--p-surface-950)] border-r border-[var(--p-surface-800)] relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--p-primary-500)]">
+      <div class="editor-header-vx" *ngIf="showHeader">
+        <div class="vx-flex vx-items-center vx-h-full">
+          <div class="active-tab">
             <i [class]="getFileIcon(file?.language) + ' text-[12px] opacity-80'"></i>
-            <span class="file-name text-[10px] font-bold text-[var(--p-surface-100)] tracking-tight antialiased uppercase opacity-90">{{ file?.name || 'Untitled' }}</span>
-            <div class="w-1.5 h-1.5 rounded-full border border-[var(--p-primary-500)] flex-vx items-center-vx justify-center-vx ml-1 group cursor-pointer" *ngIf="isDirty" title="Modified">
-              <span class="w-1 h-1 rounded-full bg-[var(--p-primary-500)] animate-pulse"></span>
-            </div>
-            <button class="ml-2 p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all flex-vx items-center-vx justify-center-vx">
+            <span class="file-name">{{ file?.name || 'Untitled' }}</span>
+            <div class="modified-dot animate-pulse" *ngIf="isDirty" title="Modified"></div>
+            <button class="ml-2 p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all vx-flex vx-items-center vx-justify-center">
               <i class="pi pi-times text-[8px]"></i>
             </button>
           </div>
         </div>
         
-        <div class="editor-actions flex-vx items-center-vx gap-vx pr-3 h-full-vx">
+        <div class="editor-actions">
           <span class="text-[9px] text-[var(--p-surface-500)] font-bold uppercase tracking-widest opacity-40">{{ file?.language || 'text' }}</span>
           <button 
-            class="flex-vx items-center-vx gap-vx px-2.5 py-1 rounded text-[9px] bg-gradient-to-r from-[var(--p-primary-600)] to-[var(--p-primary-700)] hover:from-[var(--p-primary-500)] hover:to-[var(--p-primary-600)] text-white border border-[var(--p-primary-500)] shadow-lg shadow-indigo-500/10 transition-all duration-200 disabled:opacity-20 disabled:grayscale disabled:shadow-none font-bold uppercase tracking-wider active:scale-95" 
+            class="save-btn" 
             (click)="onSave()" 
             [disabled]="!isDirty">
             <i class="pi pi-save text-[9px]"></i>
@@ -51,34 +49,10 @@ import { VertexFile } from '@vertex/types';
       </div>
       
       <!-- Editor View -->
-      <div #editorHost class="editor-host flex-1 overflow-hidden"></div>
+      <div #editorHost class="editor-host"></div>
     </div>
   `,
-  styles: [`
-    :host { display: block; height: 100%; width: 100%; font-family: 'Inter', sans-serif; }
-    .editor-header-vx {
-      height: 32px;
-      background: var(--p-surface-900);
-      border-bottom: 1px solid var(--p-surface-800);
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      flex-shrink: 0;
-    }
-    .flex-vx { display: flex !important; }
-    .items-center-vx { align-items: center !important; }
-    .justify-between-vx { justify-content: space-between !important; }
-    .justify-center-vx { justify-content: center !important; }
-    .gap-vx { gap: 0.5rem !important; }
-    .h-full-vx { height: 100% !important; }
-
-    .editor-host ::ng-deep .cm-editor { height: 100%; outline: none !important; background: transparent !important; }
-    .editor-host ::ng-deep .cm-scroller { font-family: 'JetBrains Mono', monospace !important; font-size: 13px; line-height: 1.6; }
-    .editor-host ::ng-deep .cm-gutters { background-color: var(--p-surface-950) !important; color: var(--p-surface-600) !important; border-right: 1px solid var(--p-surface-800) !important; }
-    .editor-host ::ng-deep .cm-activeLineGutter { background-color: var(--p-surface-800) !important; color: var(--p-surface-100) !important; }
-    .editor-host ::ng-deep .cm-activeLine { background-color: rgba(255, 255, 255, 0.02) !important; }
-    .editor-host ::ng-deep .cm-foldPlaceholder { background: var(--p-surface-800) !important; border: none !important; color: var(--p-surface-400) !important; }
-  `]
+  styleUrls: ["./editor.component.scss"],
 })
 export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() file: VertexFile | null = null;

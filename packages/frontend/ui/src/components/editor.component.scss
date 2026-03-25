@@ -1,0 +1,140 @@
+@use "../styles/theme" as *;
+
+.editor-container {
+  height: 100%;
+  width: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: $surface-950;
+  font-family: $font-inter;
+}
+
+.editor-header-vx {
+  height: 32px;
+  background-color: $surface-900;
+  border-bottom: 1px solid $surface-800;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-shrink: 0;
+}
+
+.active-tab {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  height: 100% !important;
+  background-color: $surface-950;
+  border-right: 1px solid $surface-800;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: $primary-500;
+  }
+}
+
+.file-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: $surface-100;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.editor-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem;
+  padding-right: 0.75rem;
+  height: 100% !important;
+}
+
+.save-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white;
+  border: 1px solid $primary-500;
+  background: linear-gradient(to right, $primary-600, $primary-700);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(to right, $primary-500, $primary-600);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.2;
+    filter: grayscale(1);
+    cursor: default;
+    box-shadow: none;
+  }
+}
+
+.editor-host {
+  flex: 1;
+  overflow: hidden;
+
+  ::ng-deep {
+    .cm-editor {
+      height: 100%;
+      outline: none !important;
+      background: transparent !important;
+    }
+
+    .cm-scroller {
+      font-family: $font-mono !important;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .cm-gutters {
+      background-color: $surface-950 !important;
+      color: $surface-600 !important;
+      border-right: 1px solid $surface-800 !important;
+    }
+
+    .cm-activeLineGutter {
+      background-color: $surface-800 !important;
+      color: $surface-100 !important;
+    }
+
+    .cm-activeLine {
+      background-color: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    .cm-foldPlaceholder {
+      background: $surface-800 !important;
+      border: none !important;
+      color: $surface-400 !important;
+    }
+  }
+}
+
+// Utility class for Modified indicator
+.modified-dot {
+  width: 6px;
+  height: 6px;
+  background-color: $primary-500;
+  border-radius: 50%;
+  margin-left: 0.25rem;
+}

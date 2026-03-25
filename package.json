@@ -25,11 +25,9 @@
     "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.2",
     "@types/bun": "latest",
     "concurrently": "^9.1.0",
     "prettier": "^3.7.4",
-    "tailwindcss": "^4.2.2",
     "turbo": "^2.8.20",
     "typescript": "5.9.2"
   },

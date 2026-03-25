@@ -1,0 +1,108 @@
+@use "../styles/theme" as *;
+
+.tabs-container {
+  background-color: $surface-900;
+  border-bottom: 1px solid $surface-800;
+  height: 36px;
+}
+
+.tabs-header-vx {
+  height: 100%;
+  display: flex !important;
+  align-items: center !important;
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar { display: none; }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tab-item-vx {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  height: 100% !important;
+  cursor: pointer;
+  border-right: 1px solid $surface-800;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: $surface-800;
+    .tab-name { color: $surface-100; }
+  }
+
+  &.active {
+    background-color: $surface-950;
+    .tab-name { color: $surface-0; }
+    
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: $primary-500;
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+    }
+  }
+}
+
+.tab-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: $surface-400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.tab-close {
+  margin-left: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  color: $surface-500;
+  opacity: 0;
+  transition: all 0.2s ease;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: none;
+  border: none;
+
+  .tab-item-vx:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background-color: $surface-700;
+    color: $surface-100;
+  }
+}
+
+.new-tab-btn {
+  padding: 0 1rem;
+  height: 100% !important;
+  color: $surface-500;
+  background: none;
+  border: none;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: $surface-100;
+    background-color: $surface-800;
+  }
+}
+
+.modified-dot {
+  width: 6px;
+  height: 6px;
+  background-color: $primary-500;
+  border-radius: 50%;
+  margin-left: 0.25rem;
+}

@@ -8,93 +8,49 @@ import { ToolbarModule } from "primeng/toolbar";
   standalone: true,
   imports: [CommonModule, SplitterModule, ToolbarModule],
   template: `
-    <div
-      class="bg-red-500 h-screen-vx w-screen-vx flex-vx flex-col-vx bg-[var(--p-surface-950)] text-[var(--p-surface-0)] select-none overflow-hidden font-inter"
-    >
+    <div class="vx-layout">
       <!-- Top Toolbar -->
-      <p-toolbar
-        class="h-10 shrink-0 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-900)] p-0 shadow-sm z-20"
-      >
+      <p-toolbar class="vx-toolbar">
         <ng-template pTemplate="start">
-          <div class="flex-vx items-center-vx gap-vx pl-3 h-full-vx">
-            <div
-              class="w-6 h-6 bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-700)] rounded shadow-inner flex items-center justify-center"
-            >
-              <span
-                class="text-[11px] font-extrabold text-white tracking-tighter"
-                >V</span
-              >
+          <div class="vx-flex vx-items-center vx-gap-2 pl-3">
+            <div class="vx-logo-container">
+              <span class="vx-logo-text">V</span>
             </div>
-            <span
-              class="text-[11px] font-bold tracking-[0.2em] text-[var(--p-surface-300)] uppercase antialiased"
-              >Vertex <span class="text-[var(--p-primary-500)]">IDE</span></span
-            >
-            <div class="w-[1px] h-4 bg-[var(--p-surface-700)] mx-4"></div>
-            <div
-              class="flex-vx items-center-vx gap-vx text-[12px] text-[var(--p-surface-400)] font-medium"
-            >
-              <button
-                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-              >
-                File
-              </button>
-              <button
-                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-              >
-                Edit
-              </button>
-              <button
-                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-              >
-                Selection
-              </button>
-              <button
-                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-              >
-                View
-              </button>
-              <button
-                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-              >
-                Go
-              </button>
+            <span class="text-[11px] font-bold tracking-[0.2em] text-[var(--p-surface-300)] uppercase antialiased">
+              Vertex <span class="vx-text-info">IDE</span>
+            </span>
+            <div class="vx-divider"></div>
+            <div class="vx-flex vx-items-center vx-gap-2">
+              <button class="vx-menu-btn">File</button>
+              <button class="vx-menu-btn">Edit</button>
+              <button class="vx-menu-btn">Selection</button>
+              <button class="vx-menu-btn">View</button>
+              <button class="vx-menu-btn">Go</button>
             </div>
           </div>
         </ng-template>
 
         <ng-template pTemplate="center">
-          <div
-            class="flex-vx items-center-vx bg-[var(--p-surface-950)] border border-[var(--p-surface-700)] rounded-md px-3 py-1 gap-2 w-96 hover:border-[var(--p-surface-500)] transition-all cursor-pointer group shadow-sm"
-          >
-            <i
-              class="pi pi-search text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)]"
-            ></i>
-            <span
-              class="text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)] flex-1"
-              >Search components, files, actions...</span
-            >
-            <span
-              class="text-[9px] text-[var(--p-surface-600)] bg-[var(--p-surface-800)] px-1.5 py-0.5 rounded border border-[var(--p-surface-700)]"
-              >⌘K</span
-            >
+          <div class="vx-search-container group shadow-sm">
+            <i class="pi pi-search text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)]"></i>
+            <span class="text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)] vx-flex-1">
+              Search components, files, actions...
+            </span>
+            <span class="text-[9px] text-[var(--p-surface-600)] vx-bg-800 px-1.5 py-0.5 rounded border border-[var(--p-surface-700)]">
+              ⌘K
+            </span>
           </div>
         </ng-template>
 
         <ng-template pTemplate="end">
-          <div class="flex-vx items-center-vx gap-vx pr-3 h-full-vx">
-            <button
-              class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all"
-            >
+          <div class="vx-flex vx-items-center vx-gap-2 pr-3">
+            <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
               <i class="pi pi-bell text-[12px]"></i>
             </button>
-            <button
-              class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all"
-            >
+            <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
               <i class="pi pi-cog text-[12px]"></i>
             </button>
-            <div
-              class="w-7 h-7 rounded-full bg-gradient-to-tr from-[var(--p-surface-800)] to-[var(--p-surface-700)] flex items-center justify-center border border-[var(--p-surface-600)] cursor-pointer hover:border-[var(--p-primary-500)] transition-all ml-1 shadow-sm"
-            >
+            <div class="w-7 h-7 rounded-full vx-bg-800 vx-flex vx-items-center vx-justify-center border border-[var(--p-surface-600)] cursor-pointer hover:border-[var(--p-primary-500)] transition-all ml-1 shadow-sm">
               <i class="pi pi-user text-[11px] text-[var(--p-surface-300)]"></i>
             </div>
           </div>
@@ -102,22 +58,16 @@ import { ToolbarModule } from "primeng/toolbar";
       </p-toolbar>
 
       <!-- Main Body -->
-      <main class="h-full flex-1 overflow-hidden relative">
+      <main class="vx-main-content">
         <p-splitter
-          [style]="{
-            height: '100%',
-            border: 'none',
-            background: 'transparent',
-          }"
+          [style]="{ height: '100%', border: 'none', background: 'transparent' }"
           [panelSizes]="[18, 82]"
           [minSizes]="[10, 30]"
           gutterSize="4"
         >
           <!-- Sidebar Panel -->
           <ng-template pTemplate="content">
-            <div
-              class="h-full flex-vx flex-col-vx bg-[var(--p-surface-900)] border-r border-[var(--p-surface-800)]"
-            >
+            <div class="vx-h-full vx-flex vx-flex-col vx-bg-900 vx-border-r">
               <ng-content select="[sidebar]"></ng-content>
             </div>
           </ng-template>
@@ -126,24 +76,18 @@ import { ToolbarModule } from "primeng/toolbar";
           <ng-template pTemplate="content">
             <p-splitter
               layout="vertical"
-              [style]="{
-                height: '100%',
-                border: 'none',
-                background: 'transparent',
-              }"
+              [style]="{ height: '100%', border: 'none', background: 'transparent' }"
               [panelSizes]="[72, 28]"
               [minSizes]="[40, 10]"
               gutterSize="4"
             >
               <ng-template pTemplate="content">
-                <div class="h-full flex flex-col bg-[var(--p-surface-950)]">
+                <div class="vx-h-full vx-flex vx-flex-col vx-bg-950">
                   <ng-content select="[editor]"></ng-content>
                 </div>
               </ng-template>
               <ng-template pTemplate="content">
-                <div
-                  class="h-full bg-[var(--p-surface-900)] overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]"
-                >
+                <div class="vx-h-full vx-bg-900 vx-overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]">
                   <ng-content select="[bottom]"></ng-content>
                 </div>
               </ng-template>
@@ -152,190 +96,52 @@ import { ToolbarModule } from "primeng/toolbar";
         </p-splitter>
       </main>
 
-      <footer class="statusbar-vx">
-        <div class="flex-vx items-center-vx gap-lg-vx h-full-vx">
-          <div
-            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
-          >
+      <footer class="vx-statusbar">
+        <div class="vx-flex vx-items-center vx-gap-4 vx-h-full">
+          <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
             <i class="pi pi-sync text-[10px] animate-spin-slow opacity-70"></i>
             <span class="antialiased">Ready</span>
           </div>
-          <span class="divider-vx"></span>
-          <div
-            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
-          >
+          <span class="vx-divider"></span>
+          <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
             <i class="pi pi-github text-[12px] opacity-70"></i>
             <span class="antialiased font-semibold tracking-tight">main</span>
             <span class="text-[var(--p-surface-500)] font-normal">*</span>
           </div>
-          <span class="divider-vx"></span>
-          <div
-            class="flex-vx items-center-vx gap-lg-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
-          >
-            <div class="flex-vx items-center-vx gap-vx">
-              <i
-                class="pi pi-exclamation-triangle text-[10px] text-amber-300"
-              ></i>
+          <span class="vx-divider"></span>
+          <div class="vx-flex vx-items-center vx-gap-4 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
+            <div class="vx-flex vx-items-center vx-gap-2">
+              <i class="pi pi-exclamation-triangle text-[10px] vx-text-warning"></i>
               <span>0</span>
             </div>
-            <div class="flex-vx items-center-vx gap-vx">
-              <i class="pi pi-times-circle text-[10px] text-red-300"></i>
+            <div class="vx-flex vx-items-center vx-gap-2">
+              <i class="pi pi-times-circle text-[10px] vx-text-error"></i>
               <span>0</span>
             </div>
           </div>
         </div>
 
-        <div class="flex-vx items-center-vx gap-lg-vx h-full-vx">
-          <div
-            class="flex-vx items-center-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx"
-          >
+        <div class="vx-flex vx-items-center vx-gap-4 vx-h-full">
+          <div class="vx-flex vx-items-center px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full">
             Spaces: 2
           </div>
-          <span class="divider-vx"></span>
-          <div
-            class="flex-vx items-center-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx"
-          >
+          <span class="vx-divider"></span>
+          <div class="vx-flex vx-items-center px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full">
             UTF-8
           </div>
-          <span class="divider-vx"></span>
-          <div
-            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx font-bold"
-          >
+          <span class="vx-divider"></span>
+          <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full font-bold">
             <i class="pi pi-code text-[12px] opacity-70"></i>
             <span>TypeScript</span>
           </div>
-          <span class="divider-vx"></span>
-          <div
-            class="flex-vx items-center-vx justify-center w-8 h-full-vx rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
-          >
+          <span class="vx-divider"></span>
+          <div class="vx-flex vx-items-center vx-justify-center w-8 vx-h-full rounded hover:vx-bg-800 cursor-pointer transition-all">
             <i class="pi pi-bell text-[11px] opacity-70"></i>
           </div>
         </div>
       </footer>
     </div>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        height: 100vh;
-        width: 100vw;
-        font-family: "Inter", system-ui, sans-serif;
-      }
-      ::ng-deep .p-toolbar {
-        background: var(--p-surface-900) !important;
-        border-radius: 0 !important;
-      }
-      ::ng-deep .p-splitter {
-        background: transparent !important;
-      }
-      ::ng-deep .p-splitter-gutter {
-        background: var(--p-surface-800) !important;
-        transition:
-          background 0.2s,
-          width 0.2s;
-        position: relative;
-      }
-      ::ng-deep .p-splitter-gutter:hover {
-        background: var(--p-primary-500) !important;
-        z-index: 50;
-      }
-      ::ng-deep .p-splitter-gutter:hover::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 2px;
-        height: 30px;
-        background: rgba(255, 255, 255, 0.4);
-        border-radius: 1px;
-      }
-      ::ng-deep .p-splitter-gutter-handle {
-        display: none;
-      }
-      .animate-spin-slow {
-        animation: spin 4s linear infinite;
-      }
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* Layout Fixes (Manual CSS to bypass Tailwind generation issues in library) */
-      .flex-vx {
-        display: flex !important;
-      }
-      .flex-col-vx {
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      .items-center-vx {
-        align-items: center !important;
-      }
-      .justify-between-vx {
-        justify-content: space-between !important;
-      }
-      .gap-vx {
-        gap: 0.5rem !important;
-      }
-      .gap-lg-vx {
-        gap: 1.5rem !important;
-      }
-      .h-full-vx {
-        height: 100% !important;
-      }
-      .h-screen-vx {
-        height: 100vh !important;
-        height: 100dvh !important;
-      }
-      .w-screen-vx {
-        width: 100vw !important;
-      }
-
-      .statusbar-vx {
-        font-family: "JetBrains Mono", monospace;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        width: 100%;
-        padding: 0 1rem;
-        height: 1.75rem !important;
-      }
-      .divider-vx {
-        display: inline-block;
-        width: 1px;
-        height: 1.1rem;
-        background: var(--p-surface-800);
-        margin: 0 0.5rem;
-        border-radius: 1px;
-        opacity: 0.5;
-      }
-
-      /* Fix Toolbar specifically */
-      ::ng-deep .p-toolbar-start,
-      ::ng-deep .p-toolbar-center,
-      ::ng-deep .p-toolbar-end {
-        display: flex !important;
-        align-items: center !important;
-        height: 100%;
-      }
-
-      /* Splitter Gutter Styling */
-      ::ng-deep .p-splitter-gutter {
-        background: transparent !important;
-        transition: background 0.2s !important;
-        user-select: none !important;
-      }
-      ::ng-deep .p-splitter-gutter:hover {
-        background: var(--p-primary-500) !important;
-        opacity: 0.5 !important;
-      }
-    `,
-  ],
+  styleUrls: ["./main-layout.component.scss"],
 })
 export class MainLayoutComponent {}
