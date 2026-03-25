@@ -1,30 +1,13 @@
 <v-main-layout>
-  <v-sidebar 
+  <v-sidebar
     sidebar
-    [workspaceFolder]="rootFolder()" 
+    [workspaceFolder]="rootFolder()"
     [activeFileId]="activeFile().id"
-    (fileSelect)="onFileSelect($event)">
+    (fileSelect)="onFileSelect($event)"
+  >
   </v-sidebar>
 
-  <v-editor 
-    editor
-    [file]="activeFile()" 
-    [showHeader]="true">
-  </v-editor>
+  <v-editor editor [file]="activeFile()" [showHeader]="true"> </v-editor>
 
-  <div bottom class="h-full flex flex-col">
-    <div class="flex items-center gap-2 px-4 h-9 bg-[var(--p-surface-950)] border-b border-[var(--p-surface-800)]">
-      <i class="pi pi-code text-[10px] text-[var(--p-primary-500)]"></i>
-      <span class="text-[10px] font-bold uppercase tracking-widest text-[var(--p-surface-400)]">Debug Console</span>
-    </div>
-    <div class="flex-1 overflow-auto p-4 font-mono text-[12px] leading-relaxed select-text">
-      <div class="flex gap-2 mb-1">
-        <span class="text-[var(--p-primary-500)] font-bold">vertex-web@cloud</span>
-        <span class="text-[var(--p-surface-500)]">: $ ng serve</span>
-      </div>
-      <div class="text-[var(--p-surface-400)] mb-1">Building application...</div>
-      <div class="text-[var(--p-green-500)]">✓ Optimized bundle generated (1.05 MB)</div>
-      <div class="text-[var(--p-surface-500)] mt-2 italic">Waiting for changes...</div>
-    </div>
-  </div>
+  <v-bottom-panel bottom></v-bottom-panel>
 </v-main-layout>

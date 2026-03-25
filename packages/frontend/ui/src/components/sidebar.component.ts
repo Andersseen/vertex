@@ -42,8 +42,8 @@ import { VertexFile, VertexFolder } from '@vertex/types';
           [scrollHeight]="'100%'">
           
           <ng-template let-node pTemplate="default">
-            <div class="flex items-center gap-2 py-0.5 group w-full truncate">
-              <i [class]="node.icon + ' text-[14px] group-hover:scale-110 transition-transform duration-200'"></i>
+            <div class="flex items-center gap-2 py-1 group w-full truncate">
+              <i [class]="node.data.customIcon + ' text-[14px] group-hover:scale-110 transition-transform duration-200'"></i>
               <span class="text-[12px] font-medium truncate group-hover:text-[var(--p-primary-300)] transition-colors antialiased select-none tracking-tight">{{ node.label }}</span>
             </div>
           </ng-template>
@@ -125,11 +125,13 @@ export class SidebarComponent implements OnChanges {
     const node: TreeNode = {
       key: item.id,
       label: item.name,
-      data: item,
-      icon: isFolder ? (item.isExpanded ? 'pi pi-folder-open text-yellow-500' : 'pi pi-folder text-yellow-500') : this.getFileIcon(item.language),
+      data: { 
+        ...item, 
+        customIcon: isFolder ? (item.isExpanded ? 'pi pi-folder-open text-yellow-500' : 'pi pi-folder text-yellow-500') : this.getFileIcon(item.language)
+      },
       expanded: isFolder ? item.isExpanded : false,
       children: isFolder ? item.children.map(child => this.mapToTreeNode(child)) : undefined,
-      selectable: !isFolder
+      selectable: true
     };
 
     if (item.id === this.activeFileId) {
@@ -155,7 +157,17 @@ export class SidebarComponent implements OnChanges {
 
   onNodeSelect(event: any): void {
     const item = event.node.data;
-    if (!('children' in item)) {
+    if ('children' in item) {
+      // Toggle folder expansion on click
+      event.node.expanded = !event.node.expanded;
+      if (event.node.expanded) {
+        this.onNodeExpand(event);
+      } else {
+        this.onNodeCollapse(event);
+      }
+      // Re-map tree nodes to update icons if necessary (folder open/close icons)
+      this.updateTreeNodes();
+    } else {
       this.fileSelect.emit(item as VertexFile);
     }
   }

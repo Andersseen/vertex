@@ -1,0 +1,48 @@
+.bottom-panel {
+  @apply bg-[var(--p-surface-950)] text-[var(--p-surface-100)] border-t border-[var(--p-surface-800)] shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)];
+  font-family: "JetBrains Mono", monospace;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.bottom-panel-header {
+  @apply flex items-center bg-[var(--p-surface-900)] border-b border-[var(--p-surface-800)] shrink-0;
+  height: 32px;
+  user-select: none;
+}
+
+.tab-item {
+  @apply flex items-center h-full px-4 text-[11px] font-bold text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all cursor-pointer border-r border-[var(--p-surface-800)] relative uppercase tracking-wider;
+  background: none;
+  border-top: none;
+  border-bottom: none;
+  outline: none;
+}
+
+.tab-item.active {
+  @apply text-[var(--p-surface-100)] bg-[var(--p-surface-950)];
+  &::after {
+    content: "";
+    @apply absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--p-primary-500)];
+  }
+}
+
+.bottom-panel-content {
+  @apply flex-1 overflow-auto bg-[var(--p-surface-950)];
+}
+
+.console-content {
+  @apply font-mono text-[13px] leading-relaxed p-4 text-[var(--p-surface-200)];
+  white-space: pre-wrap;
+}
+
+.fade-in {
+  animation: fadeInPanel 0.1s ease-out;
+}
+
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}

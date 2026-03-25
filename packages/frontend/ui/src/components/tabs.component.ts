@@ -7,123 +7,47 @@ import { VertexFile } from '@vertex/types';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="tabs-container">
-      <div class="tabs-header">
+    <div class="tabs-container bg-[var(--p-surface-900)] border-b border-[var(--p-surface-800)]">
+      <div class="tabs-header flex items-center h-9 overflow-x-auto scrollbar-hide">
         <div 
-          class="tab-item"
+          class="tab-item flex items-center gap-2 px-3 h-full cursor-pointer border-r border-[var(--p-surface-800)] relative transition-all duration-200 group"
           *ngFor="let file of files; let i = index"
           [class.active]="file.id === activeFileId"
-          [class.dirty]="file.isDirty"
           (click)="onTabClick(file)">
-          <span class="tab-icon">{{ getFileIcon(file.language) }}</span>
-          <span class="tab-name">{{ file.name }}</span>
+          <i [class]="getFileIcon(file.language) + ' text-[12px] opacity-70 group-hover:opacity-100'"></i>
+          <span class="tab-name text-[11px] font-bold text-[var(--p-surface-400)] group-hover:text-[var(--p-surface-100)] transition-colors antialiased uppercase tracking-tight">{{ file.name }}</span>
+          
+          <div class="w-1.5 h-1.5 rounded-full bg-[var(--p-primary-500)] ml-0.5 animate-pulse" *ngIf="file.isDirty"></div>
+
           <button 
-            class="tab-close"
+            class="tab-close ml-2 p-0.5 rounded hover:bg-[var(--p-surface-700)] text-[var(--p-surface-500)] hover:text-[var(--p-surface-100)] opacity-0 group-hover:opacity-100 transition-all"
             (click)="onTabClose(file, $event)"
             *ngIf="files.length > 1">
-            ✕
+            <i class="pi pi-times text-[9px]"></i>
           </button>
+          
+          <div class="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--p-primary-500)]" *ngIf="file.id === activeFileId"></div>
         </div>
-        <button class="tab-new" (click)="onNewTab()">+</button>
+        <button class="px-4 h-full text-[var(--p-surface-500)] hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] transition-all" (click)="onNewTab()">
+          <i class="pi pi-plus text-[11px]"></i>
+        </button>
       </div>
     </div>
   `,
   styles: [`
-    .tabs-container {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+    :host { display: block; }
+    .tab-item.active {
+      background: var(--p-surface-950);
     }
-    
-    .tabs-header {
-      display: flex;
-      align-items: center;
-      height: 36px;
-      overflow-x: auto;
-      scrollbar-width: none;
+    .tab-item.active .tab-name {
+      color: var(--p-surface-100);
     }
-    
-    .tabs-header::-webkit-scrollbar {
+    .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
-    
-    .tab-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 12px;
-      height: 100%;
-      cursor: pointer;
-      border-right: 1px solid var(--border);
-      background: var(--surface);
-      transition: background-color 0.2s;
-      min-width: 0;
-      max-width: 200px;
-    }
-    
-    .tab-item:hover {
-      background: var(--surface-hover);
-    }
-    
-    .tab-item.active {
-      background: var(--surface-active);
-      color: var(--text);
-    }
-    
-    .tab-item.dirty .tab-name::after {
-      content: '●';
-      margin-left: 4px;
-      color: var(--primary);
-      font-size: 10px;
-    }
-    
-    .tab-icon {
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-    
-    .tab-name {
-      font-size: 13px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-    }
-    
-    .tab-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 2px;
-      border-radius: 2px;
-      font-size: 12px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    
-    .tab-item:hover .tab-close {
-      opacity: 1;
-    }
-    
-    .tab-close:hover {
-      background: var(--surface-hover);
-      color: var(--text);
-    }
-    
-    .tab-new {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 0 12px;
-      height: 100%;
-      font-size: 16px;
-      transition: background-color 0.2s;
-    }
-    
-    .tab-new:hover {
-      background: var(--surface-hover);
-      color: var(--text);
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   `]
 })
@@ -147,26 +71,17 @@ export class TabsComponent {
     this.newTab.emit();
   }
 
-  getFileIcon(language: string): string {
+  getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
-      'typescript': '📘',
-      'javascript': '📜',
-      'html': '🌐',
-      'css': '🎨',
-      'json': '📋',
-      'md': '📝',
-      'txt': '📄',
-      'xml': '🏷️',
-      'yaml': '⚙️',
-      'sql': '🗄️',
-      'python': '🐍',
-      'rust': '🦀',
-      'go': '🐹',
-      'java': '☕',
-      'c': '⚙️',
-      'cpp': '⚙️',
-      'csharp': '💎'
+      'typescript': 'pi pi-file-edit text-blue-400',
+      'javascript': 'pi pi-file-edit text-yellow-400',
+      'html': 'pi pi-code text-orange-500',
+      'css': 'pi pi-palette text-blue-500',
+      'json': 'pi pi-info-circle text-green-400',
+      'md': 'pi pi-file text-slate-400',
+      'rust': 'pi pi-cog text-orange-700',
+      'python': 'pi pi-bolt text-blue-300'
     };
-    return iconMap[language.toLowerCase()] || '📄';
+    return iconMap[language?.toLowerCase() || ''] || 'pi pi-file text-slate-500';
   }
 }

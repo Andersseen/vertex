@@ -24,27 +24,27 @@ import { VertexFile } from '@vertex/types';
   template: `
     <div class="editor-container h-full w-full flex flex-col bg-[var(--p-surface-950)] font-inter">
       <!-- Editor Header / Tabs -->
-      <div class="editor-header flex items-center h-9 bg-[var(--p-surface-900)] select-none shrink-0 border-b border-[var(--p-surface-800)] shadow-sm" *ngIf="showHeader">
-        <div class="active-tab flex items-center gap-2 px-4 h-full bg-[var(--p-surface-950)] border-r border-[var(--p-surface-800)] relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--p-primary-500)]">
-          <i [class]="getFileIcon(file?.language) + ' text-[12px] opacity-80'"></i>
-          <span class="file-name text-[11px] font-semibold text-[var(--p-surface-100)] tracking-tight antialiased">{{ file?.name || 'Untitled' }}</span>
-          <div class="w-2 h-2 rounded-full border border-[var(--p-primary-500)] flex items-center justify-center ml-1 group cursor-pointer" *ngIf="isDirty" title="Modified">
+      <div class="editor-header flex items-center h-8 bg-[var(--p-surface-900)] select-none shrink-0 border-b border-[var(--p-surface-800)] shadow-sm" *ngIf="showHeader">
+        <div class="active-tab flex items-center gap-2 px-3 h-full bg-[var(--p-surface-950)] border-r border-[var(--p-surface-800)] relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--p-primary-500)]">
+          <i [class]="getFileIcon(file?.language) + ' text-[11px] opacity-80'"></i>
+          <span class="file-name text-[10px] font-bold text-[var(--p-surface-100)] tracking-tight antialiased uppercase">{{ file?.name || 'Untitled' }}</span>
+          <div class="w-1.5 h-1.5 rounded-full border border-[var(--p-primary-500)] flex items-center justify-center ml-0.5 group cursor-pointer" *ngIf="isDirty" title="Modified">
             <span class="w-1 h-1 rounded-full bg-[var(--p-primary-500)] animate-pulse"></span>
           </div>
-          <button class="ml-2 p-0.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all">
-            <i class="pi pi-times text-[9px]"></i>
+          <button class="ml-1.5 p-0.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all">
+            <i class="pi pi-times text-[8px]"></i>
           </button>
         </div>
         
         <div class="flex-1"></div>
         
-        <div class="editor-actions flex items-center gap-2 pr-3">
+        <div class="editor-actions flex items-center gap-2 pr-2">
           <span class="text-[9px] text-[var(--p-surface-500)] font-bold uppercase tracking-widest mr-2 opacity-50">{{ file?.language || 'text' }}</span>
           <button 
-            class="flex items-center gap-2 px-3 py-1 rounded text-[10px] bg-[var(--p-surface-800)] hover:bg-[var(--p-surface-700)] text-[var(--p-surface-200)] border border-[var(--p-surface-700)] transition-all duration-200 disabled:opacity-30 font-bold uppercase tracking-wide active:scale-95" 
+            class="flex items-center gap-2 px-2 py-0.5 rounded text-[9px] bg-[var(--p-surface-800)] hover:bg-[var(--p-surface-700)] text-[var(--p-surface-200)] border border-[var(--p-surface-700)] transition-all duration-200 disabled:opacity-30 font-bold uppercase tracking-wide active:scale-95" 
             (click)="onSave()" 
             [disabled]="!isDirty">
-            <i class="pi pi-save text-[10px]"></i>
+            <i class="pi pi-save text-[9px]"></i>
             <span>Save</span>
           </button>
         </div>
