@@ -31,7 +31,7 @@
               }
             ],
               "styles": [
-                "../../node_modules/primeicons/primeicons.css",
+                "primeicons/primeicons.css",
                 "src/styles.scss"
               ]
           },
