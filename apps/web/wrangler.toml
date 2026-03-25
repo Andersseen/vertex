@@ -1,0 +1,5 @@
+name = "vertex-web"
+pages_build_output_dir = "dist/vertex-ui/browser"
+
+[vars]
+# Add any environment variables here
