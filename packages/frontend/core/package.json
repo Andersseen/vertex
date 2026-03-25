@@ -11,9 +11,11 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@vertex/types": "workspace:*",
     "@angular/core": "^21.2.0",
-    "rxjs": "~7.8.0"
+    "@tauri-apps/api": "2.0.0-rc.0",
+    "@vertex/types": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -3,15 +3,17 @@ import { Component } from "@angular/core";
 import { DividerModule } from "primeng/divider";
 import { TabsModule } from "primeng/tabs";
 
+import { TerminalComponent } from "../terminal/terminal.component";
+
 @Component({
   selector: "v-bottom-panel",
   standalone: true,
-  imports: [CommonModule, TabsModule, DividerModule],
+  imports: [CommonModule, TabsModule, DividerModule, TerminalComponent],
   templateUrl: "./bottom-panel.component.html",
   styleUrls: ["./bottom-panel.component.scss"],
 })
 export class BottomPanelComponent {
-  activeTabIndex = 0;
+  activeTabIndex = 3;
   tabs = ["Problems", "Output", "Debug Console", "Terminal"];
 
   // Mock content for the panels

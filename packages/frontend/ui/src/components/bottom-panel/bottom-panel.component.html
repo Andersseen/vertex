@@ -88,19 +88,8 @@
     </div>
 
     <!-- Terminal Tab -->
-    <div *ngIf="activeTabIndex === 3" class="console-content-vx animate-fade-in">
-      <div *ngFor="let term of terminal" class="py-0.5">
-        <span class="text-[11px] font-mono text-[var(--p-surface-300)]">{{
-          term.text
-        }}</span>
-      </div>
-      <div class="vx-flex vx-items-center vx-gap-2 mt-2">
-        <span class="text-[11px] text-[var(--p-primary-500)]">➜</span>
-        <span
-          class="text-[11px] font-mono text-[var(--p-surface-400)] animate-pulse"
-          >_</span
-        >
-      </div>
+    <div *ngIf="activeTabIndex === 3" class="vx-h-full animate-fade-in">
+      <v-terminal class="vx-h-full"></v-terminal>
     </div>
   </div>
 </div>

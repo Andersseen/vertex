@@ -7,6 +7,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 
+import { TERMINAL_BACKEND_ADAPTER, WebTerminalService } from '@vertex/core';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -21,5 +23,9 @@ export const appConfig: ApplicationConfig = {
       },
       ripple: true
     }),
+    {
+      provide: TERMINAL_BACKEND_ADAPTER,
+      useClass: WebTerminalService
+    }
   ],
 };

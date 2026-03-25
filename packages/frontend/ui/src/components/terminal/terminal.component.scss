@@ -1,0 +1,17 @@
+@use "xterm/css/xterm.css";
+
+.terminal-container {
+  width: 100%;
+  height: 100%;
+  background-color: #020617;
+  padding: 8px;
+  overflow: hidden;
+  
+  .xterm {
+    height: 100%;
+    
+    .xterm-viewport {
+      background-color: transparent !important;
+    }
+  }
+}

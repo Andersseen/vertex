@@ -52,3 +52,8 @@ export class WorkspaceService {
     return this.workspaceSubject.value;
   }
 }
+
+export * from './terminal/terminal-backend-adapter';
+export * from './terminal/terminal-tokens';
+export * from './terminal/tauri-terminal.service';
+export * from './terminal/web-terminal.service';
