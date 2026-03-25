@@ -6,7 +6,9 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@angular/common": "^21.2.0",

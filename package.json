@@ -5,6 +5,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
@@ -25,11 +26,18 @@
     "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
+    "@angular-eslint/eslint-plugin": "^21.3.1",
+    "@angular-eslint/template-parser": "^21.3.1",
+    "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "concurrently": "^9.1.0",
+    "eslint": "^10.1.0",
     "prettier": "^3.7.4",
     "turbo": "^2.8.20",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.57.2"
   },
   "engines": {
     "node": ">=18"
