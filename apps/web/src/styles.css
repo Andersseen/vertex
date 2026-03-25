@@ -1,5 +1,7 @@
 @import "tailwindcss";
-@source "../../packages/frontend/ui/src/**/*.{ts,html,scss}";
+@source "/Users/andriipap/Andersseen/Web/vertex/packages/frontend/ui/src/**/*.{ts,html,scss}";
+@source "/Users/andriipap/Andersseen/Web/vertex/packages/frontend/core/src/**/*.ts";
+@source "/Users/andriipap/Andersseen/Web/vertex/packages/frontend/types/src/**/*.ts";
 
 :root {
   --p-primary-500: #6366f1;

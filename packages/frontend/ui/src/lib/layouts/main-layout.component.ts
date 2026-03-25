@@ -9,7 +9,7 @@ import { ToolbarModule } from "primeng/toolbar";
   imports: [CommonModule, SplitterModule, ToolbarModule],
   template: `
     <div
-      class="h-screen w-screen flex flex-col bg-[var(--p-surface-950)] text-[var(--p-surface-0)] select-none overflow-hidden font-inter"
+      class="bg-red-500 h-screen-vx w-screen-vx flex-vx flex-col-vx bg-[var(--p-surface-950)] text-[var(--p-surface-0)] select-none overflow-hidden font-inter"
     >
       <!-- Top Toolbar -->
       <p-toolbar
@@ -102,7 +102,7 @@ import { ToolbarModule } from "primeng/toolbar";
       </p-toolbar>
 
       <!-- Main Body -->
-      <main class="flex-1 overflow-hidden relative">
+      <main class="h-full flex-1 overflow-hidden relative">
         <p-splitter
           [style]="{
             height: '100%',
@@ -111,12 +111,12 @@ import { ToolbarModule } from "primeng/toolbar";
           }"
           [panelSizes]="[18, 82]"
           [minSizes]="[10, 30]"
-          gutterSize="1"
+          gutterSize="4"
         >
           <!-- Sidebar Panel -->
           <ng-template pTemplate="content">
             <div
-              class="h-full flex flex-col bg-[var(--p-surface-900)] border-r border-[var(--p-surface-800)]"
+              class="h-full flex-vx flex-col-vx bg-[var(--p-surface-900)] border-r border-[var(--p-surface-800)]"
             >
               <ng-content select="[sidebar]"></ng-content>
             </div>
@@ -133,7 +133,7 @@ import { ToolbarModule } from "primeng/toolbar";
               }"
               [panelSizes]="[72, 28]"
               [minSizes]="[40, 10]"
-              gutterSize="1"
+              gutterSize="4"
             >
               <ng-template pTemplate="content">
                 <div class="h-full flex flex-col bg-[var(--p-surface-950)]">
@@ -152,9 +152,7 @@ import { ToolbarModule } from "primeng/toolbar";
         </p-splitter>
       </main>
 
-      <footer
-        class="statusbar-vx"
-      >
+      <footer class="statusbar-vx">
         <div class="flex-vx items-center-vx gap-lg-vx h-full-vx">
           <div
             class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
@@ -175,7 +173,9 @@ import { ToolbarModule } from "primeng/toolbar";
             class="flex-vx items-center-vx gap-lg-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
           >
             <div class="flex-vx items-center-vx gap-vx">
-              <i class="pi pi-exclamation-triangle text-[10px] text-amber-300"></i>
+              <i
+                class="pi pi-exclamation-triangle text-[10px] text-amber-300"
+              ></i>
               <span>0</span>
             </div>
             <div class="flex-vx items-center-vx gap-vx">
@@ -289,6 +289,13 @@ import { ToolbarModule } from "primeng/toolbar";
       .h-full-vx {
         height: 100% !important;
       }
+      .h-screen-vx {
+        height: 100vh !important;
+        height: 100dvh !important;
+      }
+      .w-screen-vx {
+        width: 100vw !important;
+      }
 
       .statusbar-vx {
         font-family: "JetBrains Mono", monospace;
@@ -297,6 +304,7 @@ import { ToolbarModule } from "primeng/toolbar";
         justify-content: space-between !important;
         width: 100%;
         padding: 0 1rem;
+        height: 1.75rem !important;
       }
       .divider-vx {
         display: inline-block;
@@ -315,6 +323,17 @@ import { ToolbarModule } from "primeng/toolbar";
         display: flex !important;
         align-items: center !important;
         height: 100%;
+      }
+
+      /* Splitter Gutter Styling */
+      ::ng-deep .p-splitter-gutter {
+        background: transparent !important;
+        transition: background 0.2s !important;
+        user-select: none !important;
+      }
+      ::ng-deep .p-splitter-gutter:hover {
+        background: var(--p-primary-500) !important;
+        opacity: 0.5 !important;
       }
     `,
   ],
