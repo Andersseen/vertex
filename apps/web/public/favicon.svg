@@ -1,26 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    <linearGradient id="vertex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
     </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
+      <feOffset dx="0" dy="1" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="32" height="32" rx="6" fill="url(#grad1)"/>
+  <!-- Background with slight rounding -->
+  <rect width="32" height="32" rx="8" fill="#020617"/>
   
-  <!-- Letter V -->
-  <path d="M8 24 L12 12 L16 20 L20 12 L24 24" 
-        stroke="white" 
-        stroke-width="2.5" 
+  <!-- Stylized V -->
+  <path d="M7 8L16 24L25 8" 
+        stroke="url(#vertex-grad)" 
+        stroke-width="4.5" 
         stroke-linecap="round" 
         stroke-linejoin="round" 
-        fill="none"/>
+        fill="none"
+        filter="url(#shadow)"/>
   
-  <!-- Code brackets -->
-  <text x="16" y="28" 
-        font-family="monospace" 
-        font-size="4" 
-        fill="white" 
-        text-anchor="middle">&lt;/&gt;</text>
+  <!-- The 'Vertex' Point -->
+  <circle cx="16" cy="24" r="2.5" fill="white" />
+  <circle cx="16" cy="24" r="1.5" fill="#818cf8" />
 </svg>
