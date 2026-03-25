@@ -1,0 +1,8 @@
+[test]
+preload = ["./test-setup.ts"]
+ignore = [
+  "apps/web/tests/e2e",
+  "**/tests/e2e/**",
+  "**/dist/**",
+  "**/node_modules/**"
+]

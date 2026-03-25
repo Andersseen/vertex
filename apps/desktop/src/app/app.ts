@@ -1,16 +1,23 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, forwardRef } from '@angular/core';
 import {
   MainLayoutComponent,
   EditorComponent,
   SidebarComponent,
   BottomPanelComponent,
+  TabsComponent,
 } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MainLayoutComponent, EditorComponent, SidebarComponent, BottomPanelComponent],
+  imports: [
+    forwardRef(() => MainLayoutComponent),
+    forwardRef(() => EditorComponent),
+    forwardRef(() => SidebarComponent),
+    forwardRef(() => BottomPanelComponent),
+    forwardRef(() => TabsComponent),
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
