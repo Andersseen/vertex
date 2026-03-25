@@ -1,13 +1,30 @@
 <v-main-layout>
+  <!-- Left Sidebar: File Explorer -->
   <v-sidebar
     sidebar
     [workspaceFolder]="rootFolder()"
-    [activeFileId]="activeFile().id"
+    [activeFileId]="activeFileId()"
     (fileSelect)="onFileSelect($event)"
-  >
-  </v-sidebar>
+  ></v-sidebar>
 
-  <v-editor editor [file]="activeFile()" [showHeader]="true"> </v-editor>
+  <!-- Main Editor Area -->
+  <div editor class="flex flex-col h-full overflow-hidden bg-[var(--p-surface-950)]">
+    <!-- Tab Bar -->
+    <v-tabs
+      [files]="openFiles()"
+      [activeFileId]="activeFileId()"
+      (tabSelect)="onTabSelect($event)"
+      (tabClose)="onTabClose($event)"
+    ></v-tabs>
 
-  <v-bottom-panel bottom></v-bottom-panel>
+    <!-- Code Editor -->
+    <div class="flex-1 overflow-hidden">
+      <v-editor [file]="getActiveFile() || null" [showHeader]="false"></v-editor>
+    </div>
+
+    <!-- Bottom Panel -->
+    <div bottom class="h-[180px] shrink-0 border-t border-[var(--p-surface-800)]">
+      <v-bottom-panel></v-bottom-panel>
+    </div>
+  </div>
 </v-main-layout>

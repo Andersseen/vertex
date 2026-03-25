@@ -4,28 +4,55 @@ import {
   EditorComponent,
   SidebarComponent,
   BottomPanelComponent,
+  TabsComponent,
 } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MainLayoutComponent, EditorComponent, SidebarComponent, BottomPanelComponent],
+  imports: [
+    MainLayoutComponent,
+    EditorComponent,
+    SidebarComponent,
+    BottomPanelComponent,
+    TabsComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
   protected readonly title = signal('Vertex IDE Web');
 
-  protected readonly activeFile = signal<VertexFile>({
-    id: '1',
-    name: 'index.html',
-    path: 'apps/web/src/index.html',
-    content:
-      '<!DOCTYPE html>\n<html>\n<head>\n  <title>Vertex Web</title>\n</head>\n<body>\n  <app-root></app-root>\n</body>\n</html>',
-    language: 'html',
-    isDirty: false,
-  });
+  // Open files for tabs
+  protected readonly openFiles = signal<VertexFile[]>([
+    {
+      id: '1',
+      name: 'index.html',
+      path: 'apps/web/src/index.html',
+      content:
+        '<!DOCTYPE html>\n<html>\n<head>\n  <title>Vertex Web</title>\n</head>\n<body>\n  <app-root></app-root>\n</body>\n</html>',
+      language: 'html',
+      isDirty: false,
+    },
+    {
+      id: '2',
+      name: 'main.ts',
+      path: '/src/main.ts',
+      content:
+        "// Main entry point\nimport { bootstrapApplication } from '@angular/platform-browser';\nimport { AppComponent } from './app/app.component';\n\nbootstrapApplication(AppComponent);",
+      language: 'typescript',
+      isDirty: false,
+    },
+  ]);
+
+  // Active file (currently selected in editor)
+  protected readonly activeFileId = signal<string>('1');
+
+  // Helper to get the active file object
+  protected getActiveFile(): VertexFile | undefined {
+    return this.openFiles().find((f) => f.id === this.activeFileId());
+  }
 
   protected readonly rootFolder = signal<VertexFolder>({
     id: 'root',
@@ -118,6 +145,28 @@ export class App {
   });
 
   onFileSelect(file: VertexFile) {
-    this.activeFile.set(file);
+    this.activeFileId.set(file.id);
+
+    // If file is not already open, add it to open files
+    const currentOpenFiles = this.openFiles();
+    if (!currentOpenFiles.find((f) => f.id === file.id)) {
+      this.openFiles.set([...currentOpenFiles, file]);
+    }
+  }
+
+  onTabSelect(file: VertexFile) {
+    this.activeFileId.set(file.id);
+  }
+
+  onTabClose(file: VertexFile, event?: Event) {
+    event?.stopPropagation();
+    const currentFiles = this.openFiles();
+    const filteredFiles = currentFiles.filter((f) => f.id !== file.id);
+    this.openFiles.set(filteredFiles);
+
+    // If closed file was active, switch to first remaining
+    if (this.activeFileId() === file.id && filteredFiles.length > 0) {
+      this.activeFileId.set(filteredFiles[0].id);
+    }
   }
 }
