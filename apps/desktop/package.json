@@ -23,6 +23,8 @@
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
     "@primeng/themes": "^21.0.4",
+    "@tauri-apps/api": "2.0.0-rc.0",
+    "@tauri-apps/plugin-log": "2.0.0-rc.0",
     "@vertex/core": "*",
     "@vertex/types": "*",
     "@vertex/ui": "*",

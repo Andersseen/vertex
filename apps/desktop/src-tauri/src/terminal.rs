@@ -1,9 +1,8 @@
-use portable_pty::{native_pty_system, CommandBuilder, PtySize, PtySystem};
+use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use serde::Deserialize;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
-use tauri::{AppHandle, Manager, State};
-use tokio::sync::mpsc;
+use tauri::{AppHandle, Manager, State, Emitter};
 
 pub struct TerminalState {
     pub pty_write: Arc<Mutex<Box<dyn Write + Send>>>,
