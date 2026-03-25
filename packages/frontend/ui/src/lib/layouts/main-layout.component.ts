@@ -16,7 +16,7 @@ import { ToolbarModule } from "primeng/toolbar";
         class="h-10 shrink-0 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-900)] p-0 shadow-sm z-20"
       >
         <ng-template pTemplate="start">
-          <div class="flex items-center gap-3 pl-3">
+          <div class="flex-vx items-center-vx gap-vx pl-3 h-full-vx">
             <div
               class="w-6 h-6 bg-gradient-to-br from-[var(--p-primary-500)] to-[var(--p-primary-700)] rounded shadow-inner flex items-center justify-center"
             >
@@ -29,42 +29,42 @@ import { ToolbarModule } from "primeng/toolbar";
               class="text-[11px] font-bold tracking-[0.2em] text-[var(--p-surface-300)] uppercase antialiased"
               >Vertex <span class="text-[var(--p-primary-500)]">IDE</span></span
             >
-          </div>
-          <div class="w-[1px] h-4 bg-[var(--p-surface-700)] mx-4"></div>
-          <div
-            class="flex items-center gap-1 text-[12px] text-[var(--p-surface-400)] font-medium"
-          >
-            <button
-              class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+            <div class="w-[1px] h-4 bg-[var(--p-surface-700)] mx-4"></div>
+            <div
+              class="flex-vx items-center-vx gap-vx text-[12px] text-[var(--p-surface-400)] font-medium"
             >
-              File
-            </button>
-            <button
-              class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-            >
-              Edit
-            </button>
-            <button
-              class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-            >
-              Selection
-            </button>
-            <button
-              class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-            >
-              View
-            </button>
-            <button
-              class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
-            >
-              Go
-            </button>
+              <button
+                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+              >
+                File
+              </button>
+              <button
+                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+              >
+                Edit
+              </button>
+              <button
+                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+              >
+                Selection
+              </button>
+              <button
+                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+              >
+                View
+              </button>
+              <button
+                class="hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] px-3 py-1.5 rounded transition-all duration-200 active:scale-95"
+              >
+                Go
+              </button>
+            </div>
           </div>
         </ng-template>
 
         <ng-template pTemplate="center">
           <div
-            class="flex items-center bg-[var(--p-surface-950)] border border-[var(--p-surface-700)] rounded-md px-3 py-1 gap-2 w-96 hover:border-[var(--p-surface-500)] transition-all cursor-pointer group shadow-sm"
+            class="flex-vx items-center-vx bg-[var(--p-surface-950)] border border-[var(--p-surface-700)] rounded-md px-3 py-1 gap-2 w-96 hover:border-[var(--p-surface-500)] transition-all cursor-pointer group shadow-sm"
           >
             <i
               class="pi pi-search text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)]"
@@ -81,7 +81,7 @@ import { ToolbarModule } from "primeng/toolbar";
         </ng-template>
 
         <ng-template pTemplate="end">
-          <div class="flex items-center gap-2 pr-3">
+          <div class="flex-vx items-center-vx gap-vx pr-3 h-full-vx">
             <button
               class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all"
             >
@@ -152,20 +152,19 @@ import { ToolbarModule } from "primeng/toolbar";
         </p-splitter>
       </main>
 
-      <!-- Status Bar -->
       <footer
-        class="statusbar-vx h-7 shrink-0 border-t border-[var(--p-surface-800)] bg-[var(--p-surface-950)] flex items-center px-3 justify-between text-[11px] text-[var(--p-surface-400)] font-medium shadow-[0_-2px_8px_rgba(0,0,0,0.15)] select-none antialiased"
+        class="statusbar-vx"
       >
-        <div class="flex items-center gap-2">
+        <div class="flex-vx items-center-vx gap-lg-vx h-full-vx">
           <div
-            class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
+            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
           >
-            <i class="pi pi-sync text-[11px] animate-spin-slow opacity-70"></i>
+            <i class="pi pi-sync text-[10px] animate-spin-slow opacity-70"></i>
             <span class="antialiased">Ready</span>
           </div>
           <span class="divider-vx"></span>
           <div
-            class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
+            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
           >
             <i class="pi pi-github text-[12px] opacity-70"></i>
             <span class="antialiased font-semibold tracking-tight">main</span>
@@ -173,39 +172,41 @@ import { ToolbarModule } from "primeng/toolbar";
           </div>
           <span class="divider-vx"></span>
           <div
-            class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
+            class="flex-vx items-center-vx gap-lg-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all h-full-vx"
           >
-            <i
-              class="pi pi-exclamation-triangle text-[11px] text-amber-300"
-            ></i>
-            <span>0</span>
-            <i class="pi pi-times-circle text-[11px] text-red-300"></i>
-            <span>0</span>
+            <div class="flex-vx items-center-vx gap-vx">
+              <i class="pi pi-exclamation-triangle text-[10px] text-amber-300"></i>
+              <span>0</span>
+            </div>
+            <div class="flex-vx items-center-vx gap-vx">
+              <i class="pi pi-times-circle text-[10px] text-red-300"></i>
+              <span>0</span>
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex-vx items-center-vx gap-lg-vx h-full-vx">
           <div
-            class="px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased"
+            class="flex-vx items-center-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx"
           >
             Spaces: 2
           </div>
           <span class="divider-vx"></span>
           <div
-            class="px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased"
+            class="flex-vx items-center-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx"
           >
             UTF-8
           </div>
           <span class="divider-vx"></span>
           <div
-            class="px-2 py-0.5 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased flex items-center gap-1 font-bold"
+            class="flex-vx items-center-vx gap-vx px-2 py-1 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all antialiased h-full-vx font-bold"
           >
             <i class="pi pi-code text-[12px] opacity-70"></i>
             <span>TypeScript</span>
           </div>
           <span class="divider-vx"></span>
           <div
-            class="flex items-center justify-center w-7 h-6 rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
+            class="flex-vx items-center-vx justify-center w-8 h-full-vx rounded hover:bg-[var(--p-surface-800)] cursor-pointer transition-all"
           >
             <i class="pi pi-bell text-[11px] opacity-70"></i>
           </div>
@@ -264,11 +265,38 @@ import { ToolbarModule } from "primeng/toolbar";
           transform: rotate(360deg);
         }
       }
+
+      /* Layout Fixes (Manual CSS to bypass Tailwind generation issues in library) */
+      .flex-vx {
+        display: flex !important;
+      }
+      .flex-col-vx {
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      .items-center-vx {
+        align-items: center !important;
+      }
+      .justify-between-vx {
+        justify-content: space-between !important;
+      }
+      .gap-vx {
+        gap: 0.5rem !important;
+      }
+      .gap-lg-vx {
+        gap: 1.5rem !important;
+      }
+      .h-full-vx {
+        height: 100% !important;
+      }
+
       .statusbar-vx {
         font-family: "JetBrains Mono", monospace;
-        display: flex;
-        align-items: center;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         width: 100%;
+        padding: 0 1rem;
       }
       .divider-vx {
         display: inline-block;
@@ -278,6 +306,15 @@ import { ToolbarModule } from "primeng/toolbar";
         margin: 0 0.5rem;
         border-radius: 1px;
         opacity: 0.5;
+      }
+
+      /* Fix Toolbar specifically */
+      ::ng-deep .p-toolbar-start,
+      ::ng-deep .p-toolbar-center,
+      ::ng-deep .p-toolbar-end {
+        display: flex !important;
+        align-items: center !important;
+        height: 100%;
       }
     `,
   ],

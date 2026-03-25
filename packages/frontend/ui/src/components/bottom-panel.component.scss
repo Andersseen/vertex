@@ -1,20 +1,27 @@
 .bottom-panel {
-  @apply bg-[var(--p-surface-950)] text-[var(--p-surface-100)] border-t border-[var(--p-surface-800)] shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)];
+  @apply bg-[var(--p-surface-950)] text-[var(--p-surface-100)] border-t border-[var(--p-surface-800)];
   font-family: "JetBrains Mono", monospace;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
   height: 100%;
   position: relative;
+  box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.4);
 }
 
 .bottom-panel-header {
-  @apply flex items-center bg-[var(--p-surface-900)] border-b border-[var(--p-surface-800)] shrink-0;
+  @apply bg-[var(--p-surface-900)] border-b border-[var(--p-surface-800)] shrink-0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   height: 32px;
   user-select: none;
 }
 
 .tab-item {
-  @apply flex items-center h-full px-4 text-[11px] font-bold text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all cursor-pointer border-r border-[var(--p-surface-800)] relative uppercase tracking-wider;
+  @apply px-5 text-[10px] font-bold text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] hover:bg-[var(--p-surface-800)] transition-all cursor-pointer border-r border-[var(--p-surface-800)] relative uppercase tracking-widest antialiased;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
   background: none;
   border-top: none;
   border-bottom: none;
@@ -22,27 +29,30 @@
 }
 
 .tab-item.active {
-  @apply text-[var(--p-surface-100)] bg-[var(--p-surface-950)];
+  @apply text-[var(--p-surface-0)] bg-[var(--p-surface-950)];
   &::after {
     content: "";
-    @apply absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--p-primary-500)];
+    @apply absolute bottom-0 left-0 right-0 h-[2.5px] bg-[var(--p-primary-500)] shadow-[0_0_8px_rgba(99,102,241,0.5)];
   }
 }
 
-.bottom-panel-content {
-  @apply flex-1 overflow-auto bg-[var(--p-surface-950)];
-}
-
-.console-content {
-  @apply font-mono text-[13px] leading-relaxed p-4 text-[var(--p-surface-200)];
+.console-content-vx {
+  @apply font-mono text-[12px] leading-relaxed p-4 text-[var(--p-surface-300)];
   white-space: pre-wrap;
+  display: block;
 }
 
-.fade-in {
-  animation: fadeInPanel 0.1s ease-out;
-}
+/* Manual Layout Classes for internal use */
+.flex-vx { display: flex !important; }
+.flex-col-vx { display: flex !important; flex-direction: column !important; }
+.items-center-vx { align-items: center !important; }
+.items-start-vx { align-items: flex-start !important; }
+.justify-between-vx { justify-content: space-between !important; }
+.justify-center-vx { justify-content: center !important; }
+.gap-vx { gap: 0.5rem !important; }
+.h-full-vx { height: 100% !important; }
+.flex-1-vx { flex: 1 !important; }
 
-@keyframes fadeInPanel {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: none; }
+.prob-item:hover {
+  background: linear-gradient(90deg, rgba(var(--p-primary-500-rgb), 0.05), transparent);
 }

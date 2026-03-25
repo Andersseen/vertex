@@ -20,33 +20,29 @@ import { VertexFile, VertexFolder } from "@vertex/types";
       class="h-full flex flex-col bg-[var(--p-surface-900)] border-r border-[var(--p-surface-800)] shadow-lg font-inter"
     >
       <!-- Explorer Header -->
-      <div
-        class="flex items-center justify-between px-3 h-9 border-b border-[var(--p-surface-800)] bg-[var(--p-surface-950)] shrink-0 shadow-sm"
-      >
-        <div class="flex items-center gap-2">
-          <i class="pi pi-list text-[11px] text-[var(--p-primary-500)]"></i>
-          <span
-            class="text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--p-surface-400)] antialiased"
-            >Explorer</span
-          >
+      <!-- Sidebar Header -->
+      <div class="sidebar-header-vx flex-vx items-center-vx justify-between-vx px-3 shrink-0">
+        <div class="flex-vx items-center-vx gap-vx">
+          <i class="pi pi-bars text-[12px] text-[var(--p-surface-400)]"></i>
+          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--p-surface-200)] antialiased">Explorer</span>
         </div>
-        <div class="flex gap-1">
+        <div class="flex-vx items-center-vx gap-1">
           <button
-            class="p-1.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all active:scale-90"
+            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all flex-vx items-center-vx justify-center-vx"
             (click)="newFile.emit()"
             title="New File"
           >
             <i class="pi pi-file-plus text-[11px]"></i>
           </button>
           <button
-            class="p-1.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all active:scale-90"
+            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all flex-vx items-center-vx justify-center-vx"
             (click)="newFolder.emit()"
             title="New Folder"
           >
             <i class="pi pi-folder-plus text-[11px]"></i>
           </button>
           <button
-            class="p-1.5 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all active:scale-90"
+            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all flex-vx items-center-vx justify-center-vx"
             (click)="refresh.emit()"
             title="Refresh"
           >
@@ -54,90 +50,62 @@ import { VertexFile, VertexFolder } from "@vertex/types";
           </button>
         </div>
       </div>
-
+      
       <!-- File Tree -->
-      <div
-        class="flex-1 overflow-auto custom-tree-container py-2 selection-none"
-      >
-        <p-tree
-          [value]="treeNodes"
-          selectionMode="single"
+      <div class="flex-1 overflow-auto custom-scrollbar-vx">
+        <p-tree 
+          [value]="treeNodes" 
+          selectionMode="single" 
           [(selection)]="selectedNode"
           (onNodeSelect)="onNodeSelect($event)"
           (onNodeExpand)="onNodeExpand($event)"
           (onNodeCollapse)="onNodeCollapse($event)"
-          class="w-full no-border-tree"
+          class="w-full border-none p-0"
           [scrollHeight]="'100%'"
         >
           <ng-template let-node pTemplate="default">
-            <div class="flex items-center gap-2 py-1 group w-full truncate">
-              <i
-                [class]="
-                  node.data.customIcon +
-                  ' text-[14px] group-hover:scale-110 transition-transform duration-200'
-                "
-              ></i>
-              <span
-                class="text-[12px] font-medium truncate group-hover:text-[var(--p-primary-300)] transition-colors antialiased select-none tracking-tight"
-                >{{ node.label }}</span
-              >
+            <div class="flex-vx items-center-vx gap-vx py-0.5">
+              <i [class]="node.data.customIcon + ' text-[13px] opacity-70'"></i>
+              <span class="text-[12px] tracking-tight">{{node.label}}</span>
             </div>
           </ng-template>
         </p-tree>
       </div>
     </div>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        height: 100%;
-        font-family: "Inter", sans-serif;
-      }
-
-      ::ng-deep .no-border-tree.p-tree {
-        background: transparent !important;
-        border: none !important;
-        padding: 2px !important;
-      }
-
-      ::ng-deep .p-tree-toggler {
-        width: 1.25rem !important;
-        height: 1.25rem !important;
-        color: var(--p-surface-600) !important;
-        transition:
-          color 0.2s,
-          transform 0.2s !important;
-      }
-
-      ::ng-deep .p-tree-toggler:hover {
-        color: var(--p-surface-300) !important;
-      }
-
-      ::ng-deep .p-treenode-content {
-        padding: 0.15rem 0.5rem !important;
-        border-radius: 4px !important;
-        transition:
-          background 0.15s,
-          border-left 0.1s !important;
-        border-left: 2px solid transparent !important;
-      }
-
-      ::ng-deep .p-treenode-content:hover {
-        background: var(--p-surface-800) !important;
-      }
-
-      ::ng-deep .p-treenode-content.p-highlight {
-        background: rgba(var(--p-primary-500-rgb), 0.1) !important;
-        border-left: 2px solid var(--p-primary-500) !important;
-        color: var(--p-primary-300) !important;
-      }
-
-      ::ng-deep .p-treenode-content.p-highlight .p-tree-toggler {
-        color: var(--p-primary-400) !important;
-      }
-    `,
-  ],
+  styles: [`
+    :host { display: block; height: 100%; width: 100%; border-right: 1px solid var(--p-surface-800); background: var(--p-surface-900); }
+    .sidebar-header-vx {
+      height: 32px;
+      border-bottom: 1px solid var(--p-surface-800);
+      background: var(--p-surface-900);
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+    .flex-vx { display: flex !important; }
+    .items-center-vx { align-items: center !important; }
+    .justify-between-vx { justify-content: space-between !important; }
+    .justify-center-vx { justify-content: center !important; }
+    .gap-vx { gap: 0.5rem !important; }
+    
+    ::ng-deep .p-tree { background: transparent !important; color: inherit !important; border: none !important; padding: 0.5rem 0 !important; }
+    ::ng-deep .p-treenode-content {
+      padding: 0.25rem 0.75rem !important;
+      border-radius: 0 !important;
+      transition: background 0.1s ease !important;
+      border: none !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    ::ng-deep .p-treenode-content:hover { background: var(--p-surface-800) !important; }
+    ::ng-deep .p-treenode-content.p-highlight {
+      background: rgba(var(--p-primary-500-rgb), 0.15) !important;
+      border-right: 2px solid var(--p-primary-500) !important;
+      color: var(--p-surface-0) !important;
+    }
+    ::ng-deep .p-tree-toggler { margin-right: 0.25rem !important; width: 1.25rem !important; height: 1.25rem !important; }
+  `],
 })
 export class SidebarComponent implements OnChanges {
   @Input() workspaceFolder: VertexFolder | null = null;
