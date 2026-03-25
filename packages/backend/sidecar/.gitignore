@@ -109,3 +109,6 @@ ng build stats.json
 # Tauri specific (si aplica)
 target/
 Cargo.lock
+
+# Sidecar binaries
+sidecar-bin*

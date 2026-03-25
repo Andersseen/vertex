@@ -1,118 +1,87 @@
-# Vertex IDE
+# Vertex IDE 🌌
 
-Un IDE ligero construido con Tauri, Angular, CodeMirror y Bun.
+**Vertex** is not just another code editor; it is a "point of convergence" designed for speed, modularity, and precision. Built with the most cutting-edge technologies of the modern web ecosystem: **Angular 21**, **Bun**, **Tauri**, and **CodeMirror 6**.
 
-## Arquitectura
+---
 
-- **Frontend**: Angular + CodeMirror
-- **Backend**: Bun + Hono (sidecar)
-- **Desktop**: Tauri (Rust)
-- **Monorepo**: Turborepo
-- **Package Manager**: Bun
+## ⚡ The Vertex Philosophy
 
-## Estructura del Proyecto
+### Why does Vertex exist?
+Most modern editors have fallen into the "software obesity" trap. They have become heavy platforms trying to solve every problem at once. Vertex is born with a different premise: **an IDE should be a surgical tool, not an operating system.**
+
+Vertex (from Latin *vĕrtex*: summit, point of union) is the intersection between native performance and web flexibility.
+
+### Why is it not "another VSCode clone"?
+VSCode is an incredible tool, but its architecture is deeply tied to a monolithic model based on Electron and the Monaco editor. Vertex breaks away from this to offer:
+- **True Lightweight Performance**: Thanks to **Tauri (Rust)**, Vertex consumes a fraction of the memory used by Electron-based editors.
+- **Total Control**: We don't inherit VSCode's design decisions. Every pixel and every interaction is designed for a "Zen" experience.
+
+---
+
+## 🛠️ Technical Decisions: The "Why"
+
+### CodeMirror 6 vs. Monaco
+This is the most critical technical decision in Vertex. While Monaco is the engine behind VSCode (powerful but rigid and heavy), we chose **CodeMirror 6** for its:
+- **Extreme Modularity**: CM6 is designed as a system of functional extensions. We can build exactly what we need without the overhead of a full desktop editor inside a tab.
+- **Accessibility & Mobile-Friendly**: CM6 behaves natively in the DOM, allowing for a much more fluid integration with **Angular** templates.
+- **Modernity**: Its functional state management and handling of large documents make it ideal for the "Push-Pull" reactivity architecture we are implementing.
+
+### Angular 21 + Signals
+We use the latest version of Angular to leverage the new **Signals** model. This allows for granular reactivity: only what actually changes is updated, eliminating unnecessary change detection cycles and ensuring constant 60fps in the UI.
+
+### The Sidecar (Bun + Hono)
+Instead of a heavy Node.js process, we use a specialized **Sidecar** compiled with **Bun**. This provides an ultra-fast local API for file system operations and heavy processing, keeping the frontend lightweight and responsive.
+
+---
+
+## 📂 Monorepo Structure
 
 ```
 vertex/
 ├── apps/
-│   ├── web/              # Angular web app
-│   └── desktop/          # Tauri desktop app
+│   ├── web/              # Web Application (Cloudflare Pages ready)
+│   └── desktop/          # Desktop Application (Tauri + Rust)
 ├── packages/
-│   ├── frontend/         # Shared frontend libs
-│   │   ├── types/        # TypeScript types
-│   │   ├── core/         # Core services
-│   │   └── ui/           # UI components
+│   ├── frontend/         # Shared libraries
+│   │   ├── types/        # Unified type contracts
+│   │   ├── core/         # Reactivity engine and base services
+│   │   └── ui/           # SCSS design system and components
 │   └── backend/
-│       └── sidecar/      # Bun + Hono API
-└── turbo.json            # Configuración de Turborepo
+│       └── sidecar/      # Minimalist Bun + Hono backend
 ```
 
-## Scripts disponibles
+---
 
-### Desarrollo
+## 🚀 Quick Start
+
+### Prerequisites
+- [Bun](https://bun.sh) (v1.1+)
+- Rust (for the desktop build)
+
+### Main Commands
 
 ```bash
-# Web frontend (Angular) - puerto 4200
+# Installation
+bun install
+
+# Web Development (Angular) - http://localhost:4200
 bun web:dev
 
-# Desktop app (Tauri + Angular)
+# Desktop Development (Tauri)
 bun desktop:dev
 
-# Backend API (Sidecar) - puerto 3001
-bun sidecar:dev
-
-# Todo junto (Backend + Web)
+# Run Everything (Frontend + Sidecar)
 bun dev:all
-
-# Todo junto (Backend + Desktop)
-bun dev:desktop
 ```
 
-### Testing
+---
 
-```bash
-# Unit tests
-bun test
+## 🧪 Quality Strategy
 
-# E2E tests (solo web)
-bun test:e2e
+- **Unit Testing**: Vitest for business logic and Angular CLI for components.
+- **E2E Testing**: Playwright to ensure the user flow is perfect in Chrome, Firefox, and Safari.
+- **CI/CD**: Automated pipeline that validates types, lint, and tests on every push.
 
-# E2E con UI
-bun test:e2e:ui
-```
+---
 
-### Build
-
-```bash
-# Web
-bun web:build
-
-# Desktop
-bun desktop:build
-
-# Backend
-bun sidecar:build
-
-# Todo el proyecto
-bun build
-```
-
-## Arquitectura de Sidecar
-
-El sidecar es un servidor API ligero que corre en Bun + Hono:
-
-- Puerto: 3001 (configurable via PORT)
-- Endpoints:
-  - `GET /` - Información del servicio
-  - `GET /health` - Health check
-
-## Desarrollo
-
-1. Instalar dependencias: `bun install`
-2. Iniciar frontend: `bun web:dev`
-3. Iniciar backend: `bun sidecar:dev`
-4. Iniciar app completa: `bun desktop:dev`
-
-## Testing Strategy
-
-### Unit Tests
-
-- Vitest para packages
-- Angular CLI testing para apps
-
-### E2E Tests
-
-- Playwright para web app
-- Tests corren solo en web (misma UI que desktop)
-- Multi-browser: Chromium, Firefox, Safari
-
-## Por qué esta arquitectura?
-
-- **Apps separadas**: Web independiente vs Desktop con APIs nativas
-- **Packages compartidos**: Sin duplicación de código
-- **Testing eficiente**: E2E solo en web, misma UI en desktop
-- **Tauri vs Electron**: Más ligero, mejor rendimiento
-- **CodeMirror vs Monaco**: Más modular, mejor para personalización
-- **Bun vs Node**: Más rápido, bundler integrado
-- **Angular**: Ecosistema maduro, TypeScript first
-- **Hono**: Framework web minimalista y rápido para Bun
+*Vertex is an evolving project. We seek perfection in simplicity.* 🚀
