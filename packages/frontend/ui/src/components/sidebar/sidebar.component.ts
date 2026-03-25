@@ -15,61 +15,10 @@ import { VertexFile, VertexFolder } from "@vertex/types";
   selector: "v-sidebar",
   standalone: true,
   imports: [CommonModule, TreeModule],
-  template: `
-    <div class="sidebar-container">
-      <!-- Sidebar Header -->
-      <div class="sidebar-header-vx">
-        <div class="vx-flex vx-items-center vx-gap-2">
-          <i class="pi pi-bars text-[12px] text-[var(--p-surface-400)]"></i>
-          <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--p-surface-200)] antialiased">Explorer</span>
-        </div>
-        <div class="vx-flex vx-items-center vx-gap-1">
-          <button
-            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-            (click)="newFile.emit()"
-            title="New File"
-          >
-            <i class="pi pi-file-plus text-[11px]"></i>
-          </button>
-          <button
-            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-            (click)="newFolder.emit()"
-            title="New Folder"
-          >
-            <i class="pi pi-folder-plus text-[11px]"></i>
-          </button>
-          <button
-            class="p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-            (click)="refresh.emit()"
-            title="Refresh"
-          >
-            <i class="pi pi-refresh text-[11px]"></i>
-          </button>
-        </div>
-      </div>
-      
-      <!-- File Tree -->
-      <div class="sidebar-content custom-scrollbar-vx">
-        <p-tree 
-          [value]="treeNodes" 
-          selectionMode="single" 
-          [(selection)]="selectedNode"
-          (onNodeSelect)="onNodeSelect($event)"
-          (onNodeExpand)="onNodeExpand($event)"
-          (onNodeCollapse)="onNodeCollapse($event)"
-          class="w-full border-none p-0"
-          [scrollHeight]="'100%'"
-        >
-          <ng-template let-node pTemplate="default">
-            <div class="vx-flex vx-items-center vx-gap-2 py-0.5">
-              <i [class]="node.data.customIcon + ' text-[13px] opacity-70'"></i>
-              <span class="text-[12px] tracking-tight">{{node.label}}</span>
-            </div>
-          </ng-template>
-        </p-tree>
-      </div>
-    </div>
-  `,
+  host: {
+    class: "vx-h-full vx-w-full block",
+  },
+  templateUrl: "./sidebar.component.html",
   styleUrls: ["./sidebar.component.scss"],
 })
 export class SidebarComponent implements OnChanges {

@@ -1,0 +1,24 @@
+<div class="tabs-container">
+  <div class="tabs-header-vx">
+    <div 
+      class="tab-item-vx group"
+      *ngFor="let file of files; let i = index"
+      [class.active]="file.id === activeFileId"
+      (click)="onTabClick(file)">
+      <i [class]="getFileIcon(file.language) + ' text-[12px] opacity-70 group-hover:opacity-100'"></i>
+      <span class="tab-name">{{ file.name }}</span>
+      
+      <div class="modified-dot animate-pulse" *ngIf="file.isDirty"></div>
+
+      <button 
+        class="tab-close"
+        (click)="onTabClose(file, $event)"
+        *ngIf="files.length > 1">
+        <i class="pi pi-times text-[9px]"></i>
+      </button>
+    </div>
+    <button class="new-tab-btn" (click)="onNewTab()">
+      <i class="pi pi-plus text-[11px]"></i>
+    </button>
+  </div>
+</div>
