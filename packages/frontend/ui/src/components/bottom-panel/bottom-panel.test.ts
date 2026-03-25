@@ -11,8 +11,8 @@ describe("BottomPanelComponent", () => {
     expect(component.tabs).toEqual(["Problems", "Output", "Debug Console", "Terminal"]);
   });
 
-  test("should have activeTabIndex 0 by default", () => {
+  test("should have activeTabIndex 3 by default", () => {
     const component = new BottomPanelComponent();
-    expect(component.activeTabIndex).toBe(0);
+    expect(component.activeTabIndex).toBe(3);
   });
 });

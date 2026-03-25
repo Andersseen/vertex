@@ -91,6 +91,11 @@ mock.module("@angular/core", () => ({
   },
   booleanAttribute: (v: any) => !!v,
   numberAttribute: (v: any) => Number(v),
+  afterNextRender: (fn: any) => fn(),
+  afterRender: (fn: any) => fn(),
+  TERMINAL_BACKEND_ADAPTER: class { constructor(_name: string) { /* noop */ } },
+  TauriTerminalService: class { connect() { return Promise.resolve(); } onData$ = { pipe: () => ({ subscribe: () => ({}) }) }; },
+  WebTerminalService: class { connect() { return Promise.resolve(); } onData$ = { pipe: () => ({ subscribe: () => ({}) }) }; },
 }));
 
 console.log("Registering @vertex/ui mock...");
@@ -139,6 +144,7 @@ mock.module("rxjs", () => ({
     add(_sub: any) { /* noop */ }
   },
   of: (val: any) => ({ subscribe: (cb: any) => cb(val), pipe: () => ({ subscribe: (cb: any) => cb(val) }) }),
+  takeUntil: (_notifier: any) => (source: any) => source,
 }));
 
 console.log("Registering primeng mocks...");
@@ -154,5 +160,30 @@ mock.module("primeng/toolbar", () => ({ ToolbarModule: mockModule }));
 mock.module("primeng/tree", () => ({ TreeModule: mockModule }));
 mock.module("primeng/divider", () => ({ DividerModule: mockModule }));
 mock.module("primeng/tabs", () => ({ TabsModule: mockModule }));
+mock.module("xterm", () => ({ 
+  Terminal: class { 
+    loadAddon() { /* noop */ }
+    open() { /* noop */ }
+    dispose() { /* noop */ }
+    onData() { return { dispose: () => { /* noop */ } }; }
+    write() { /* noop */ }
+    cols = 80;
+    rows = 24;
+  } 
+}));
+mock.module("xterm-addon-fit", () => ({ FitAddon: class { fit() { /* noop */ } } }));
+mock.module("xterm-addon-webgl", () => ({ WebglAddon: class { /* noop */ } }));
+
+console.log("Mocking @tauri-apps/api...");
+mock.module("@tauri-apps/api/core", () => ({ invoke: async () => ({}) }));
+mock.module("@tauri-apps/api/event", () => ({ 
+  listen: async () => (() => { /* unlisten noop */ }),
+  emit: async () => ({})
+}));
+
+console.log("Mocking @vertex/core terminal tokens...");
+// We need to extend the @vertex/core mock or add it here if not fully covered
+// But actually it's already mocked at line 16 (for core)
+// Let's add the terminal tokens to it.
 
 console.log("--- TEST SETUP COMPLETED ---");
