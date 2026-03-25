@@ -15,11 +15,21 @@
 .vx-flex-col { flex-direction: column; }
 .vx-flex-row { flex-direction: row; }
 .vx-items-center { align-items: center; }
+.vx-items-start { align-items: flex-start; }
 .vx-justify-between { justify-content: space-between; }
+.vx-justify-center { justify-content: center; }
 .vx-flex-1 { flex: 1 1 0%; }
 .vx-h-full { height: 100%; }
 .vx-w-full { width: 100%; }
 .vx-overflow-hidden { overflow: hidden; }
+.vx-relative { position: relative; }
+
+// Utility Gaps
+.vx-gap-0 { gap: 0; }
+.vx-gap-1 { gap: 0.25rem; }
+.vx-gap-2 { gap: 0.5rem; }
+.vx-gap-3 { gap: 0.75rem; }
+.vx-gap-4 { gap: 1rem; }
 
 // Utility Backgrounds
 .vx-bg-950 { background-color: $surface-950; }

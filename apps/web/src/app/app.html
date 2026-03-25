@@ -8,7 +8,7 @@
   ></v-sidebar>
 
   <!-- Main Editor Area -->
-  <div editor class="flex flex-col h-full overflow-hidden bg-[var(--p-surface-950)]">
+  <div editor class="vx-flex vx-flex-col vx-h-full vx-overflow-hidden vx-bg-950">
     <!-- Tab Bar -->
     <v-tabs
       [files]="openFiles()"
@@ -18,13 +18,11 @@
     ></v-tabs>
 
     <!-- Code Editor -->
-    <div class="flex-1 overflow-hidden">
+    <div class="vx-flex-1 vx-overflow-hidden">
       <v-editor [file]="getActiveFile() || null" [showHeader]="false"></v-editor>
     </div>
-
-    <!-- Bottom Panel -->
-    <div bottom class="h-[180px] shrink-0 border-t border-[var(--p-surface-800)]">
-      <v-bottom-panel></v-bottom-panel>
-    </div>
   </div>
+
+  <!-- Bottom Panel Slot -->
+  <v-bottom-panel bottom></v-bottom-panel>
 </v-main-layout>

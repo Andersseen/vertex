@@ -1,7 +1,7 @@
-<div class="tabs-container">
-  <div class="tabs-header-vx">
+<div class="tabs-container vx-w-full">
+  <div class="tabs-header-vx vx-flex vx-items-center vx-h-full">
     <div 
-      class="tab-item-vx group"
+      class="tab-item-vx group vx-flex vx-items-center"
       *ngFor="let file of files; let i = index"
       [class.active]="file.id === activeFileId"
       (click)="onTabClick(file)">
@@ -11,13 +11,13 @@
       <div class="modified-dot animate-pulse" *ngIf="file.isDirty"></div>
 
       <button 
-        class="tab-close"
+        class="tab-close vx-flex vx-items-center vx-justify-center"
         (click)="onTabClose(file, $event)"
         *ngIf="files.length > 1">
         <i class="pi pi-times text-[9px]"></i>
       </button>
     </div>
-    <button class="new-tab-btn" (click)="onNewTab()">
+    <button class="new-tab-btn vx-flex vx-items-center vx-justify-center" (click)="onNewTab()">
       <i class="pi pi-plus text-[11px]"></i>
     </button>
   </div>

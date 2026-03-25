@@ -1,21 +1,21 @@
-<div class="editor-container">
+<div class="editor-container vx-h-full vx-w-full vx-flex vx-flex-col">
   <!-- Editor Header / Tabs -->
-  <div class="editor-header-vx" *ngIf="showHeader">
+  <div class="editor-header-vx vx-flex vx-items-center vx-justify-between" *ngIf="showHeader">
     <div class="vx-flex vx-items-center vx-h-full">
-      <div class="active-tab">
+      <div class="active-tab vx-flex vx-items-center vx-gap-2 px-3">
         <i [class]="getFileIcon(file?.language) + ' text-[12px] opacity-80'"></i>
         <span class="file-name">{{ file?.name || 'Untitled' }}</span>
         <div class="modified-dot animate-pulse" *ngIf="isDirty" title="Modified"></div>
-        <button class="ml-2 p-1 hover:bg-[var(--p-surface-800)] rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all vx-flex vx-items-center vx-justify-center">
+        <button class="ml-2 p-1 hover:vx-bg-800 rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all vx-flex vx-items-center vx-justify-center">
           <i class="pi pi-times text-[8px]"></i>
         </button>
       </div>
     </div>
     
-    <div class="editor-actions">
+    <div class="editor-actions vx-flex vx-items-center vx-gap-3 px-3">
       <span class="text-[9px] text-[var(--p-surface-500)] font-bold uppercase tracking-widest opacity-40">{{ file?.language || 'text' }}</span>
       <button 
-        class="save-btn" 
+        class="save-btn vx-flex vx-items-center vx-gap-1" 
         (click)="onSave()" 
         [disabled]="!isDirty">
         <i class="pi pi-save text-[9px]"></i>
@@ -25,5 +25,5 @@
   </div>
   
   <!-- Editor View -->
-  <div #editorHost class="editor-host"></div>
+  <div #editorHost class="editor-host vx-flex-1"></div>
 </div>
