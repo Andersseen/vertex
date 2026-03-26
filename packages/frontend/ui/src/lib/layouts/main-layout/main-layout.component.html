@@ -1,51 +1,39 @@
 <div class="vx-layout">
-  <!-- Top Toolbar -->
-  <p-toolbar class="vx-toolbar">
-    <ng-template pTemplate="start">
-      <div class="vx-flex vx-items-center vx-gap-2 pl-3">
-        <div class="vx-logo-container">
-          <span class="vx-logo-text">V</span>
-        </div>
-        <span class="text-[11px] font-bold tracking-[0.2em] text-[var(--p-surface-300)] uppercase antialiased">
-          Vertex <span class="vx-text-info">IDE</span>
-        </span>
-        <div class="vx-divider"></div>
-        <div class="vx-flex vx-items-center vx-gap-2">
-          <button class="vx-menu-btn">File</button>
-          <button class="vx-menu-btn">Edit</button>
-          <button class="vx-menu-btn">Selection</button>
-          <button class="vx-menu-btn">View</button>
-          <button class="vx-menu-btn">Go</button>
-        </div>
+  <!-- Custom Header -->
+  <header class="vx-header">
+    <div class="vx-header-left">
+      <div class="vx-logo-container">
+        <span class="vx-logo-text">V</span>
       </div>
-    </ng-template>
+      <span class="vx-app-title">
+        Vertex <span class="text-[var(--p-primary-500)]">IDE</span>
+      </span>
+      <div class="vx-header-divider"></div>
+      <nav class="vx-header-menu">
+        <button class="vx-menu-item">File</button>
+        <button class="vx-menu-item">Edit</button>
+        <button class="vx-menu-item">Selection</button>
+        <button class="vx-menu-item">View</button>
+        <button class="vx-menu-item">Go</button>
+      </nav>
+    </div>
 
-    <ng-template pTemplate="center">
-      <div class="vx-search-container group shadow-sm">
-        <i class="pi pi-search text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)]"></i>
-        <span class="text-[11px] text-[var(--p-surface-500)] group-hover:text-[var(--p-surface-300)] vx-flex-1">
-          Search components, files, actions...
-        </span>
-        <span class="text-[9px] text-[var(--p-surface-600)] vx-bg-800 px-1.5 py-0.5 rounded border border-[var(--p-surface-700)]">
-          ⌘K
-        </span>
+    <div class="vx-header-center">
+      <div class="vx-search-wrapper group">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search files, commands..." class="vx-search-input" />
+        <span class="vx-search-kbd">⌘K</span>
       </div>
-    </ng-template>
+    </div>
 
-    <ng-template pTemplate="end">
-      <div class="vx-flex vx-items-center vx-gap-2 pr-3">
-        <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
-          <i class="pi pi-bell text-[12px]"></i>
-        </button>
-        <button class="p-2 hover:bg-[var(--p-surface-800)] rounded-full text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex">
-          <i class="pi pi-cog text-[12px]"></i>
-        </button>
-        <div class="w-7 h-7 rounded-full vx-bg-800 vx-flex vx-items-center vx-justify-center border border-[var(--p-surface-600)] cursor-pointer hover:border-[var(--p-primary-500)] transition-all ml-1 shadow-sm">
-          <i class="pi pi-user text-[11px] text-[var(--p-surface-300)]"></i>
-        </div>
+    <div class="vx-header-right">
+      <button class="vx-icon-btn"><i class="pi pi-bell"></i></button>
+      <button class="vx-icon-btn"><i class="pi pi-cog"></i></button>
+      <div class="vx-user-avatar">
+        <i class="pi pi-user"></i>
       </div>
-    </ng-template>
-  </p-toolbar>
+    </div>
+  </header>
 
   <!-- Main Body -->
   <main class="vx-main-content">

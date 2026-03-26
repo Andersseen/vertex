@@ -15,6 +15,7 @@ pub struct TerminalManager {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct ResizePayload {
     pub id: String,
     pub cols: u16,

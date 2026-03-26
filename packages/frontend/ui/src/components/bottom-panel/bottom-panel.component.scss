@@ -64,11 +64,18 @@
   }
 }
 
+.tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
 .console-content-vx {
   font-family: $font-mono;
   font-size: 11px;
-  line-height: 1.6;
-  padding: 1rem;
+  line-height: 1.4;
+  padding: 0.5rem 0.75rem;
   color: $surface-300;
   white-space: pre-wrap;
   display: block;
