@@ -6,6 +6,9 @@
       "name": "vertex",
       "dependencies": {
         "@angular/animations": "^21.2.5",
+        "@angular/common": "^21.2.5",
+        "@angular/compiler": "^21.2.5",
+        "@angular/core": "^21.2.5",
       },
       "devDependencies": {
         "@angular-eslint/eslint-plugin": "^21.3.1",
@@ -111,6 +114,7 @@
       "name": "@vertex/core",
       "version": "0.1.0",
       "dependencies": {
+        "@angular/common": "^21.2.0",
         "@angular/core": "^21.2.0",
         "@tauri-apps/api": "2.0.0-rc.0",
         "@vertex/types": "workspace:*",

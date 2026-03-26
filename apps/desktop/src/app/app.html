@@ -2,7 +2,7 @@
   <v-sidebar
     sidebar
     [workspaceFolder]="rootFolder()"
-    [activeFileId]="activeFile().id"
+    [activeFileId]="activeFile()?.id || null"
     (fileSelect)="onFileSelect($event)"
   >
   </v-sidebar>
