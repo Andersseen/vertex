@@ -34,7 +34,7 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "../../packages/backend/sidecar/sidecar-bin"
+      "../../../packages/backend/sidecar/sidecar-bin"
     ]
   }
 }

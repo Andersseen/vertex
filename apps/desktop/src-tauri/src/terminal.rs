@@ -27,7 +27,7 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String) -> Result<(), Str
 
     // Use default shell based on OS
     let shell = if cfg!(target_os = "windows") {
-        "powershell.exe"
+        "powershell.exe".to_string()
     } else {
         std::env::var("SHELL").unwrap_or_else(|_| "zsh".to_string())
     };
