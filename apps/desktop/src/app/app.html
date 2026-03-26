@@ -1,13 +1,14 @@
-<v-main-layout>
+<v-main-layout (openFolder)="openFolder()">
   <v-sidebar
     sidebar
     [workspaceFolder]="rootFolder()"
     [activeFileId]="activeFile()?.id || null"
     (fileSelect)="onFileSelect($event)"
+    (folderToggle)="onFolderToggle($event)"
   >
   </v-sidebar>
 
-  <v-editor editor [file]="activeFile()" [showHeader]="true"> </v-editor>
+  <v-editor editor [file]="activeFile()" [showHeader]="true" (save)="onSave()"> </v-editor>
 
   <v-bottom-panel bottom></v-bottom-panel>
 </v-main-layout>

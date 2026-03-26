@@ -62,7 +62,8 @@ export class SidebarComponent implements OnChanges {
           : this.getFileIcon(item.language),
       },
       expanded: isFolder ? item.isExpanded : false,
-      children: isFolder
+      leaf: !isFolder, // Folder is not a leaf, even if it has no children (lazy loading)
+      children: isFolder && item.children && item.children.length > 0
         ? item.children.map((child) => this.mapToTreeNode(child))
         : undefined,
       selectable: true,

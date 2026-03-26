@@ -21,16 +21,23 @@ export class FileService {
   private readonly baseUrl = 'http://localhost:3001/fs';
 
   /**
-   * List files in a directory and map to VertexFolder structure
+   * List children of a directory (lazy loading)
+   */
+  getChildren(path: string): Observable<(VertexFile | VertexFolder)[]> {
+    return this.http.get<SidecarFileItem[]>(`${this.baseUrl}/children`, { params: { path } }).pipe(
+      map((items: SidecarFileItem[]) => items.map(item => this.mapToVertex(item)))
+    );
+  }
+
+  /**
+   * Load a full folder structure (recursive - use with caution for large folders)
    */
   getFiles(path: string): Observable<VertexFolder> {
-    return this.http.get<SidecarFileItem[]>(`${this.baseUrl}/list`, { params: { path } }).pipe(
+    return this.http.get<SidecarFileItem[]>(`${this.baseUrl}/children`, { params: { path } }).pipe(
       map((items: SidecarFileItem[]) => {
-        // Find folder name from path
         const name = path.split(/[/\\]/).pop() || 'root';
-        
         return {
-          id: btoa(path),
+          id: path,
           name,
           path,
           isExpanded: true,

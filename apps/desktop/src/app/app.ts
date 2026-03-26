@@ -6,7 +6,7 @@ import {
   BottomPanelComponent,
 } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
-import { FileService } from '@vertex/core';
+import { FileService, TauriService } from '@vertex/core';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +21,7 @@ import { FileService } from '@vertex/core';
   styleUrl: './app.scss',
 })
 export class App {
+  private readonly tauriService = inject(TauriService);
   private readonly fileService = inject(FileService);
 
   protected readonly title = signal('Vertex IDE');
@@ -28,20 +29,54 @@ export class App {
   protected readonly rootFolder = signal<VertexFolder | null>(null);
 
   constructor() {
-    // Initial load - using current working directory
-    this.fileService.getFiles('.').subscribe((folder: VertexFolder) => {
+    // Initial load - using current working directory as default
+    this.loadDirectory('.');
+  }
+
+  private loadDirectory(path: string) {
+    this.fileService.getFiles(path).subscribe((folder: VertexFolder) => {
       this.rootFolder.set(folder);
     });
+  }
+
+  async openFolder() {
+    const selectedPath = await this.tauriService.selectFolder();
+    if (selectedPath) {
+      this.loadDirectory(selectedPath);
+    }
   }
 
   onFileSelect(file: VertexFile) {
     if (!file.content) {
       this.fileService.readFile(file.path).subscribe((content: string) => {
-        file.content = content;
-        this.activeFile.set(file);
+        // Create a new instance to trigger change detection if needed
+        const updatedFile = { ...file, content };
+        this.activeFile.set(updatedFile);
       });
     } else {
       this.activeFile.set(file);
+    }
+  }
+
+  onFolderToggle(folder: VertexFolder) {
+    if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
+      this.fileService.getChildren(folder.path).subscribe((children: (VertexFile | VertexFolder)[]) => {
+        folder.children = children;
+        // Trigger a refresh of the rootFolder signal to update the UI
+        if (this.rootFolder()) {
+          this.rootFolder.set({ ...this.rootFolder()! });
+        }
+      });
+    }
+  }
+
+  onSave() {
+    const file = this.activeFile();
+    if (file && file.content !== undefined) {
+      this.fileService.writeFile(file.path, file.content).subscribe(() => {
+        file.isDirty = false;
+        this.activeFile.set({ ...file });
+      });
     }
   }
 }

@@ -58,3 +58,4 @@ export * from './terminal/terminal-tokens';
 export * from './terminal/tauri-terminal.service';
 export * from './terminal/web-terminal.service';
 export * from './fs/file.service';
+export * from './fs/tauri.service';

@@ -25,31 +25,52 @@ app.get("/health", (c) => {
 // --- Filesystem API ---
 
 /**
- * List files in a directory
- * GET /fs/list?path=/some/path
+ * List children of a directory (lazy loading)
+ * GET /fs/children?path=/some/path
  */
-app.get("/fs/list", async (c) => {
-  const path = c.req.query("path") || process.cwd();
-  try {
-    const entries = await readdir(path, { withFileTypes: true });
-    const result = await Promise.all(
-      entries.map(async (entry) => {
-        const fullPath = join(path, entry.name);
-        const isDirectory = entry.isDirectory();
-        const stats = await stat(fullPath);
+app.get("/fs/children", async (c) => {
+  const path = c.req.query("path");
+  if (!path) return c.json({ error: "Path is required" }, 400);
 
-        return {
-          id: Buffer.from(fullPath).toString("base64"),
-          name: entry.name,
-          path: fullPath,
-          kind: isDirectory ? "directory" : "file",
-          size: stats.size,
-          modifiedAt: stats.mtime,
-          language: isDirectory ? undefined : getLanguageFromExt(entry.name),
-        };
-      })
+  try {
+    const stats = await stat(path);
+    if (!stats.isDirectory()) {
+      return c.json({ error: "Not a directory" }, 400);
+    }
+
+    const entries = await readdir(path, { withFileTypes: true });
+    
+    // Ignore common heavy folders
+    const ignoreList = ["node_modules", ".git", ".next", ".astro", "dist", "target"];
+    
+    const result = await Promise.all(
+      entries
+        .filter(entry => !ignoreList.includes(entry.name))
+        .map(async (entry) => {
+          const fullPath = join(path, entry.name);
+          const isDirectory = entry.isDirectory();
+          let entryStats;
+          try {
+            entryStats = await stat(fullPath);
+          } catch {
+            // Handle broken symlinks or permission issues
+            return null;
+          }
+
+          return {
+            id: fullPath, // Use absolute path as ID for simplicity
+            name: entry.name,
+            path: fullPath,
+            kind: isDirectory ? "directory" : "file",
+            size: entryStats.size,
+            modifiedAt: entryStats.mtime,
+            language: isDirectory ? undefined : getLanguageFromExt(entry.name),
+            hasChildren: isDirectory // For lazy loading UI
+          };
+        })
     );
-    return c.json(result);
+
+    return c.json(result.filter(item => item !== null));
   } catch (error) {
     const e = error as Error;
     return c.json({ error: e.message }, 500);
