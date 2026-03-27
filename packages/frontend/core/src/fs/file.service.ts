@@ -18,7 +18,7 @@ interface SidecarFileItem {
 })
 export class FileService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3001/fs';
+  private readonly baseUrl = 'http://127.0.0.1:3001/fs';
 
   /**
    * List children of a directory (lazy loading)

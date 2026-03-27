@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { readdir, readFile, writeFile, stat } from "node:fs/promises";
 import { join, extname } from "node:path";
@@ -136,7 +135,7 @@ function getLanguageFromExt(filename: string): string {
 const port = Number(process.env.PORT) || 3001;
 console.log(`Vertex Sidecar iniciando en puerto ${port}`);
 
-serve({
-  fetch: app.fetch,
+export default {
   port,
-});
+  fetch: app.fetch,
+};

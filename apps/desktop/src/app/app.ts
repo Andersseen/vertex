@@ -1,4 +1,4 @@
-import { Component, signal, forwardRef, inject } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import {
   MainLayoutComponent,
   EditorComponent,
@@ -11,12 +11,7 @@ import { FileService, TauriService } from '@vertex/core';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    forwardRef(() => MainLayoutComponent),
-    forwardRef(() => EditorComponent),
-    forwardRef(() => SidebarComponent),
-    forwardRef(() => BottomPanelComponent),
-  ],
+  imports: [MainLayoutComponent, EditorComponent, SidebarComponent, BottomPanelComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -60,13 +55,15 @@ export class App {
 
   onFolderToggle(folder: VertexFolder) {
     if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
-      this.fileService.getChildren(folder.path).subscribe((children: (VertexFile | VertexFolder)[]) => {
-        folder.children = children;
-        // Trigger a refresh of the rootFolder signal to update the UI
-        if (this.rootFolder()) {
-          this.rootFolder.set({ ...this.rootFolder()! });
-        }
-      });
+      this.fileService
+        .getChildren(folder.path)
+        .subscribe((children: (VertexFile | VertexFolder)[]) => {
+          folder.children = children;
+          // Trigger a refresh of the rootFolder signal to update the UI
+          if (this.rootFolder()) {
+            this.rootFolder.set({ ...this.rootFolder()! });
+          }
+        });
     }
   }
 

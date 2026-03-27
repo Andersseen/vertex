@@ -13,6 +13,6 @@ describe("BottomPanelComponent", () => {
 
   test("should have activeTabIndex 3 by default", () => {
     const component = new BottomPanelComponent();
-    expect(component.activeTabIndex).toBe(3);
+    expect(component.activeTabIndex()).toBe(3);
   });
 });
