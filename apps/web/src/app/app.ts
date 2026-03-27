@@ -85,28 +85,63 @@ export class App {
   }
 
   onFileSelect(file: VertexFile) {
+    // 1. Set as active immediately for UI responsiveness
     this.activeFileId.set(file.id);
 
-    // Load content if not already loaded
-    if (!file.content) {
+    // 2. Check if we already have this file open
+    const openFiles = this.openFiles();
+    const existingFile = openFiles.find(f => f.id === file.id);
+
+    // 3. Handle content loading and list update
+    if (!file.content && (!existingFile || !existingFile.content)) {
       this.fileService.readFile(file.path).subscribe((content: string) => {
-        file.content = content;
-        this.addFileToOpen(file);
+        const updatedFile = { ...file, content };
+        this.updateOrAddFile(updatedFile);
       });
     } else {
-      this.addFileToOpen(file);
+      // If the incoming file has no content but the existing one does, 
+      // preserve the existing one but still call updateOrAddFile to handle potential 
+      // reference updates from sidebar tree refreshes
+      const fileToUse = (!file.content && existingFile?.content) 
+        ? { ...file, content: existingFile.content } 
+        : file;
+      this.updateOrAddFile(fileToUse);
     }
   }
 
-  private addFileToOpen(file: VertexFile) {
+  private updateOrAddFile(file: VertexFile) {
     const currentOpenFiles = this.openFiles();
-    if (!currentOpenFiles.find((f) => f.id === file.id)) {
+    const existingIndex = currentOpenFiles.findIndex((f) => f.id === file.id);
+
+    if (existingIndex === -1) {
+      // New file, add to tabs
       this.openFiles.set([...currentOpenFiles, file]);
+    } else {
+      // Existing file, update the reference to ensure it's in sync with sidebar/latest content
+      const updatedFiles = [...currentOpenFiles];
+      updatedFiles[existingIndex] = file;
+      this.openFiles.set(updatedFiles);
     }
   }
 
   onTabSelect(file: VertexFile) {
     this.activeFileId.set(file.id);
+  }
+
+  onNewFile() {
+    const name = window.prompt('Enter file name:');
+    if (name) {
+      const newFile: VertexFile = {
+        id: `new-${Date.now()}`,
+        name,
+        path: name,
+        content: '',
+        language: 'text',
+        isDirty: true
+      };
+      this.updateOrAddFile(newFile);
+      this.activeFileId.set(newFile.id);
+    }
   }
 
   onTabClose(file: VertexFile, event?: MouseEvent) {

@@ -12,9 +12,13 @@ import { VertexFile } from '@vertex/types';
 export class TabsComponent {
   @Input() files: VertexFile[] = [];
   @Input() activeFileId: string | null = null;
+  @Output() newTab = new EventEmitter<void>();
   @Output() tabSelect = new EventEmitter<VertexFile>();
   @Output() tabClose = new EventEmitter<VertexFile>();
-  @Output() newTab = new EventEmitter<void>();
+
+  trackById(index: number, item: VertexFile): string {
+    return item.id;
+  }
 
   onTabClick(file: VertexFile): void {
     this.tabSelect.emit(file);

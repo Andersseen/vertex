@@ -5,6 +5,8 @@
     [workspaceFolder]="rootFolder()"
     [activeFileId]="activeFileId()"
     (fileSelect)="onFileSelect($event)"
+    (newFile)="onNewFile()"
+    (newFolder)="onNewFile()"
   ></v-sidebar>
 
   <!-- Main Editor Area -->
@@ -15,6 +17,7 @@
       [activeFileId]="activeFileId()"
       (tabSelect)="onTabSelect($event)"
       (tabClose)="onTabClose($event)"
+      (newTab)="onNewFile()"
     ></v-tabs>
 
     <!-- Code Editor -->

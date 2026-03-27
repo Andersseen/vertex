@@ -2,7 +2,7 @@
   <div class="tabs-header-vx vx-flex vx-items-center vx-h-full">
     <div 
       class="tab-item-vx group vx-flex vx-items-center"
-      *ngFor="let file of files; let i = index"
+      *ngFor="let file of files; let i = index; trackBy: trackById"
       [class.active]="file.id === activeFileId"
       (click)="onTabClick(file)">
       <i [class]="getFileIcon(file.language) + ' text-[12px] opacity-70 group-hover:opacity-100'"></i>
