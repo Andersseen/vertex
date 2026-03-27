@@ -33,7 +33,7 @@
   <!-- File Tree -->
   <div class="sidebar-content vx-flex-1 overflow-auto custom-scrollbar-vx">
     <p-tree 
-      [value]="treeNodes" 
+      [value]="treeNodes()" 
       selectionMode="single" 
       [(selection)]="selectedNode"
       (onNodeSelect)="onNodeSelect($event)"
@@ -43,9 +43,9 @@
       [scrollHeight]="'100%'"
     >
       <ng-template let-node pTemplate="default">
-        <div class="vx-flex vx-items-center vx-gap-2 py-0.5">
-          <i [class]="node.data.customIcon + ' text-[13px] opacity-70'"></i>
-          <span class="text-[12px] tracking-tight">{{node.label}}</span>
+        <div class="vx-flex vx-items-center vx-gap-2 py-0.5 vx-w-full vx-overflow-hidden">
+          <i [class]="node.data.customIcon + ' text-[13px] opacity-70 shrink-0'"></i>
+          <span class="p-treenode-label text-[12px] tracking-tight vx-truncate">{{node.label}}</span>
         </div>
       </ng-template>
     </p-tree>

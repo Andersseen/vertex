@@ -3,18 +3,19 @@
     <div class="vx-flex vx-items-center vx-h-full vx-gap-0">
       <button
         *ngFor="let tab of tabs; let i = index"
-        (click)="activeTabIndex = i"
-        [class.active]="activeTabIndex === i"
+        [id]="'tab-' + tab.toLowerCase().replace(' ', '-')"
+        (click)="activeTabIndex.set(i)"
+        [class.active]="activeTabIndex() === i"
         class="tab-item vx-h-full vx-flex vx-items-center"
       >
         <span class="tab-label">{{ tab }}</span>
       </button>
     </div>
     
-    <div
-      class="vx-flex vx-items-center px-4 vx-gap-3 text-[10px] text-[var(--p-surface-400)] font-bold uppercase tracking-widest vx-h-full"
-    >
-      <span class="opacity-60">Terminal</span>
+    <div class="vx-flex vx-items-center px-4 vx-gap-2 text-[10px] text-[var(--p-surface-400)] vx-h-full">
+      <button class="hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center p-1 rounded hover:vx-bg-800">
+        <i class="pi pi-minus text-[9px]"></i>
+      </button>
       <button class="hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center p-1 rounded hover:vx-bg-800">
         <i class="pi pi-times text-[9px]"></i>
       </button>
@@ -23,7 +24,7 @@
 
   <div class="bottom-panel-content vx-flex-1 overflow-auto p-3">
     <!-- Problems Tab -->
-    <div *ngIf="activeTabIndex === 0" class="console-content-vx animate-fade-in">
+    <div *ngIf="activeTabIndex() === 0" class="console-content-vx animate-fade-in">
       <div
         *ngFor="let prob of problems"
         class="vx-flex vx-items-start vx-gap-2 py-1 hover:vx-bg-800 px-2 rounded cursor-pointer transition-colors prob-item"
@@ -54,7 +55,7 @@
     </div>
 
     <!-- Output Tab -->
-    <div *ngIf="activeTabIndex === 1" class="console-content-vx animate-fade-in">
+    <div *ngIf="activeTabIndex() === 1" class="console-content-vx animate-fade-in">
       <div *ngFor="let out of output" class="py-0.5">
         <span
           [class]="
@@ -71,7 +72,7 @@
     </div>
 
     <!-- Debug Console Tab -->
-    <div *ngIf="activeTabIndex === 2" class="console-content-vx animate-fade-in">
+    <div *ngIf="activeTabIndex() === 2" class="console-content-vx animate-fade-in">
       <div *ngFor="let dbg of debugConsole" class="py-0.5">
         <span
           [class]="
@@ -88,7 +89,7 @@
     </div>
 
     <!-- Terminal Tab -->
-    <div *ngIf="activeTabIndex === 3" class="vx-h-full animate-fade-in">
+    <div *ngIf="activeTabIndex() === 3" class="vx-h-full animate-fade-in">
       <v-terminal class="vx-h-full"></v-terminal>
     </div>
   </div>

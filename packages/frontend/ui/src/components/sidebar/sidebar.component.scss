@@ -42,6 +42,10 @@
   border: none !important;
   display: flex !important;
   align-items: center !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 
   &:hover {
     background: $surface-800 !important;

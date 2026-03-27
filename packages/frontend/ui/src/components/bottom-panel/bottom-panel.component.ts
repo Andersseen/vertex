@@ -1,7 +1,7 @@
-import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { DividerModule } from "primeng/divider";
 import { TabsModule } from "primeng/tabs";
+import { CommonModule } from "@angular/common";
 
 import { TerminalComponent } from "../terminal/terminal.component";
 
@@ -13,7 +13,7 @@ import { TerminalComponent } from "../terminal/terminal.component";
   styleUrls: ["./bottom-panel.component.scss"],
 })
 export class BottomPanelComponent {
-  activeTabIndex = 3;
+  activeTabIndex = signal(3);
   tabs = ["Problems", "Output", "Debug Console", "Terminal"];
 
   // Mock content for the panels

@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, Output, EventEmitter } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { SplitterModule } from "primeng/splitter";
 import { ToolbarModule } from "primeng/toolbar";
@@ -10,4 +10,6 @@ import { ToolbarModule } from "primeng/toolbar";
   templateUrl: "./main-layout.component.html",
   styleUrls: ["./main-layout.component.scss"],
 })
-export class MainLayoutComponent {}
+export class MainLayoutComponent {
+  @Output() openFolder = new EventEmitter<void>();
+}

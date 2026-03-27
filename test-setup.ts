@@ -1,23 +1,57 @@
 // Basic test setup for Bun to handle Angular components in unit tests
 import { mock } from "bun:test";
 
-console.log("--- TEST SETUP STARTING ---");
+console.log("--- TEST SETUP STARTING (Manual) ---");
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+// Minimal DOM mock for xterm and other browser-dependent libs
+if (typeof global.window === 'undefined') {
+  (global as any).window = {
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => {},
+    CustomEvent: class {},
+    navigator: { userAgent: 'Bun' },
+    location: { href: 'http://localhost' },
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+  };
+  (global as any).document = {
+    createElement: () => ({
+      appendChild: () => ({}),
+      style: {},
+      classList: { add: () => {}, remove: () => {} },
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      ownerDocument: { defaultView: (global as any).window },
+    }),
+    body: { appendChild: () => ({}), style: { tabSize: '4', MozTabSize: '4' } },
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    documentElement: { style: { tabSize: '4', MozTabSize: '4' } },
+    head: { appendChild: () => ({}) },
+  };
+  (global as any).navigator = (global as any).window.navigator;
+  (global as any).Node = class {};
+  (global as any).Element = class {};
+  (global as any).HTMLElement = class {};
+  (global as any).HTMLDivElement = class {};
+  (global as any).ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
+}
+
 const noop = (name: string) => {
-  // console.log(`Mocking decorator/symbol: ${name}`);
   return () => () => { /* noop */ };
 };
 
-// Mock Angular Core to avoid JIT decorator errors
+// Mock Angular Core
 console.log("Registering @angular/core mock...");
 mock.module("@angular/core", () => ({
   Component: noop("Component"),
   Directive: noop("Directive"),
   Pipe: noop("Pipe"),
   Injectable: noop("Injectable"),
+  NgModule: noop("NgModule"),
   Input: noop("Input"),
   Output: noop("Output"),
   ViewChild: noop("ViewChild"),
@@ -26,18 +60,25 @@ mock.module("@angular/core", () => ({
   ContentChildren: noop("ContentChildren"),
   HostBinding: noop("HostBinding"),
   HostListener: noop("HostListener"),
-  NgModule: noop("NgModule"),
-  signal: (val: any) => {
-    const s: any = () => val;
-    s.set = (_v: any) => { /* noop */ };
-    s.update = (_fn: any) => { /* noop */ };
-    s.asReadonly = () => s;
-    return s;
-  },
-  computed: (fn: any) => (() => fn()),
-  effect: (_fn: any) => { /* noop */ },
   Inject: noop("Inject"),
-  inject: (_token: any) => ({}),
+  inject: (_token: any) => {
+    const mockObservable = (data: any) => ({
+      subscribe: (observer: any) => {
+        const callback = typeof observer === 'function' ? observer : observer.next;
+        if (callback) callback(data);
+        return { unsubscribe: () => {} };
+      },
+      pipe: () => mockObservable(data)
+    });
+
+    return { 
+      subscribe: (observer: any) => ({ unsubscribe: () => {} }),
+      pipe: () => ({ subscribe: (observer: any) => ({}) }),
+      getFiles: () => mockObservable({ name: '.', path: '.', children: [] }),
+      readFile: () => mockObservable('mock content'),
+      getChildren: () => mockObservable([]),
+    };
+  },
   Optional: noop("Optional"),
   Self: noop("Self"),
   SkipSelf: noop("SkipSelf"),
@@ -48,9 +89,16 @@ mock.module("@angular/core", () => ({
     subscribe(_cb: any) { return { unsubscribe: () => { /* noop */ } }; }
   },
   InjectionToken: class { constructor(_name: string) { /* noop */ } },
-  provideAppInitializer: (_fn: any) => ({}),
   PLATFORM_ID: "platform_id",
-  makeEnvironmentProviders: (_providers: any[]) => ({}),
+  signal: (val: any) => {
+    const s: any = () => val;
+    s.set = (_v: any) => { /* noop */ };
+    s.update = (_fn: any) => { /* noop */ };
+    s.asReadonly = () => s;
+    return s;
+  },
+  computed: (fn: any) => (() => fn()),
+  effect: (_fn: any) => { /* noop */ },
   untracked: (fn: any) => fn(),
   resource: (_opts: any) => ({}),
   rxResource: (_opts: any) => ({}),
@@ -63,96 +111,85 @@ mock.module("@angular/core", () => ({
   output: () => ({ emit: (_v: any) => { /* noop */ }, subscribe: (_cb: any) => ({ unsubscribe: () => { /* noop */ } }) }),
   viewChild: () => ({}),
   viewChildren: () => ({}),
-  contentChild: () => ({}),
-  contentChildren: () => ({}),
-  ChangeDetectorRef: class {
-    markForCheck() { /* noop */ }
-    detectChanges() { /* noop */ }
-  },
-  Renderer2: class { /* noop */ },
-  ElementRef: class { constructor(_el: any) { /* noop */ } },
-  Injector: {
-    create: (_opts: any) => ({ get: (_t: any) => ({}) }),
-    get: (_t: any) => ({})
-  },
-  ViewEncapsulation: { None: 0, Emulated: 1, ShadowDom: 2 },
-  ChangeDetectionStrategy: { OnPush: 0, Default: 1 },
-  Attribute: noop("Attribute"),
-  NgZone: class {
-    run(fn: any) { return fn(); }
-    runOutsideAngular(fn: any) { return fn(); }
-  },
-  TemplateRef: class { /* noop */ },
-  ViewContainerRef: class { /* noop */ },
-  QueryList: class {
-    map(fn: any) { return []; }
-    forEach(fn: any) { /* noop */ }
-    toArray() { return []; }
-  },
-  booleanAttribute: (v: any) => !!v,
-  numberAttribute: (v: any) => Number(v),
   afterNextRender: (fn: any) => fn(),
   afterRender: (fn: any) => fn(),
-  TERMINAL_BACKEND_ADAPTER: class { constructor(_name: string) { /* noop */ } },
-  TauriTerminalService: class { connect() { return Promise.resolve(); } onData$ = { pipe: () => ({ subscribe: () => ({}) }) }; },
-  WebTerminalService: class { connect() { return Promise.resolve(); } onData$ = { pipe: () => ({ subscribe: () => ({}) }) }; },
-}));
-
-console.log("Registering @vertex/ui mock...");
-mock.module("@vertex/ui", () => ({
-  MainLayoutComponent: class { /* noop */ },
-  EditorComponent: class { /* noop */ },
-  SidebarComponent: class { /* noop */ },
-  BottomPanelComponent: class { /* noop */ },
-  TabsComponent: class { /* noop */ },
+  ChangeDetectorRef: class { markForCheck() {} detectChanges() {} },
+  Renderer2: class {},
+  ElementRef: class { constructor(_el: any) {} },
+  Injector: { get: () => ({}) },
+  ViewEncapsulation: { None: 0, Emulated: 1, ShadowDom: 2 },
+  ChangeDetectionStrategy: { OnPush: 0, Default: 1 },
+  NgZone: class { run(fn: any) { return fn(); } runOutsideAngular(fn: any) { return fn(); } },
+  DOCUMENT: "document",
+  DestroyRef: class { onDestroy(_fn: any) {} },
+  PendingTasks: class { add() { return () => {}; } },
+  VERSION: { major: "21" },
+  ɵformatRuntimeError: (c: any, m: any) => m,
+  ɵsetClassMetadata: () => {},
+  ɵɵdefineComponent: () => ({}),
+  ɵɵdefineDirective: () => ({}),
+  ɵɵdefineInjectable: () => ({}),
+  ɵɵdefineNgModule: () => ({}),
+  ɵɵdefinePipe: () => ({}),
+  ɵɵdirectiveInject: () => ({}),
+  ɵɵinject: () => ({}),
+  ɵConsole: class { log() {} warn() {} error() {} },
+  ɵTracingService: class {},
+  ɵperformanceMarkFeature: () => [],
+  ɵtruncateMiddle: (v: any) => v,
+  ɵencapsulateResourceError: (e: any) => e,
 }));
 
 console.log("Registering @angular/common mock...");
 mock.module("@angular/common", () => ({
-  CommonModule: class { /* noop */ },
-  NgIf: class { /* noop */ },
-  NgFor: class { /* noop */ },
-  NgClass: class { /* noop */ },
-  NgStyle: class { /* noop */ },
+  CommonModule: class {},
+  NgIf: class {},
+  NgFor: class {},
+  NgClass: class {},
+  NgStyle: class {},
   DOCUMENT: "document",
-  isPlatformBrowser: (_id: any) => true,
-  isPlatformServer: (_id: any) => false,
+  isPlatformBrowser: () => true,
+  isPlatformServer: () => false,
 }));
 
 console.log("Registering rxjs mock...");
+import { BehaviorSubject, Subject, Observable, Subscription, of, from, firstValueFrom, lastValueFrom } from "rxjs";
 mock.module("rxjs", () => ({
-  BehaviorSubject: class {
-    value: any;
-    constructor(val: any) { this.value = val; }
-    next(val: any) { this.value = val; }
-    asObservable() { return this; }
-    subscribe(_cb: any) { return { unsubscribe: () => { /* noop */ } }; }
-    pipe() { return this; }
-  },
-  Observable: class {
-    subscribe(_cb: any) { return { unsubscribe: () => { /* noop */ } }; }
-    pipe() { return this; }
-  },
-  Subject: class {
-    next(_val: any) { /* noop */ }
-    asObservable() { return this; }
-    subscribe(_cb: any) { return { unsubscribe: () => { /* noop */ } }; }
-    pipe() { return this; }
-  },
-  Subscription: class {
-    unsubscribe() { /* noop */ }
-    add(_sub: any) { /* noop */ }
-  },
-  of: (val: any) => ({ subscribe: (cb: any) => cb(val), pipe: () => ({ subscribe: (cb: any) => cb(val) }) }),
-  takeUntil: (_notifier: any) => (source: any) => source,
+  BehaviorSubject,
+  Subject,
+  Observable,
+  Subscription,
+  of,
+  from, 
+  firstValueFrom,
+  lastValueFrom,
+  map: (fn: any) => (source: any) => source,
+  filter: (fn: any) => (source: any) => source,
+  tap: (fn: any) => (source: any) => source,
+  switchMap: (fn: any) => (source: any) => source,
+  catchError: (fn: any) => (source: any) => source,
+  throwError: (fn: any) => of(fn()),
+  EMPTY: of(null),
+  takeUntil: () => (source: any) => source,
+  finalize: () => (source: any) => source,
+  delay: () => (source: any) => source,
+}));
+
+console.log("Registering @vertex/ui mock...");
+mock.module("@vertex/ui", () => ({
+  MainLayoutComponent: class {},
+  EditorComponent: class {},
+  SidebarComponent: class {},
+  BottomPanelComponent: class {},
+  TabsComponent: class {},
 }));
 
 console.log("Registering primeng mocks...");
-const mockModule = class { /* noop */ };
+const mockModule = class {};
 mock.module("primeng/api", () => ({
-  ConfirmationService: class { /* noop */ },
-  MessageService: class { /* noop */ },
-  TreeNode: class { /* noop */ },
+  ConfirmationService: class {},
+  MessageService: class {},
+  TreeNode: class {},
   SharedModule: mockModule,
 }));
 mock.module("primeng/splitter", () => ({ SplitterModule: mockModule }));
@@ -160,30 +197,31 @@ mock.module("primeng/toolbar", () => ({ ToolbarModule: mockModule }));
 mock.module("primeng/tree", () => ({ TreeModule: mockModule }));
 mock.module("primeng/divider", () => ({ DividerModule: mockModule }));
 mock.module("primeng/tabs", () => ({ TabsModule: mockModule }));
+
 mock.module("xterm", () => ({ 
   Terminal: class { 
-    loadAddon() { /* noop */ }
-    open() { /* noop */ }
-    dispose() { /* noop */ }
-    onData() { return { dispose: () => { /* noop */ } }; }
-    write() { /* noop */ }
-    cols = 80;
-    rows = 24;
+    loadAddon() {} open() {} dispose() {} onData() { return { dispose: () => {} }; } write() {} 
+    cols = 80; rows = 24; 
   } 
 }));
-mock.module("xterm-addon-fit", () => ({ FitAddon: class { fit() { /* noop */ } } }));
-mock.module("xterm-addon-webgl", () => ({ WebglAddon: class { /* noop */ } }));
+mock.module("xterm-addon-fit", () => ({ FitAddon: class { fit() {} } }));
+mock.module("xterm-addon-webgl", () => ({ WebglAddon: class {} }));
 
 console.log("Mocking @tauri-apps/api...");
 mock.module("@tauri-apps/api/core", () => ({ invoke: async () => ({}) }));
-mock.module("@tauri-apps/api/event", () => ({ 
-  listen: async () => (() => { /* unlisten noop */ }),
-  emit: async () => ({})
-}));
+mock.module("@tauri-apps/api/event", () => ({ listen: async () => (() => {}), emit: async () => ({}) }));
 
 console.log("Mocking @vertex/core terminal tokens...");
-// We need to extend the @vertex/core mock or add it here if not fully covered
-// But actually it's already mocked at line 16 (for core)
-// Let's add the terminal tokens to it.
+mock.module("@vertex/core", () => ({
+  TERMINAL_BACKEND_ADAPTER: "TERMINAL_BACKEND_ADAPTER",
+  FileService: class {
+    getFiles() { return of({ name: '.', children: [] }); }
+    readFile() { return of(''); }
+    getChildren() { return of([]); }
+  },
+  TauriTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
+  WebTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
+  TauriService: class { selectFolder() { return Promise.resolve('/mock/path'); } },
+}));
 
 console.log("--- TEST SETUP COMPLETED ---");

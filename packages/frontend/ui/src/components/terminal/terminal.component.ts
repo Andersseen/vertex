@@ -55,12 +55,19 @@ export class TerminalComponent implements OnInit, OnDestroy {
     this.fitAddon = new FitAddon();
     this.terminal.loadAddon(this.fitAddon);
 
-    // Try WebGL, fallback to DOM if it fails
-    try {
-      const webglAddon = new WebglAddon();
-      this.terminal.loadAddon(webglAddon);
-    } catch (e) {
-      console.warn('WebGL addon failed to load, falling back to DOM renderer', e);
+    // Prefer DOM renderer in headless environments (E2E tests) for better stability
+    const isHeadless = typeof navigator !== 'undefined' && 
+      (navigator.webdriver || /Headless/.test(navigator.userAgent));
+
+    if (!isHeadless) {
+      try {
+        const webglAddon = new WebglAddon();
+        this.terminal.loadAddon(webglAddon);
+      } catch (e) {
+        console.warn('WebGL addon failed to load, falling back to DOM renderer', e);
+      }
+    } else {
+      console.info('Headless environment detected, using DOM renderer for stability');
     }
 
     this.terminal.open(this.terminalContainer.nativeElement);

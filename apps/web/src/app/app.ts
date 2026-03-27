@@ -1,156 +1,126 @@
-import { Component, signal, forwardRef } from '@angular/core';
-import {
-  MainLayoutComponent,
-  EditorComponent,
-  SidebarComponent,
-  BottomPanelComponent,
-  TabsComponent,
-} from '@vertex/ui';
+import { Component, signal, inject } from '@angular/core';
+import { MainLayoutComponent } from '../../../../packages/frontend/ui/src/lib/layouts/main-layout/main-layout.component';
+import { EditorComponent } from '../../../../packages/frontend/ui/src/components/editor/editor.component';
+import { SidebarComponent } from '../../../../packages/frontend/ui/src/components/sidebar/sidebar.component';
+import { BottomPanelComponent } from '../../../../packages/frontend/ui/src/components/bottom-panel/bottom-panel.component';
+import { TabsComponent } from '../../../../packages/frontend/ui/src/components/tabs/tabs.component';
 import { VertexFile, VertexFolder } from '@vertex/types';
+import { FileService } from '@vertex/core';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [
-    forwardRef(() => MainLayoutComponent),
-    forwardRef(() => EditorComponent),
-    forwardRef(() => SidebarComponent),
-    forwardRef(() => BottomPanelComponent),
-    forwardRef(() => TabsComponent),
+    MainLayoutComponent,
+    EditorComponent,
+    SidebarComponent,
+    BottomPanelComponent,
+    TabsComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
+  private readonly fileService = inject(FileService);
+
   protected readonly title = signal('Vertex IDE Web');
+  protected readonly openFiles = signal<VertexFile[]>([]);
+  protected readonly activeFileId = signal<string | null>(null);
+  protected readonly rootFolder = signal<VertexFolder | null>(null);
 
-  // Open files for tabs
-  protected readonly openFiles = signal<VertexFile[]>([
-    {
-      id: '1',
-      name: 'index.html',
-      path: 'apps/web/src/index.html',
-      content:
-        '<!DOCTYPE html>\n<html>\n<head>\n  <title>Vertex Web</title>\n</head>\n<body>\n  <app-root></app-root>\n</body>\n</html>',
-      language: 'html',
-      isDirty: false,
-    },
-    {
-      id: '2',
-      name: 'main.ts',
-      path: '/src/main.ts',
-      content:
-        "// Main entry point\nimport { bootstrapApplication } from '@angular/platform-browser';\nimport { AppComponent } from './app/app.component';\n\nbootstrapApplication(AppComponent);",
-      language: 'typescript',
-      isDirty: false,
-    },
-  ]);
+  constructor() {
+    // Initial load - using current working directory as default project root
+    this.fileService.getFiles('.').subscribe({
+      next: (folder: VertexFolder) => {
+        this.rootFolder.set(folder);
 
-  // Active file (currently selected in editor)
-  protected readonly activeFileId = signal<string>('1');
-
-  // Helper to get the active file object
-  protected getActiveFile(): VertexFile | undefined {
-    return this.openFiles().find((f) => f.id === this.activeFileId());
+        // Auto-open first file for E2E tests and better DX
+        if (folder.children && folder.children.length > 0) {
+          const firstFile = folder.children.find((f) => !('children' in f)) as VertexFile;
+          if (firstFile) {
+            this.onFileSelect(firstFile);
+          }
+        }
+      },
+      error: (err) => {
+        console.error(`[App] Failed to load root folder:`, err);
+      },
+    });
   }
 
-  protected readonly rootFolder = signal<VertexFolder>({
-    id: 'root',
-    name: 'web-project',
-    path: '/',
-    isExpanded: true,
-    children: [
-      {
-        id: 'dir-src',
-        name: 'src',
-        path: '/src',
-        isExpanded: true,
-        children: [
-          {
-            id: 'dir-app',
-            name: 'app',
-            path: '/src/app',
-            isExpanded: true,
-            children: [
-              {
-                id: 'app-comp',
-                name: 'app.component.ts',
-                path: '/src/app/app.component.ts',
-                content: '// App Component',
-                language: 'typescript',
-                isDirty: false,
-              },
-              {
-                id: 'app-html',
-                name: 'app.component.html',
-                path: '/src/app/app.component.html',
-                content: '<!-- App HTML -->',
-                language: 'html',
-                isDirty: false,
-              },
-              {
-                id: 'app-css',
-                name: 'app.component.css',
-                path: '/src/app/app.component.css',
-                content: '/* App CSS */',
-                language: 'css',
-                isDirty: false,
-              },
-            ],
-          },
-          {
-            id: 'index-html',
-            name: 'index.html',
-            path: '/src/index.html',
-            content:
-              '<!DOCTYPE html>\n<html>\n<head>\n  <title>Vertex Web</title>\n</head>\n<body>\n  <app-root></app-root>\n</body>\n</html>',
-            language: 'html',
-            isDirty: false,
-          },
-          {
-            id: 'main-ts',
-            name: 'main.ts',
-            path: '/src/main.ts',
-            content: '// Main entry point',
-            language: 'typescript',
-            isDirty: false,
-          },
-        ],
-      },
-      {
-        id: 'readme',
-        name: 'README.md',
-        path: '/README.md',
-        content: '# Vertex IDE\n\nModular, High-Performance IDE.',
-        language: 'markdown',
-        isDirty: false,
-      },
-      {
-        id: 'package-json',
-        name: 'package.json',
-        path: '/package.json',
-        content: '{\n  "name": "vertex-web",\n  "version": "1.0.0"\n}',
-        language: 'json',
-        isDirty: false,
-      },
-      {
-        id: 'tsconfig',
-        name: 'tsconfig.json',
-        path: '/tsconfig.json',
-        content: '{\n  "extends": "../../tsconfig.json"\n}',
-        language: 'json',
-        isDirty: false,
-      },
-    ],
-  });
+  onFolderToggle(folder: VertexFolder) {
+    if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
+      this.fileService
+        .getChildren(folder.path)
+        .subscribe((children: (VertexFile | VertexFolder)[]) => {
+          folder.children = children;
+          // Trigger a refresh of the rootFolder signal to update the UI
+          if (this.rootFolder()) {
+            this.rootFolder.set({ ...this.rootFolder()! });
+          }
+        });
+    }
+  }
+
+  openFolder() {
+    const path = window.prompt(
+      'Enter absolute path to workspace folder:',
+      this.rootFolder()?.path || '.',
+    );
+    if (path) {
+      this.fileService.getFiles(path).subscribe({
+        next: (folder: VertexFolder) => {
+          this.rootFolder.set(folder);
+        },
+        error: (err) => {
+          console.error(`[App] Failed to load folder: ${path}`, err);
+          window.alert(`Failed to load folder: ${path}`);
+        },
+      });
+    }
+  }
+
+  protected getActiveFile(): VertexFile | undefined {
+    const id = this.activeFileId();
+    return id ? this.openFiles().find((f) => f.id === id) : undefined;
+  }
 
   onFileSelect(file: VertexFile) {
+    // 1. Set as active immediately for UI responsiveness
     this.activeFileId.set(file.id);
 
-    // If file is not already open, add it to open files
+    // 2. Check if we already have this file open
+    const openFiles = this.openFiles();
+    const existingFile = openFiles.find(f => f.id === file.id);
+
+    // 3. Handle content loading and list update
+    if (!file.content && (!existingFile || !existingFile.content)) {
+      this.fileService.readFile(file.path).subscribe((content: string) => {
+        const updatedFile = { ...file, content };
+        this.updateOrAddFile(updatedFile);
+      });
+    } else {
+      // If the incoming file has no content but the existing one does, 
+      // preserve the existing one but still call updateOrAddFile to handle potential 
+      // reference updates from sidebar tree refreshes
+      const fileToUse = (!file.content && existingFile?.content) 
+        ? { ...file, content: existingFile.content } 
+        : file;
+      this.updateOrAddFile(fileToUse);
+    }
+  }
+
+  private updateOrAddFile(file: VertexFile) {
     const currentOpenFiles = this.openFiles();
-    if (!currentOpenFiles.find((f) => f.id === file.id)) {
+    const existingIndex = currentOpenFiles.findIndex((f) => f.id === file.id);
+
+    if (existingIndex === -1) {
+      // New file, add to tabs
       this.openFiles.set([...currentOpenFiles, file]);
+    } else {
+      // Existing file, update the reference to ensure it's in sync with sidebar/latest content
+      const updatedFiles = [...currentOpenFiles];
+      updatedFiles[existingIndex] = file;
+      this.openFiles.set(updatedFiles);
     }
   }
 
@@ -158,7 +128,23 @@ export class App {
     this.activeFileId.set(file.id);
   }
 
-  onTabClose(file: VertexFile, event?: Event) {
+  onNewFile() {
+    const name = window.prompt('Enter file name:');
+    if (name) {
+      const newFile: VertexFile = {
+        id: `new-${Date.now()}`,
+        name,
+        path: name,
+        content: '',
+        language: 'text',
+        isDirty: true
+      };
+      this.updateOrAddFile(newFile);
+      this.activeFileId.set(newFile.id);
+    }
+  }
+
+  onTabClose(file: VertexFile, event?: MouseEvent) {
     event?.stopPropagation();
     const currentFiles = this.openFiles();
     const filteredFiles = currentFiles.filter((f) => f.id !== file.id);
@@ -167,6 +153,8 @@ export class App {
     // If closed file was active, switch to first remaining
     if (this.activeFileId() === file.id && filteredFiles.length > 0) {
       this.activeFileId.set(filteredFiles[0].id);
+    } else if (filteredFiles.length === 0) {
+      this.activeFileId.set(null);
     }
   }
 }

@@ -54,6 +54,7 @@
     "concurrently": "^9.1.0",
     "eslint": "^10.1.0",
     "prettier": "^3.7.4",
+    "rxjs": "~7.8.0",
     "turbo": "^2.8.20",
     "typescript": "5.9.2",
     "typescript-eslint": "^8.57.2"
@@ -70,6 +71,9 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
-    "@angular/animations": "^21.2.5"
+    "@angular/animations": "^21.2.5",
+    "@angular/common": "^21.2.5",
+    "@angular/compiler": "^21.2.5",
+    "@angular/core": "^21.2.5"
   }
 }

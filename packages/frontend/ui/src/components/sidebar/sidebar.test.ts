@@ -8,11 +8,11 @@ describe("SidebarComponent", () => {
 
   test("should have empty treeNodes by default", () => {
     const component = new SidebarComponent();
-    expect(component.treeNodes).toEqual([]);
+    expect(component.treeNodes()).toEqual([]);
   });
 
   test("should have selectedNode null by default", () => {
     const component = new SidebarComponent();
-    expect(component.selectedNode).toBeNull();
+    expect(component.selectedNode()).toBeNull();
   });
 });

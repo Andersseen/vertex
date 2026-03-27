@@ -10,6 +10,7 @@ import { listen, UnlistenFn, Event } from '@tauri-apps/api/event';
 export class TauriTerminalService implements TerminalBackendAdapter {
   private dataSubject = new Subject<string>();
   private unlistenStdout: UnlistenFn | null = null;
+  private currentId = 'default'; // In a multi-terminal app, this would be set per instance
   
   readonly onData$ = this.dataSubject.asObservable();
 
@@ -17,13 +18,15 @@ export class TauriTerminalService implements TerminalBackendAdapter {
 
   async connect(): Promise<void> {
     try {
-      // Listen for stdout events from Tauri backend
-      this.unlistenStdout = await listen<string>('terminal-stdout', (event: Event<string>) => {
-        this.dataSubject.next(event.payload);
+      // Listen for stdout events specific to this terminal ID
+      this.unlistenStdout = await listen<string>(`terminal-stdout-${this.currentId}`, (event: Event<string>) => {
+        this.ngZone.run(() => {
+          this.dataSubject.next(event.payload);
+        });
       });
 
-      // Spawn the shell in the backend
-      await invoke('spawn_terminal');
+      // Spawn the shell in the backend with an ID
+      await invoke('spawn_terminal', { id: this.currentId });
     } catch (error) {
       console.error('Failed to connect to Tauri PTY:', error);
       throw error;
@@ -31,11 +34,11 @@ export class TauriTerminalService implements TerminalBackendAdapter {
   }
 
   async write(data: string): Promise<void> {
-    await invoke('write_to_terminal', { data });
+    await invoke('write_to_terminal', { id: this.currentId, data });
   }
 
   async resize(cols: number, rows: number): Promise<void> {
-    await invoke('resize_terminal', { cols, rows });
+    await invoke('resize_terminal', { id: this.currentId, cols, rows });
   }
 
   async disconnect(): Promise<void> {
@@ -43,6 +46,11 @@ export class TauriTerminalService implements TerminalBackendAdapter {
       this.unlistenStdout();
       this.unlistenStdout = null;
     }
-    // We would also invoke a 'kill' command if needed
+    await invoke('close_terminal', { id: this.currentId });
+  }
+
+  // Helper to set ID manually for multi-terminal support
+  setTerminalId(id: string): void {
+    this.currentId = id;
   }
 }

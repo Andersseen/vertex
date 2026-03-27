@@ -1,10 +1,10 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  SimpleChanges,
+  input,
+  output,
+  computed,
+  signal,
+  effect,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TreeModule } from "primeng/tree";
@@ -21,34 +21,52 @@ import { VertexFile, VertexFolder } from "@vertex/types";
   templateUrl: "./sidebar.component.html",
   styleUrls: ["./sidebar.component.scss"],
 })
-export class SidebarComponent implements OnChanges {
-  @Input() workspaceFolder: VertexFolder | null = null;
-  @Input() activeFileId: string | null = null;
+export class SidebarComponent {
+  workspaceFolder = input<VertexFolder | null>(null);
+  activeFileId = input<string | null>(null);
 
-  @Output() fileSelect = new EventEmitter<VertexFile>();
-  @Output() newFile = new EventEmitter<void>();
-  @Output() newFolder = new EventEmitter<void>();
-  @Output() folderToggle = new EventEmitter<VertexFolder>();
-  @Output() refresh = new EventEmitter<void>();
+  fileSelect = output<VertexFile>();
+  newFile = output<void>();
+  newFolder = output<void>();
+  folderToggle = output<VertexFolder>();
+  refresh = output<void>();
 
-  treeNodes: TreeNode[] = [];
-  selectedNode: TreeNode | null = null;
+  treeNodes = computed(() => {
+    const folder = this.workspaceFolder();
+    if (!folder) return [];
+    return [this.mapToTreeNode(folder)];
+  });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes["workspaceFolder"] || changes["activeFileId"]) {
-      this.updateTreeNodes();
-    }
-  }
+  selectedNode = signal<TreeNode | null>(null);
 
-  private updateTreeNodes(): void {
-    if (!this.workspaceFolder) {
-      this.treeNodes = [];
-      return;
-    }
-    this.treeNodes = [this.mapToTreeNode(this.workspaceFolder)];
+  constructor() {
+    effect(() => {
+      const activeId = this.activeFileId();
+      const nodes = this.treeNodes();
+      if (!activeId || nodes.length === 0) {
+        this.selectedNode.set(null);
+        return;
+      }
+
+      // Find the node with matching id in the tree
+      const findNode = (items: TreeNode[]): TreeNode | null => {
+        for (const node of items) {
+          if (node.key === activeId) return node;
+          if (node.children) {
+            const found = findNode(node.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const foundNode = findNode(nodes);
+      this.selectedNode.set(foundNode);
+    });
   }
 
   private mapToTreeNode(item: VertexFile | VertexFolder): TreeNode {
+    console.log(`[Sidebar] Mapping item to TreeNode: ${item.name}`);
     const isFolder = "children" in item;
     const node: TreeNode = {
       key: item.id,
@@ -62,15 +80,12 @@ export class SidebarComponent implements OnChanges {
           : this.getFileIcon(item.language),
       },
       expanded: isFolder ? item.isExpanded : false,
-      children: isFolder
+      leaf: !isFolder, // Folder is not a leaf, even if it has no children (lazy loading)
+      children: isFolder && item.children && item.children.length > 0
         ? item.children.map((child) => this.mapToTreeNode(child))
         : undefined,
       selectable: true,
     };
-
-    if (item.id === this.activeFileId) {
-      this.selectedNode = node;
-    }
 
     return node;
   }
