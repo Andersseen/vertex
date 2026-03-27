@@ -5,7 +5,9 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun --watch run index.ts",
-    "build": "bun build ./index.ts --compile --outfile sidecar-bin"
+    "build": "bun build ./index.ts --compile --outfile sidecar-bin",
+    "test": "bun test src/**/*.test.ts",
+    "test:security": "bun test src/security/security.test.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.5",
