@@ -61,11 +61,24 @@ mock.module("@angular/core", () => ({
   HostBinding: noop("HostBinding"),
   HostListener: noop("HostListener"),
   Inject: noop("Inject"),
-  inject: (_token: any) => ({ 
-    subscribe: (cb: any) => ({ unsubscribe: () => {} }),
-    pipe: () => ({ subscribe: (cb: any) => ({}) }),
-    getFiles: () => ({ subscribe: (cb: any) => cb({ name: '.', path: '.', children: [] }) }),
-  }),
+  inject: (_token: any) => {
+    const mockObservable = (data: any) => ({
+      subscribe: (observer: any) => {
+        const callback = typeof observer === 'function' ? observer : observer.next;
+        if (callback) callback(data);
+        return { unsubscribe: () => {} };
+      },
+      pipe: () => mockObservable(data)
+    });
+
+    return { 
+      subscribe: (observer: any) => ({ unsubscribe: () => {} }),
+      pipe: () => ({ subscribe: (observer: any) => ({}) }),
+      getFiles: () => mockObservable({ name: '.', path: '.', children: [] }),
+      readFile: () => mockObservable('mock content'),
+      getChildren: () => mockObservable([]),
+    };
+  },
   Optional: noop("Optional"),
   Self: noop("Self"),
   SkipSelf: noop("SkipSelf"),

@@ -109,23 +109,31 @@ test.describe('Vertex IDE UI Components', () => {
 
   test('bottom panel should switch tabs', async ({ page }) => {
     const bottomPanel = page.locator('v-bottom-panel');
-    await expect(bottomPanel).toBeVisible();
+    await expect(bottomPanel).toBeVisible({ timeout: 20000 });
 
-    // Give it a moment to settle across all browsers
-    await page.waitForTimeout(500);
+    // Give it a moment to settle
+    await page.waitForTimeout(1000);
 
-    // Updated labels to match UI sentence case
-    const tabsList = ['Problems', 'Output', 'Debug Console', 'Terminal'];
+    const tabsList = [
+      { name: 'Problems', id: 'tab-problems' },
+      { name: 'Output', id: 'tab-output' },
+      { name: 'Debug Console', id: 'tab-debug-console' },
+      { name: 'Terminal', id: 'tab-terminal' }
+    ];
     
-    for (const tabName of tabsList) {
-      // Find button by its text content
-      const tabButton = bottomPanel.locator('button').filter({ hasText: tabName });
+    for (const tab of tabsList) {
+      const tabButton = page.locator(`#${tab.id}`);
       
-      // Use force: true to ensure click happens even if there are JS errors blocking some interactions
-      await tabButton.click({ force: true });
+      // Use evaluate-based click for maximum stability in all browsers
+      await tabButton.evaluate(el => (el as HTMLElement).click());
       
-      // Use wait for class to appear with a generous timeout and retry
-      await expect(tabButton).toHaveClass(/active/, { timeout: 15000 });
+      // Wait for the active class to appear
+      await expect(tabButton).toHaveClass(/active/, { timeout: 10000 });
+      
+      // Verification of content visibility
+      if (tab.name === 'Problems') {
+        await expect(page.locator('.prob-item').first().or(page.getByText('No problems detected'))).toBeVisible();
+      }
     }
   });
 

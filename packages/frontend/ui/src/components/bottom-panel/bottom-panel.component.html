@@ -3,6 +3,7 @@
     <div class="vx-flex vx-items-center vx-h-full vx-gap-0">
       <button
         *ngFor="let tab of tabs; let i = index"
+        [id]="'tab-' + tab.toLowerCase().replace(' ', '-')"
         (click)="activeTabIndex.set(i)"
         [class.active]="activeTabIndex() === i"
         class="tab-item vx-h-full vx-flex vx-items-center"
