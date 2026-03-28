@@ -1,116 +1,101 @@
-<div class="bottom-panel vx-h-full vx-flex-col font-mono">
-  <div
-    class="bottom-panel-header vx-flex vx-items-center vx-justify-between shrink-0"
-  >
-    <div class="vx-flex vx-items-center vx-h-full vx-gap-0">
-      <button
-        *ngFor="let tab of tabs; let i = index"
-        [id]="'tab-' + tab.toLowerCase().replace(' ', '-')"
-        (click)="activeTabIndex.set(i)"
-        [class.active]="activeTabIndex() === i"
-        class="tab-item vx-h-full vx-flex vx-items-center"
-      >
-        <span class="tab-label">{{ tab }}</span>
+<div class="bottom-panel">
+  <header class="bottom-panel__header">
+    <nav class="bottom-panel__tabs">
+      @for (tab of tabs; track $index; let i = $index) {
+        <button
+          [id]="'tab-' + tab.toLowerCase().replace(' ', '-')"
+          (click)="activeTabIndex.set(i)"
+          [class.bottom-panel__tab--active]="activeTabIndex() === i"
+          class="bottom-panel__tab"
+          type="button"
+        >
+          <span class="bottom-panel__tab-label">{{ tab }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="bottom-panel__actions">
+      <button class="bottom-panel__action-btn" type="button">
+        <i class="pi pi-minus"></i>
+      </button>
+      <button class="bottom-panel__action-btn" type="button">
+        <i class="pi pi-times"></i>
       </button>
     </div>
+  </header>
 
-    <div
-      class="vx-flex vx-items-center px-4 vx-gap-2 text-[10px] text-[var(--p-surface-400)] vx-h-full"
-    >
-      <button
-        class="hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center p-1 rounded hover:vx-bg-800"
-      >
-        <i class="pi pi-minus text-[9px]"></i>
-      </button>
-      <button
-        class="hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center p-1 rounded hover:vx-bg-800"
-      >
-        <i class="pi pi-times text-[9px]"></i>
-      </button>
-    </div>
-  </div>
-
-  <div class="bottom-panel-content vx-flex-1 overflow-auto p-3">
+  <div class="bottom-panel__content">
     <!-- Problems Tab -->
-    <div
-      *ngIf="activeTabIndex() === 0"
-      class="console-content-vx animate-fade-in"
-    >
-      <div
-        *ngFor="let prob of problems"
-        class="vx-flex vx-items-start vx-gap-2 py-1 hover:vx-bg-800 px-2 rounded cursor-pointer transition-colors prob-item"
-      >
-        <i
-          [class]="
-            prob.type === 'error'
-              ? 'pi pi-times-circle text-red-400'
-              : 'pi pi-exclamation-triangle text-amber-400'
-          "
-          class="text-[12px] mt-0.5"
-        ></i>
-        <div class="vx-flex-1">
-          <span class="text-[12px] text-[var(--p-surface-300)]">{{
-            prob.message
-          }}</span>
-          <span class="text-[10px] text-[var(--p-surface-500)] ml-2"
-            >{{ prob.file }}:{{ prob.line }}</span
-          >
-        </div>
+    @if (activeTabIndex() === 0) {
+      <div class="bottom-panel__console">
+        @for (prob of problems; track $index) {
+          <div class="bottom-panel__problem">
+            <i
+              class="bottom-panel__problem-icon"
+              [class.bottom-panel__problem-icon--error]="prob.type === 'error'"
+              [class.bottom-panel__problem-icon--warning]="
+                prob.type === 'warning'
+              "
+              [class]="
+                prob.type === 'error'
+                  ? 'pi pi-times-circle'
+                  : 'pi pi-exclamation-triangle'
+              "
+            ></i>
+            <div class="bottom-panel__problem-content">
+              <span class="bottom-panel__problem-message">{{
+                prob.message
+              }}</span>
+              <span class="bottom-panel__problem-meta"
+                >{{ prob.file }}:{{ prob.line }}</span
+              >
+            </div>
+          </div>
+        }
+
+        @if (problems.length === 0) {
+          <div class="bottom-panel__console-item">No problems detected</div>
+        }
       </div>
-      <div
-        *ngIf="problems.length === 0"
-        class="text-[12px] text-[var(--p-surface-500)] p-2"
-      >
-        No problems detected
-      </div>
-    </div>
+    }
 
     <!-- Output Tab -->
-    <div
-      *ngIf="activeTabIndex() === 1"
-      class="console-content-vx animate-fade-in"
-    >
-      <div *ngFor="let out of output" class="py-0.5">
-        <span
-          [class]="
-            out.type === 'success'
-              ? 'text-green-400'
-              : out.type === 'warning'
-                ? 'text-amber-400'
-                : 'text-[var(--p-surface-400)]'
-          "
-          class="text-[11px] font-mono"
-          >{{ out.text }}</span
-        >
+    @if (activeTabIndex() === 1) {
+      <div class="bottom-panel__console">
+        @for (out of output; track $index) {
+          <div
+            class="bottom-panel__output-item"
+            [class.bottom-panel__output-item--success]="out.type === 'success'"
+            [class.bottom-panel__output-item--warning]="out.type === 'warning'"
+            [class.bottom-panel__output-item--info]="out.type === 'info'"
+          >
+            {{ out.text }}
+          </div>
+        }
       </div>
-    </div>
+    }
 
     <!-- Debug Console Tab -->
-    <div
-      *ngIf="activeTabIndex() === 2"
-      class="console-content-vx animate-fade-in"
-    >
-      <div *ngFor="let dbg of debugConsole" class="py-0.5">
-        <span
-          [class]="
-            dbg.type === 'success'
-              ? 'text-green-400'
-              : dbg.type === 'warning'
-                ? 'text-amber-400'
-                : 'text-blue-400'
-          "
-          class="text-[11px] font-mono"
-          >{{ dbg.text }}</span
-        >
+    @if (activeTabIndex() === 2) {
+      <div class="bottom-panel__console">
+        @for (dbg of debugConsole; track $index) {
+          <div
+            class="bottom-panel__debug-item"
+            [class.bottom-panel__debug-item--success]="dbg.type === 'success'"
+            [class.bottom-panel__debug-item--warning]="dbg.type === 'warning'"
+            [class.bottom-panel__debug-item--info]="dbg.type === 'info'"
+          >
+            {{ dbg.text }}
+          </div>
+        }
       </div>
-    </div>
+    }
 
     <!-- Terminal Tab -->
-    <div *ngIf="activeTabIndex() === 3" class="vx-h-full animate-fade-in">
-      <v-terminal
-        class="vx-h-full"
-        [workingDirectory]="workspacePath()"
-      ></v-terminal>
-    </div>
+    @if (activeTabIndex() === 3) {
+      <div class="bottom-panel__terminal">
+        <v-terminal [workingDirectory]="workspacePath()"></v-terminal>
+      </div>
+    }
   </div>
 </div>

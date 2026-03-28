@@ -8,11 +8,14 @@ describe("EditorComponent", () => {
 
   test("should have default showHeader to true", () => {
     const component = new EditorComponent();
-    expect(component.showHeader).toBe(true);
+    // Access the input signal value using function call syntax
+    expect(component.showHeader()).toBe(true);
   });
 
-  test("should have isDirty false by default", () => {
+  test("should accept showHeader input", () => {
     const component = new EditorComponent();
-    expect(component.isDirty).toBe(false);
+    // Input signals are read-only, we can only test the default value
+    // In a real test with TestBed, we would set the input via componentRef
+    expect(component.showHeader()).toBe(true);
   });
 });

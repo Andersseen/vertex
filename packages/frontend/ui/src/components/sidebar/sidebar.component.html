@@ -1,51 +1,53 @@
-<div class="sidebar-container vx-h-full vx-w-full vx-flex vx-flex-col">
+<div class="sidebar">
   <!-- Sidebar Header -->
-  <div class="sidebar-header-vx vx-flex vx-items-center vx-justify-between">
-    <div class="vx-flex vx-items-center vx-gap-2">
-      <i class="pi pi-bars text-[12px] text-[var(--p-surface-400)]"></i>
-      <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--p-surface-200)] antialiased">Explorer</span>
+  <header class="sidebar__header">
+    <div class="sidebar__title-group">
+      <i class="sidebar__icon pi pi-bars"></i>
+      <span class="sidebar__title">Explorer</span>
     </div>
-    <div class="vx-flex vx-items-center vx-gap-1">
+
+    <div class="sidebar__actions">
       <button
-        class="p-1 hover:vx-bg-800 rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-        (click)="newFile.emit()"
+        class="sidebar__action-btn"
+        type="button"
+        (click)="createNewFile()"
         title="New File"
       >
-        <i class="pi pi-file-plus text-[11px]"></i>
+        <i class="pi pi-file-plus"></i>
       </button>
       <button
-        class="p-1 hover:vx-bg-800 rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-        (click)="newFolder.emit()"
+        class="sidebar__action-btn"
+        type="button"
+        (click)="createNewFolder()"
         title="New Folder"
       >
-        <i class="pi pi-folder-plus text-[11px]"></i>
+        <i class="pi pi-folder-plus"></i>
       </button>
       <button
-        class="p-1 hover:vx-bg-800 rounded text-[var(--p-surface-400)] hover:text-[var(--p-surface-100)] transition-all vx-flex vx-items-center vx-justify-center"
-        (click)="refresh.emit()"
+        class="sidebar__action-btn"
+        type="button"
+        (click)="refreshExplorer()"
         title="Refresh"
       >
-        <i class="pi pi-refresh text-[11px]"></i>
+        <i class="pi pi-refresh"></i>
       </button>
     </div>
-  </div>
-  
-  <!-- File Tree -->
-  <div class="sidebar-content vx-flex-1 overflow-auto custom-scrollbar-vx">
-    <p-tree 
-      [value]="treeNodes()" 
-      selectionMode="single" 
+  </header>
+
+  <!-- Sidebar Content -->
+  <div class="sidebar__content">
+    <p-tree
+      [value]="treeNodes()"
+      selectionMode="single"
       [(selection)]="selectedNode"
-      (onNodeSelect)="onNodeSelect($event)"
-      (onNodeExpand)="onNodeExpand($event)"
-      (onNodeCollapse)="onNodeCollapse($event)"
-      class="w-full border-none p-0"
-      [scrollHeight]="'100%'"
+      (onNodeSelect)="selectNodeOrToggleFolder($event)"
+      (onNodeExpand)="expandFolder($event)"
+      (onNodeCollapse)="collapseFolder($event)"
     >
       <ng-template let-node pTemplate="default">
-        <div class="vx-flex vx-items-center vx-gap-2 py-0.5 vx-w-full vx-overflow-hidden">
-          <i [class]="node.data.customIcon + ' text-[13px] opacity-70 shrink-0'"></i>
-          <span class="p-treenode-label text-[12px] tracking-tight vx-truncate">{{node.label}}</span>
+        <div class="sidebar__tree-item">
+          <i [class]="node.data.customIcon + ' sidebar__tree-icon'"></i>
+          <span class="sidebar__tree-label">{{ node.label }}</span>
         </div>
       </ng-template>
     </p-tree>

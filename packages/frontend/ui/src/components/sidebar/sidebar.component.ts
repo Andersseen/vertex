@@ -5,6 +5,7 @@ import {
   computed,
   signal,
   effect,
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TreeModule } from "primeng/tree";
@@ -13,31 +14,35 @@ import { VertexFile, VertexFolder } from "@vertex/types";
 
 @Component({
   selector: "v-sidebar",
-  standalone: true,
   imports: [CommonModule, TreeModule],
   host: {
     class: "vx-h-full vx-w-full block",
   },
   templateUrl: "./sidebar.component.html",
   styleUrls: ["./sidebar.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  workspaceFolder = input<VertexFolder | null>(null);
-  activeFileId = input<string | null>(null);
+  // Inputs
+  readonly workspaceFolder = input<VertexFolder | null>(null);
+  readonly activeFileId = input<string | null>(null);
 
-  fileSelect = output<VertexFile>();
-  newFile = output<void>();
-  newFolder = output<void>();
-  folderToggle = output<VertexFolder>();
-  refresh = output<void>();
+  // Outputs
+  readonly fileSelect = output<VertexFile>();
+  readonly newFile = output<void>();
+  readonly newFolder = output<void>();
+  readonly folderToggle = output<VertexFolder>();
+  readonly refresh = output<void>();
 
-  treeNodes = computed(() => {
+  // Computed state
+  protected readonly treeNodes = computed(() => {
     const folder = this.workspaceFolder();
     if (!folder) return [];
     return [this.mapToTreeNode(folder)];
   });
 
-  selectedNode = signal<TreeNode | null>(null);
+  // Internal state - protected for template access
+  protected readonly selectedNode = signal<TreeNode | null>(null);
 
   constructor() {
     effect(() => {
@@ -81,9 +86,10 @@ export class SidebarComponent {
       },
       expanded: isFolder ? item.isExpanded : false,
       leaf: !isFolder, // Folder is not a leaf, even if it has no children (lazy loading)
-      children: isFolder && item.children && item.children.length > 0
-        ? item.children.map((child) => this.mapToTreeNode(child))
-        : undefined,
+      children:
+        isFolder && item.children && item.children.length > 0
+          ? item.children.map((child) => this.mapToTreeNode(child))
+          : undefined,
       selectable: true,
     };
 
@@ -106,15 +112,15 @@ export class SidebarComponent {
     );
   }
 
-  onNodeSelect(event: any): void {
-    const item = event.node.data;
+  protected selectNodeOrToggleFolder(event: { node: TreeNode }): void {
+    const item = event.node.data as VertexFile | VertexFolder;
     if ("children" in item) {
       // Folder - toggle expansion instead of selecting
       event.node.expanded = !event.node.expanded;
       if (event.node.expanded) {
-        this.onNodeExpand(event);
+        this.expandFolder(event);
       } else {
-        this.onNodeCollapse(event);
+        this.collapseFolder(event);
       }
     } else {
       // File - select it
@@ -122,15 +128,27 @@ export class SidebarComponent {
     }
   }
 
-  onNodeExpand(event: any): void {
+  protected expandFolder(event: { node: TreeNode }): void {
     const folder = event.node.data as VertexFolder;
     folder.isExpanded = true;
     this.folderToggle.emit(folder);
   }
 
-  onNodeCollapse(event: any): void {
+  protected collapseFolder(event: { node: TreeNode }): void {
     const folder = event.node.data as VertexFolder;
     folder.isExpanded = false;
     this.folderToggle.emit(folder);
+  }
+
+  protected createNewFile(): void {
+    this.newFile.emit();
+  }
+
+  protected createNewFolder(): void {
+    this.newFolder.emit();
+  }
+
+  protected refreshExplorer(): void {
+    this.refresh.emit();
   }
 }

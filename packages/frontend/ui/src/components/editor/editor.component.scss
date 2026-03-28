@@ -1,141 +1,202 @@
 @use "../../styles/theme" as *;
 
-.editor-container {
-  height: 100%;
-  width: 100%;
-  display: flex !important;
-  flex-direction: column !important;
+// Block: Editor
+.editor {
+  @include full-height;
+  @include full-width;
+  @include flex-column;
   background-color: $surface-950;
-  font-family: $font-inter;
-}
+  font-family: $font-sans;
 
-.editor-header-vx {
-  height: 32px;
-  background-color: $surface-900;
-  border-bottom: 1px solid $surface-800;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  flex-shrink: 0;
-}
+  // Element: Header
+  &__header {
+    @include flex-between;
+    height: 32px;
+    background-color: $surface-900;
+    border-bottom: 1px solid $surface-800;
+    flex-shrink: 0;
+  }
 
-.active-tab {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem;
-  padding: 0 1rem;
-  height: 100% !important;
-  background-color: rgba(99, 102, 241, 0.05);
-  border-right: 1px solid $surface-800;
-  position: relative;
+  // Element: Tab
+  &__tab {
+    @include flex;
+    @include items-center;
+    gap: $spacing-2;
+    height: 100%;
+    padding: 0 $spacing-4;
+    background-color: rgba($primary-500, 0.05);
+    border-right: 1px solid $surface-800;
+    position: relative;
 
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: -1px;
-    height: 16px;
-    width: 2px;
+    // Active indicator
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -1px;
+      height: 16px;
+      width: 2px;
+      background-color: $primary-500;
+      transform: translateY(-50%);
+      box-shadow: 0 0 8px $primary-500;
+    }
+  }
+
+  // Element: Tab Icon
+  &__tab-icon {
+    font-size: $font-size-xs;
+    opacity: 0.8;
+  }
+
+  // Element: Tab Name
+  &__tab-name {
+    font-size: 10px;
+    font-weight: $font-weight-bold;
+    color: $surface-100;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+    @include truncate;
+  }
+
+  // Element: Modified Indicator
+  &__modified-indicator {
+    width: 6px;
+    height: 6px;
     background-color: $primary-500;
-    transform: translateY(-50%);
-    box-shadow: 0 0 8px $primary-500;
+    @include rounded(50%);
+    margin-left: $spacing-1;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  // Element: Close Button
+  &__close-btn {
+    @include flex-center;
+    margin-left: $spacing-2;
+    padding: $spacing-1;
+    background: transparent;
+    border: none;
+    @include rounded(4px);
+    color: $surface-500;
+    cursor: pointer;
+    @include transition;
+
+    &:hover {
+      background-color: $surface-800;
+      color: $surface-200;
+    }
+
+    i {
+      font-size: 8px;
+    }
+  }
+
+  // Element: Actions
+  &__actions {
+    @include flex;
+    @include items-center;
+    gap: $spacing-3;
+    padding-right: $spacing-3;
+    height: 100%;
+  }
+
+  // Element: Language Label
+  &__language {
+    font-size: 9px;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $surface-500;
+    opacity: 0.4;
+  }
+
+  // Element: Save Button
+  &__save-btn {
+    @include flex;
+    @include items-center;
+    gap: $spacing-2;
+    padding: $spacing-1 $spacing-3;
+    @include rounded(4px);
+    font-size: 9px;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $surface-0;
+    border: 1px solid $surface-700;
+    background-color: $surface-800;
+    cursor: pointer;
+    @include transition;
+
+    &:hover:not(:disabled) {
+      background-color: $surface-700;
+      border-color: $primary-500;
+      box-shadow: 0 0 10px rgba($primary-500, 0.2);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    i {
+      font-size: 9px;
+    }
+  }
+
+  // Element: Host (CodeMirror container)
+  &__host {
+    flex: 1;
+    @include overflow-hidden;
+
+    // CodeMirror customizations
+    ::ng-deep {
+      .cm-editor {
+        @include full-height;
+        outline: none !important;
+        background: transparent !important;
+      }
+
+      .cm-scroller {
+        font-family: $font-mono !important;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .cm-gutters {
+        background-color: $surface-950 !important;
+        color: $surface-600 !important;
+        border-right: 1px solid $surface-800 !important;
+      }
+
+      .cm-activeLineGutter {
+        background-color: $surface-800 !important;
+        color: $surface-100 !important;
+      }
+
+      .cm-activeLine {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+      }
+
+      .cm-foldPlaceholder {
+        background: $surface-800 !important;
+        border: none !important;
+        color: $surface-400 !important;
+      }
+    }
   }
 }
 
-.file-name {
-  font-size: 10px;
-  font-weight: 700;
-  color: $surface-100;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
-}
-
-.editor-actions {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem;
-  padding-right: 0.75rem;
-  height: 100% !important;
-}
-
-.save-btn {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: $surface-0;
-  border: 1px solid $surface-700;
-  background-color: $surface-800;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-
-  &:hover:not(:disabled) {
-    background-color: $surface-700;
-    border-color: $primary-500;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+// Animation for modified indicator
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
-
-  &:active:not(:disabled) {
-    transform: translateY(1px);
+  50% {
+    opacity: 0.5;
   }
-
-  &:disabled {
-    opacity: 0.3;
-    pointer-events: none;
-  }
-}
-
-.editor-host {
-  flex: 1;
-  overflow: hidden;
-
-  ::ng-deep {
-    .cm-editor {
-      height: 100%;
-      outline: none !important;
-      background: transparent !important;
-    }
-
-    .cm-scroller {
-      font-family: $font-mono !important;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .cm-gutters {
-      background-color: $surface-950 !important;
-      color: $surface-600 !important;
-      border-right: 1px solid $surface-800 !important;
-    }
-
-    .cm-activeLineGutter {
-      background-color: $surface-800 !important;
-      color: $surface-100 !important;
-    }
-
-    .cm-activeLine {
-      background-color: rgba(255, 255, 255, 0.02) !important;
-    }
-
-    .cm-foldPlaceholder {
-      background: $surface-800 !important;
-      border: none !important;
-      color: $surface-400 !important;
-    }
-  }
-}
-
-// Utility class for Modified indicator
-.modified-dot {
-  width: 6px;
-  height: 6px;
-  background-color: $primary-500;
-  border-radius: 50%;
-  margin-left: 0.25rem;
 }
