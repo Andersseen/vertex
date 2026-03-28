@@ -1,9 +1,9 @@
 import { Component, signal, inject } from '@angular/core';
-import { MainLayoutComponent } from '../../../../packages/frontend/ui/src/lib/layouts/main-layout/main-layout.component';
-import { EditorComponent } from '../../../../packages/frontend/ui/src/components/editor/editor.component';
-import { SidebarComponent } from '../../../../packages/frontend/ui/src/components/sidebar/sidebar.component';
-import { BottomPanelComponent } from '../../../../packages/frontend/ui/src/components/bottom-panel/bottom-panel.component';
-import { TabsComponent } from '../../../../packages/frontend/ui/src/components/tabs/tabs.component';
+import { MainLayoutComponent } from '@vertex/ui';
+import { EditorComponent } from '@vertex/ui';
+import { SidebarComponent } from '@vertex/ui';
+import { BottomPanelComponent } from '@vertex/ui';
+import { TabsComponent } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 
@@ -90,7 +90,7 @@ export class App {
 
     // 2. Check if we already have this file open
     const openFiles = this.openFiles();
-    const existingFile = openFiles.find(f => f.id === file.id);
+    const existingFile = openFiles.find((f) => f.id === file.id);
 
     // 3. Handle content loading and list update
     if (!file.content && (!existingFile || !existingFile.content)) {
@@ -99,12 +99,11 @@ export class App {
         this.updateOrAddFile(updatedFile);
       });
     } else {
-      // If the incoming file has no content but the existing one does, 
-      // preserve the existing one but still call updateOrAddFile to handle potential 
+      // If the incoming file has no content but the existing one does,
+      // preserve the existing one but still call updateOrAddFile to handle potential
       // reference updates from sidebar tree refreshes
-      const fileToUse = (!file.content && existingFile?.content) 
-        ? { ...file, content: existingFile.content } 
-        : file;
+      const fileToUse =
+        !file.content && existingFile?.content ? { ...file, content: existingFile.content } : file;
       this.updateOrAddFile(fileToUse);
     }
   }
@@ -137,7 +136,7 @@ export class App {
         path: name,
         content: '',
         language: 'text',
-        isDirty: true
+        isDirty: true,
       };
       this.updateOrAddFile(newFile);
       this.activeFileId.set(newFile.id);
