@@ -37,7 +37,18 @@ export class App {
   async openFolder() {
     const selectedPath = await this.tauriService.selectFolder();
     if (selectedPath) {
-      this.loadDirectory(selectedPath);
+      // First update the workspace in sidecar, then load the directory
+      this.fileService.setWorkspace(selectedPath).subscribe({
+        next: () => {
+          console.log(`[App] Workspace changed to: ${selectedPath}`);
+          this.loadDirectory(selectedPath);
+        },
+        error: (err) => {
+          console.error(`[App] Failed to set workspace: ${selectedPath}`, err);
+          // Try to load anyway - might fail with 403
+          this.loadDirectory(selectedPath);
+        },
+      });
     }
   }
 

@@ -95,6 +95,14 @@ export class WorkspaceGuard {
   }
 
   /**
+   * Updates the allowed base path (e.g., when user selects a new workspace)
+   * @param newBasePath - The new base path to set
+   */
+  setAllowedBase(newBasePath: string): void {
+    (this as any).allowedBase = normalize(resolve(newBasePath));
+  }
+
+  /**
    * Checks if a file extension is allowed for reading
    * @param filename - The filename to check
    * @returns true if allowed, false otherwise

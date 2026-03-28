@@ -67,16 +67,31 @@ export class App {
       this.rootFolder()?.path || '.',
     );
     if (path) {
-      this.fileService.getFiles(path).subscribe({
-        next: (folder: VertexFolder) => {
-          this.rootFolder.set(folder);
+      // First update the workspace in sidecar, then load the directory
+      this.fileService.setWorkspace(path).subscribe({
+        next: () => {
+          console.log(`[App] Workspace changed to: ${path}`);
+          this.loadDirectory(path);
         },
         error: (err) => {
-          console.error(`[App] Failed to load folder: ${path}`, err);
-          window.alert(`Failed to load folder: ${path}`);
+          console.error(`[App] Failed to set workspace: ${path}`, err);
+          // Try to load anyway - might fail with 403
+          this.loadDirectory(path);
         },
       });
     }
+  }
+
+  private loadDirectory(path: string) {
+    this.fileService.getFiles(path).subscribe({
+      next: (folder: VertexFolder) => {
+        this.rootFolder.set(folder);
+      },
+      error: (err) => {
+        console.error(`[App] Failed to load folder: ${path}`, err);
+        window.alert(`Failed to load folder: ${path}`);
+      },
+    });
   }
 
   protected getActiveFile(): VertexFile | undefined {

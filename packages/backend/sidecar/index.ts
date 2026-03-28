@@ -17,7 +17,8 @@ const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 
 const RATE_LIMIT_REQ = Number(process.env.RATE_LIMIT_REQ) || 100;
 const RATE_LIMIT_WINDOW = Number(process.env.RATE_LIMIT_WINDOW) || 60; // seconds
 const CORS_ORIGIN =
-  process.env.CORS_ORIGIN || "http://localhost:4200,http://localhost:1420";
+  process.env.CORS_ORIGIN ||
+  "http://localhost:4200,http://localhost:4201,http://localhost:1420";
 
 // Parse allowed origins
 const allowedOrigins = CORS_ORIGIN.split(",").map((o) => o.trim());
@@ -316,6 +317,54 @@ app.get("/fs/workspace", (c) => {
       window: RATE_LIMIT_WINDOW,
     },
   });
+});
+
+/**
+ * Set/change workspace root
+ * POST /fs/workspace
+ * Body: { path: string }
+ *
+ * This allows the user to select any folder as workspace root.
+ * Security: The new workspace must be a valid directory.
+ */
+app.post("/fs/workspace", async (c) => {
+  let body: { path?: string };
+
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const { path: newPath } = body;
+
+  if (!newPath || typeof newPath !== "string") {
+    return c.json({ error: "Path is required" }, 400);
+  }
+
+  try {
+    // Verify the path exists and is a directory
+    const stats = await stat(newPath);
+    if (!stats.isDirectory()) {
+      return c.json({ error: "Path is not a directory" }, 400);
+    }
+
+    // Update the workspace guard with new path
+    guard.setAllowedBase(newPath);
+
+    console.log(`[Workspace] Changed to: ${newPath}`);
+    return c.json({
+      success: true,
+      path: newPath,
+      message: "Workspace updated successfully",
+    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return c.json({ error: "Directory not found" }, 404);
+    }
+    console.error(`[Error] Failed to change workspace: ${newPath}`, error);
+    return c.json({ error: "Failed to change workspace" }, 500);
+  }
 });
 
 // ==================== HELPERS ====================
