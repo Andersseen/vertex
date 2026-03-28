@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, signal, input } from "@angular/core";
 import { DividerModule } from "primeng/divider";
 import { TabsModule } from "primeng/tabs";
 import { CommonModule } from "@angular/common";
@@ -13,6 +13,7 @@ import { TerminalComponent } from "../terminal/terminal.component";
   styleUrls: ["./bottom-panel.component.scss"],
 })
 export class BottomPanelComponent {
+  workspacePath = input<string>("");
   activeTabIndex = signal(3);
   tabs = ["Problems", "Output", "Debug Console", "Terminal"];
 

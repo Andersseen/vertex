@@ -10,5 +10,5 @@
 
   <v-editor editor [file]="activeFile()" [showHeader]="true" (save)="onSave()"> </v-editor>
 
-  <v-bottom-panel bottom></v-bottom-panel>
+  <v-bottom-panel bottom [workspacePath]="rootFolder()?.path || ''"></v-bottom-panel>
 </v-main-layout>

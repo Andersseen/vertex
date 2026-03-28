@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
 /**
  * Interface defining the contract for terminal backend implementations (Tauri, Web, etc.)
@@ -6,8 +6,9 @@ import { Observable } from 'rxjs';
 export interface TerminalBackendAdapter {
   /**
    * Initialize the terminal connection (spawn PTY)
+   * @param cwd - Optional current working directory to start the terminal in
    */
-  connect(): Promise<void>;
+  connect(cwd?: string): Promise<void>;
 
   /**
    * Write data to the backend PTY

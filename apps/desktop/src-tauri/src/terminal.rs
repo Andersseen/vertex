@@ -23,7 +23,7 @@ pub struct ResizePayload {
 }
 
 #[tauri::command]
-pub async fn spawn_terminal(app_handle: AppHandle, id: String) -> Result<(), String> {
+pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<String>) -> Result<(), String> {
     let pty_system = native_pty_system();
 
     // Use default shell based on OS
@@ -42,7 +42,13 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String) -> Result<(), Str
         })
         .map_err(|e| e.to_string())?;
 
-    let cmd = CommandBuilder::new(shell);
+    let mut cmd = CommandBuilder::new(shell);
+    
+    // Set working directory if provided
+    if let Some(working_dir) = cwd {
+        cmd.cwd(std::path::PathBuf::from(working_dir));
+    }
+    
     let _child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
 
     let reader = pair.master.try_clone_reader().map_err(|e| e.to_string())?;

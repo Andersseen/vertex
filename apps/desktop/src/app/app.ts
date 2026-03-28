@@ -6,7 +6,7 @@ import {
   BottomPanelComponent,
 } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
-import { FileService, TauriService } from '@vertex/core';
+import { FileService, TauriService, WorkspaceService } from '@vertex/core';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +18,7 @@ import { FileService, TauriService } from '@vertex/core';
 export class App {
   private readonly tauriService = inject(TauriService);
   private readonly fileService = inject(FileService);
+  private readonly workspaceService = inject(WorkspaceService);
 
   protected readonly title = signal('Vertex IDE');
   protected readonly activeFile = signal<VertexFile | null>(null);
@@ -25,28 +26,41 @@ export class App {
 
   constructor() {
     // Initial load - using current working directory as default
-    this.loadDirectory('.');
+    this.loadDirectory('.', 'Vertex Project');
   }
 
-  private loadDirectory(path: string) {
+  private loadDirectory(path: string, name?: string) {
     this.fileService.getFiles(path).subscribe((folder: VertexFolder) => {
       this.rootFolder.set(folder);
+
+      // Update workspace service so terminal knows where to start
+      const folderName = name || folder.name || 'Project';
+      this.workspaceService.openWorkspace({
+        id: path,
+        name: folderName,
+        path: path,
+        files: folder,
+        panels: [],
+      });
     });
   }
 
   async openFolder() {
     const selectedPath = await this.tauriService.selectFolder();
     if (selectedPath) {
+      // Extract folder name from path
+      const folderName = selectedPath.split(/[/\\]/).pop() || 'Project';
+
       // First update the workspace in sidecar, then load the directory
       this.fileService.setWorkspace(selectedPath).subscribe({
         next: () => {
           console.log(`[App] Workspace changed to: ${selectedPath}`);
-          this.loadDirectory(selectedPath);
+          this.loadDirectory(selectedPath, folderName);
         },
         error: (err) => {
           console.error(`[App] Failed to set workspace: ${selectedPath}`, err);
           // Try to load anyway - might fail with 403
-          this.loadDirectory(selectedPath);
+          this.loadDirectory(selectedPath, folderName);
         },
       });
     }
