@@ -77,6 +77,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   // State
   private editorView: EditorView | null = null;
+  private _suppressEmit = false;
   protected readonly isDirty = false;
 
   ngAfterViewInit(): void {
@@ -85,7 +86,16 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes["file"] && !changes["file"].firstChange && this.editorView) {
-      this.updateContent(this.file()?.content ?? "");
+      // Only update editor if the file ID changed (switching tabs)
+      // NOT when just the content object reference changed (typing updates)
+      const prev = changes["file"].previousValue as VertexFile | null;
+      const curr = changes["file"].currentValue as VertexFile | null;
+
+      if (prev?.id !== curr?.id) {
+        this._suppressEmit = true;
+        this.updateContent(curr?.content ?? "");
+        this._suppressEmit = false;
+      }
     }
   }
 
@@ -146,7 +156,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
         oneDark,
         this.getLanguageExtension(currentFile?.language),
         EditorView.updateListener.of((update) => {
-          if (update.docChanged) {
+          if (update.docChanged && !this._suppressEmit) {
             this.contentChange.emit(update.state.doc.toString());
           }
         }),

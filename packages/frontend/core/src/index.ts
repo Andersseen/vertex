@@ -1,11 +1,7 @@
-// Services
-export * from "./terminal/terminal.service";
+// Terminal
 export * from "./terminal/terminal-panel.component";
-
-// Legacy terminal exports
 export * from "./terminal/terminal-backend-adapter";
 export * from "./terminal/terminal-tokens";
-export * from "./terminal/tauri-terminal.service";
 export * from "./terminal/web-terminal.service";
 
 // FS exports
