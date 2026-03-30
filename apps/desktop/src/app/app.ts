@@ -1,4 +1,4 @@
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import {
   MainLayoutComponent,
   EditorComponent,
@@ -33,23 +33,41 @@ export class App {
   protected readonly rootFolder = signal<VertexFolder | null>(null);
   protected readonly workspacePath = signal<string>('');
 
+  // COMPUTED SIGNAL — prevents infinite change detection loop (NG0103)
+  // Unlike a method call, computed memoizes the result and only notifies
+  // when the returned reference actually changes.
+  protected readonly activeFile = computed(() => {
+    const id = this.activeFileId();
+    if (!id) return null;
+    return this.openFiles().find((f) => f.id === id) ?? null;
+  });
+
   constructor() {
-    // Initial load - using current working directory as default
-    this.loadDirectory('.', 'Vertex Project');
+    // Fetch the absolute workspace path from sidecar, then load directory
+    this.fileService.getWorkspace().subscribe({
+      next: (workspace) => {
+        const absolutePath = workspace.path;
+        console.log(`[App] Workspace resolved to: ${absolutePath}`);
+        this.workspacePath.set(absolutePath);
+        this.loadDirectory(absolutePath, absolutePath.split(/[/\\]/).pop() || 'Project');
+      },
+      error: () => {
+        // Fallback to relative path
+        this.loadDirectory('.', 'Vertex Project');
+      },
+    });
   }
 
   private loadDirectory(path: string, name?: string) {
     this.fileService.getFiles(path).subscribe((folder: VertexFolder) => {
-      this.rootFolder.set(folder);
-      // Store the absolute path for the terminal
-      this.workspacePath.set(folder.path);
+      this.rootFolder.set({ ...folder, path });
 
-      // Update workspace service so terminal knows where to start
+      // Update workspace service
       const folderName = name || folder.name || 'Project';
       this.workspaceService.openWorkspace({
         id: path,
         name: folderName,
-        path: path,
+        path,
         files: folder,
         panels: [],
       });
@@ -74,6 +92,7 @@ export class App {
       this.fileService.setWorkspace(selectedPath).subscribe({
         next: () => {
           console.log(`[App] Workspace changed to: ${selectedPath}`);
+          this.workspacePath.set(selectedPath);
           this.loadDirectory(selectedPath, folderName);
         },
         error: (err) => {
@@ -103,14 +122,14 @@ export class App {
     if (!file.content) {
       this.fileService.readFile(file.path).subscribe((content: string) => {
         const updatedFile = { ...file, content };
-        this.addOrUpdateFile(updatedFile);
+        this.addFileToTabs(updatedFile);
       });
     } else {
-      this.addOrUpdateFile(file);
+      this.addFileToTabs(file);
     }
   }
 
-  private addOrUpdateFile(file: VertexFile) {
+  private addFileToTabs(file: VertexFile) {
     const currentFiles = this.openFiles();
     const existingIndex = currentFiles.findIndex((f) => f.id === file.id);
 
@@ -157,7 +176,7 @@ export class App {
       language: 'text',
       isDirty: true,
     };
-    this.addOrUpdateFile(newFile);
+    this.addFileToTabs(newFile);
   }
 
   onFolderToggle(folder: VertexFolder) {
@@ -175,26 +194,26 @@ export class App {
   }
 
   onSave() {
-    const activeFile = this.getActiveFile();
-    if (activeFile && activeFile.content !== undefined) {
-      this.fileService.writeFile(activeFile.path, activeFile.content).subscribe(() => {
-        activeFile.isDirty = false;
-        this.addOrUpdateFile(activeFile);
+    const file = this.activeFile();
+    if (file && file.content !== undefined) {
+      this.fileService.writeFile(file.path, file.content).subscribe(() => {
+        this.addFileToTabs({ ...file, isDirty: false });
       });
     }
   }
 
   onContentChange(content: string) {
-    const activeFile = this.getActiveFile();
-    if (activeFile) {
-      const updatedFile = { ...activeFile, content, isDirty: true };
-      this.addOrUpdateFile(updatedFile);
+    const file = this.activeFile();
+    if (file) {
+      const updatedFile = { ...file, content, isDirty: true };
+      // Only update the file in the array, don't re-set activeFileId
+      const currentFiles = this.openFiles();
+      const index = currentFiles.findIndex((f) => f.id === file.id);
+      if (index !== -1) {
+        const updatedFiles = [...currentFiles];
+        updatedFiles[index] = updatedFile;
+        this.openFiles.set(updatedFiles);
+      }
     }
-  }
-
-  protected getActiveFile(): VertexFile | null {
-    const id = this.activeFileId();
-    if (!id) return null;
-    return this.openFiles().find((f) => f.id === id) || null;
   }
 }

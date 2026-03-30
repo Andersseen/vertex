@@ -32,6 +32,30 @@
   flex-shrink: 0;
 }
 
+.vx-logo-container {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, $primary-500, $primary-700);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba($primary-500, 0.3);
+}
+
+.vx-logo-text {
+  font-size: 14px;
+  font-weight: 800;
+  color: $surface-0;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.vx-ide-highlight {
+  color: $primary-400;
+}
+
 .vx-header-left,
 .vx-header-right {
   display: flex !important;

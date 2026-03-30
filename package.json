@@ -40,10 +40,10 @@
     "sidecar:dev": "cd packages/backend/sidecar && bun run dev",
     "sidecar:build": "cd packages/backend/sidecar && bun run build",
     "terminal:install": "cd packages/backend/terminal && npm install",
-    "terminal:dev": "cd packages/backend/terminal && WORKSPACE_PATH=$(pwd) npm run dev",
+    "terminal:dev": "WORKSPACE_PATH=$(pwd) node packages/backend/terminal/index.js",
     "terminal:build": "cd packages/backend/terminal && npm run build",
-    "dev:all": "concurrently \"bun sidecar:dev\" \"npm run terminal:dev\" \"bun web:dev\"",
-    "dev:desktop": "concurrently \"bun sidecar:dev\" \"WORKSPACE_PATH=$(pwd) npm run terminal:dev\" \"bun desktop:dev\""
+    "dev:all": "concurrently \"bun sidecar:dev\" \"bun terminal:dev\" \"bun web:dev\"",
+    "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun terminal:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
     "@angular-eslint/eslint-plugin": "^21.3.1",

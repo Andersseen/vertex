@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { MainLayoutComponent } from '@vertex/ui';
 import { EditorComponent } from '@vertex/ui';
 import { SidebarComponent } from '@vertex/ui';
@@ -18,6 +18,7 @@ import { FileService } from '@vertex/core';
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   private readonly fileService = inject(FileService);
@@ -26,12 +27,34 @@ export class App {
   protected readonly openFiles = signal<VertexFile[]>([]);
   protected readonly activeFileId = signal<string | null>(null);
   protected readonly rootFolder = signal<VertexFolder | null>(null);
+  protected readonly workspacePath = signal<string>('');
+
+  // COMPUTED SIGNAL — prevents NG0103 infinite change detection loop
+  protected readonly activeFile = computed(() => {
+    const id = this.activeFileId();
+    if (!id) return null;
+    return this.openFiles().find((f) => f.id === id) ?? null;
+  });
 
   constructor() {
-    // Initial load - using current working directory as default project root
-    this.fileService.getFiles('.').subscribe({
+    // Fetch the absolute workspace path to pass to the terminal
+    this.fileService.getWorkspace().subscribe({
+      next: (workspace) => {
+        const absolutePath = workspace.path;
+        console.log(`[App] Workspace resolved to: ${absolutePath}`);
+        this.workspacePath.set(absolutePath);
+        this.loadDirectory(absolutePath);
+      },
+      error: () => {
+        this.loadDirectory('.');
+      },
+    });
+  }
+
+  private loadDirectory(path: string) {
+    this.fileService.getFiles(path).subscribe({
       next: (folder: VertexFolder) => {
-        this.rootFolder.set(folder);
+        this.rootFolder.set({ ...folder, path });
 
         // Auto-open first file for E2E tests and better DX
         if (folder.children && folder.children.length > 0) {
@@ -42,7 +65,7 @@ export class App {
         }
       },
       error: (err) => {
-        console.error(`[App] Failed to load root folder:`, err);
+        console.error(`[App] Failed to load folder:`, err);
       },
     });
   }
@@ -67,36 +90,18 @@ export class App {
       this.rootFolder()?.path || '.',
     );
     if (path) {
-      // First update the workspace in sidecar, then load the directory
       this.fileService.setWorkspace(path).subscribe({
         next: () => {
           console.log(`[App] Workspace changed to: ${path}`);
+          this.workspacePath.set(path);
           this.loadDirectory(path);
         },
         error: (err) => {
           console.error(`[App] Failed to set workspace: ${path}`, err);
-          // Try to load anyway - might fail with 403
           this.loadDirectory(path);
         },
       });
     }
-  }
-
-  private loadDirectory(path: string) {
-    this.fileService.getFiles(path).subscribe({
-      next: (folder: VertexFolder) => {
-        this.rootFolder.set(folder);
-      },
-      error: (err) => {
-        console.error(`[App] Failed to load folder: ${path}`, err);
-        window.alert(`Failed to load folder: ${path}`);
-      },
-    });
-  }
-
-  protected getActiveFile(): VertexFile | undefined {
-    const id = this.activeFileId();
-    return id ? this.openFiles().find((f) => f.id === id) : undefined;
   }
 
   onFileSelect(file: VertexFile) {
@@ -114,9 +119,6 @@ export class App {
         this.updateOrAddFile(updatedFile);
       });
     } else {
-      // If the incoming file has no content but the existing one does,
-      // preserve the existing one but still call updateOrAddFile to handle potential
-      // reference updates from sidebar tree refreshes
       const fileToUse =
         !file.content && existingFile?.content ? { ...file, content: existingFile.content } : file;
       this.updateOrAddFile(fileToUse);
@@ -128,10 +130,8 @@ export class App {
     const existingIndex = currentOpenFiles.findIndex((f) => f.id === file.id);
 
     if (existingIndex === -1) {
-      // New file, add to tabs
       this.openFiles.set([...currentOpenFiles, file]);
     } else {
-      // Existing file, update the reference to ensure it's in sync with sidebar/latest content
       const updatedFiles = [...currentOpenFiles];
       updatedFiles[existingIndex] = file;
       this.openFiles.set(updatedFiles);
@@ -164,11 +164,24 @@ export class App {
     const filteredFiles = currentFiles.filter((f) => f.id !== file.id);
     this.openFiles.set(filteredFiles);
 
-    // If closed file was active, switch to first remaining
     if (this.activeFileId() === file.id && filteredFiles.length > 0) {
       this.activeFileId.set(filteredFiles[0].id);
     } else if (filteredFiles.length === 0) {
       this.activeFileId.set(null);
+    }
+  }
+
+  onContentChange(content: string) {
+    const file = this.activeFile();
+    if (file) {
+      const updatedFile = { ...file, content, isDirty: true };
+      const currentFiles = this.openFiles();
+      const index = currentFiles.findIndex((f) => f.id === file.id);
+      if (index !== -1) {
+        const updatedFiles = [...currentFiles];
+        updatedFiles[index] = updatedFile;
+        this.openFiles.set(updatedFiles);
+      }
     }
   }
 }
