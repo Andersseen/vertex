@@ -12,7 +12,6 @@ import {
 import { CommonModule } from "@angular/common";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { WebglAddon } from "xterm-addon-webgl";
 import { TERMINAL_BACKEND_ADAPTER } from "@vertex/core";
 import type { TerminalBackendAdapter } from "@vertex/core";
 import { Subject, takeUntil } from "rxjs";
@@ -20,12 +19,9 @@ import { Subject, takeUntil } from "rxjs";
 @Component({
   selector: "v-terminal",
   imports: [CommonModule],
-  template: `<div #terminalContainer class="terminal-container"></div>`,
+  template: `<div #terminalContainer class="terminal__container"></div>`,
   styleUrls: ["./terminal.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: "block vx-h-full",
-  },
 })
 export class TerminalComponent implements OnInit, OnDestroy {
   // Inputs
@@ -44,16 +40,22 @@ export class TerminalComponent implements OnInit, OnDestroy {
   private terminal: Terminal | null = null;
   private fitAddon: FitAddon | null = null;
   private readonly destroy$ = new Subject<void>();
+  private dataSubscription?: ReturnType<
+    typeof this.terminalBackend.onData$.subscribe
+  >;
   private resizeObserver?: ResizeObserver;
-  private isConnected = false;
+  private isConnecting = false;
+  private hasInitialized = false;
 
   constructor() {
-    // Effect to reconnect terminal when working directory changes
+    // Effect to handle working directory changes
     effect(() => {
       const cwd = this.workingDirectory();
-      if (cwd && this.terminal) {
-        console.log(`[Terminal] Working directory changed to: ${cwd}`);
-        this.reconnectToDirectory(cwd);
+
+      // Only reconnect if already initialized and cwd actually changed
+      if (this.hasInitialized && this.terminal && cwd) {
+        console.log(`[Terminal] Directory change detected: ${cwd}`);
+        this.reconnect(cwd);
       }
     });
   }
@@ -73,12 +75,15 @@ export class TerminalComponent implements OnInit, OnDestroy {
       },
       fontFamily: "JetBrains Mono, monospace",
       fontSize: 14,
+      convertEol: true,
+      scrollback: 10000,
+      allowTransparency: false,
+      cursorStyle: "block",
     });
 
     this.fitAddon = new FitAddon();
     this.terminal.loadAddon(this.fitAddon);
 
-    this.configureRenderer();
     this.setupEventHandlers();
 
     this.terminal.open(container.nativeElement);
@@ -87,34 +92,12 @@ export class TerminalComponent implements OnInit, OnDestroy {
     // Initial connection
     const cwd = this.workingDirectory();
     if (cwd) {
-      this.reconnectToDirectory(cwd);
+      this.connect(cwd);
     } else {
-      this.connectToDefaultDirectory();
+      this.connect();
     }
-  }
 
-  private configureRenderer(): void {
-    if (!this.terminal) return;
-
-    const isHeadless =
-      typeof navigator !== "undefined" &&
-      (navigator.webdriver || /Headless/.test(navigator.userAgent));
-
-    if (!isHeadless) {
-      try {
-        const webglAddon = new WebglAddon();
-        this.terminal.loadAddon(webglAddon);
-      } catch (e) {
-        console.warn(
-          "WebGL addon failed to load, falling back to DOM renderer",
-          e,
-        );
-      }
-    } else {
-      console.info(
-        "Headless environment detected, using DOM renderer for stability",
-      );
-    }
+    this.hasInitialized = true;
   }
 
   private setupEventHandlers(): void {
@@ -131,51 +114,85 @@ export class TerminalComponent implements OnInit, OnDestroy {
     });
     this.resizeObserver.observe(container.nativeElement);
 
-    // Terminal Input -> Backend
+    // Terminal Input -> Backend (only forward, don't echo)
     this.terminal.onData((data) => {
       this.terminalBackend.write(data);
     });
 
     // Backend -> Terminal Output
-    this.terminalBackend.onData$
+    this.subscribeToBackend();
+  }
+
+  private subscribeToBackend(): void {
+    // Unsubscribe from any existing subscription first
+    this.unsubscribeFromBackend();
+
+    // Subscribe to backend data
+    this.dataSubscription = this.terminalBackend.onData$
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => this.terminal?.write(data));
+      .subscribe((data) => {
+        this.terminal?.write(data);
+      });
   }
 
-  private async reconnectToDirectory(cwd: string): Promise<void> {
-    await this.disconnectFromBackend();
-    this.terminal?.clear();
+  private unsubscribeFromBackend(): void {
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+      this.dataSubscription = undefined;
+    }
+  }
+
+  private async reconnect(cwd: string): Promise<void> {
+    if (this.isConnecting) {
+      console.log("[Terminal] Connection in progress, skipping...");
+      return;
+    }
+
+    this.isConnecting = true;
 
     try {
+      console.log(`[Terminal] Reconnecting to: ${cwd}`);
+
+      // Clear terminal before reconnecting
+      this.terminal?.clear();
+
+      // Reconnect backend
       await this.terminalBackend.connect(cwd);
-      this.isConnected = true;
-      console.log(`[Terminal] Connected to: ${cwd}`);
+
+      console.log(`[Terminal] Reconnected successfully`);
     } catch (err) {
-      console.error("[Terminal] PTY Connect failed:", err);
+      console.error("[Terminal] Reconnection failed:", err);
+      this.terminal?.writeln(`\r\n\x1b[31mFailed to connect to: ${cwd}\x1b[0m`);
+    } finally {
+      this.isConnecting = false;
     }
   }
 
-  private async connectToDefaultDirectory(): Promise<void> {
+  private async connect(cwd?: string): Promise<void> {
+    if (this.isConnecting) return;
+
+    this.isConnecting = true;
+
     try {
-      await this.terminalBackend.connect();
-      this.isConnected = true;
+      console.log(`[Terminal] Initial connection${cwd ? ` to: ${cwd}` : ""}`);
+      await this.terminalBackend.connect(cwd);
+      console.log("[Terminal] Connected successfully");
     } catch (err) {
-      console.error("[Terminal] PTY Connect failed:", err);
-    }
-  }
-
-  private async disconnectFromBackend(): Promise<void> {
-    if (this.isConnected) {
-      await this.terminalBackend.disconnect();
-      this.isConnected = false;
+      console.error("[Terminal] Connection failed:", err);
+      this.terminal?.writeln(
+        "\r\n\x1b[31mFailed to connect to terminal\x1b[0m",
+      );
+    } finally {
+      this.isConnecting = false;
     }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.unsubscribeFromBackend();
     this.resizeObserver?.disconnect();
     this.terminal?.dispose();
-    this.disconnectFromBackend();
+    this.terminalBackend.disconnect();
   }
 }

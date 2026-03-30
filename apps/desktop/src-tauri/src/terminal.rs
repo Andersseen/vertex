@@ -26,6 +26,22 @@ pub struct ResizePayload {
 pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<String>) -> Result<(), String> {
     let pty_system = native_pty_system();
 
+    // Close any existing terminal with the same ID first
+    let should_wait = {
+        let manager = app_handle.state::<TerminalManager>();
+        let mut instances = manager.instances.lock().unwrap();
+        let removed = instances.remove(&id).is_some();
+        if removed {
+            println!("[Terminal] Closed existing terminal with ID: {}", id);
+        }
+        removed
+    };
+    
+    // Give a small delay for the old reader thread to terminate
+    if should_wait {
+        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    }
+
     // Use default shell based on OS
     let shell = if cfg!(target_os = "windows") {
         "powershell.exe".to_string()
@@ -61,25 +77,40 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<Strin
         writer: writer,
         master: pair.master,
     });
+    drop(instances); // Release lock before spawning thread
 
     // Spawn tokio task to read from PTY and emit to frontend
     let handle = app_handle.clone();
     let id_clone = id.clone();
     
+    println!("[Terminal] Spawning reader thread for ID: {}", id_clone);
+    
     // We use tokio::task::spawn_blocking because reading from PTY is blocking
     tokio::task::spawn_blocking(move || {
         let mut reader = reader;
-        let mut buffer = [0u8; 4096];
+        // Smaller buffer for better UTF-8 handling
+        let mut buffer = [0u8; 1024];
         loop {
             match reader.read(&mut buffer) {
-                Ok(0) => break,
-                Ok(n) => {
-                    let data = String::from_utf8_lossy(&buffer[..n]).to_string();
-                    let _ = handle.emit(&format!("terminal-stdout-{}", id_clone), data);
+                Ok(0) => {
+                    println!("[Terminal] EOF reached for {}", id_clone);
+                    break;
                 }
-                Err(_) => break,
+                Ok(n) => {
+                    // Convert bytes to string, replacing invalid UTF-8 sequences
+                    let data = String::from_utf8_lossy(&buffer[..n]).to_string();
+                    if let Err(e) = handle.emit(&format!("terminal-stdout-{}", id_clone), data) {
+                        eprintln!("[Terminal] Failed to emit data: {}", e);
+                        break;
+                    }
+                }
+                Err(e) => {
+                    eprintln!("[Terminal] Read error for {}: {}", id_clone, e);
+                    break;
+                }
             }
         }
+        println!("[Terminal] Reader thread ended for {}", id_clone);
     });
 
     Ok(())
@@ -128,7 +159,9 @@ pub fn close_terminal(
     manager: State<'_, TerminalManager>,
 ) -> Result<(), String> {
     let mut instances = manager.instances.lock().unwrap();
-    instances.remove(&id);
+    if instances.remove(&id).is_some() {
+        println!("[Terminal] Closed terminal with ID: {}", id);
+    }
     // The reader thread will eventually terminate when it fails to read or gets EOF
     Ok(())
 }

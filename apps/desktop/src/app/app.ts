@@ -1,19 +1,26 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   MainLayoutComponent,
   EditorComponent,
   SidebarComponent,
   BottomPanelComponent,
+  TabsComponent,
 } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService, TauriService, WorkspaceService } from '@vertex/core';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [MainLayoutComponent, EditorComponent, SidebarComponent, BottomPanelComponent],
+  imports: [
+    MainLayoutComponent,
+    EditorComponent,
+    SidebarComponent,
+    BottomPanelComponent,
+    TabsComponent,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   private readonly tauriService = inject(TauriService);
@@ -21,8 +28,10 @@ export class App {
   private readonly workspaceService = inject(WorkspaceService);
 
   protected readonly title = signal('Vertex IDE');
-  protected readonly activeFile = signal<VertexFile | null>(null);
+  protected readonly openFiles = signal<VertexFile[]>([]);
+  protected readonly activeFileId = signal<string | null>(null);
   protected readonly rootFolder = signal<VertexFolder | null>(null);
+  protected readonly workspacePath = signal<string>('');
 
   constructor() {
     // Initial load - using current working directory as default
@@ -32,6 +41,8 @@ export class App {
   private loadDirectory(path: string, name?: string) {
     this.fileService.getFiles(path).subscribe((folder: VertexFolder) => {
       this.rootFolder.set(folder);
+      // Store the absolute path for the terminal
+      this.workspacePath.set(folder.path);
 
       // Update workspace service so terminal knows where to start
       const folderName = name || folder.name || 'Project';
@@ -42,6 +53,14 @@ export class App {
         files: folder,
         panels: [],
       });
+
+      // Auto-open first file for better UX
+      if (folder.children && folder.children.length > 0) {
+        const firstFile = folder.children.find((f) => !('children' in f)) as VertexFile;
+        if (firstFile) {
+          this.openFile(firstFile);
+        }
+      }
     });
   }
 
@@ -67,15 +86,78 @@ export class App {
   }
 
   onFileSelect(file: VertexFile) {
+    this.openFile(file);
+  }
+
+  private openFile(file: VertexFile) {
+    // Check if file is already open
+    const existingFile = this.openFiles().find((f) => f.id === file.id);
+
+    if (existingFile) {
+      // Just activate the existing tab
+      this.activeFileId.set(file.id);
+      return;
+    }
+
+    // Load file content if not already loaded
     if (!file.content) {
       this.fileService.readFile(file.path).subscribe((content: string) => {
-        // Create a new instance to trigger change detection if needed
         const updatedFile = { ...file, content };
-        this.activeFile.set(updatedFile);
+        this.addOrUpdateFile(updatedFile);
       });
     } else {
-      this.activeFile.set(file);
+      this.addOrUpdateFile(file);
     }
+  }
+
+  private addOrUpdateFile(file: VertexFile) {
+    const currentFiles = this.openFiles();
+    const existingIndex = currentFiles.findIndex((f) => f.id === file.id);
+
+    if (existingIndex === -1) {
+      // Add new file to tabs
+      this.openFiles.set([...currentFiles, file]);
+    } else {
+      // Update existing file
+      const updatedFiles = [...currentFiles];
+      updatedFiles[existingIndex] = file;
+      this.openFiles.set(updatedFiles);
+    }
+
+    // Activate the file
+    this.activeFileId.set(file.id);
+  }
+
+  onTabSelect(file: VertexFile) {
+    this.activeFileId.set(file.id);
+  }
+
+  onTabClose(file: VertexFile) {
+    const currentFiles = this.openFiles();
+    const filteredFiles = currentFiles.filter((f) => f.id !== file.id);
+    this.openFiles.set(filteredFiles);
+
+    // If closed file was active, switch to another one
+    if (this.activeFileId() === file.id) {
+      if (filteredFiles.length > 0) {
+        this.activeFileId.set(filteredFiles[filteredFiles.length - 1].id);
+      } else {
+        this.activeFileId.set(null);
+      }
+    }
+  }
+
+  onNewTab() {
+    // Create a new untitled file
+    const newFile: VertexFile = {
+      id: `untitled-${Date.now()}`,
+      name: 'Untitled',
+      path: 'untitled',
+      content: '',
+      language: 'text',
+      isDirty: true,
+    };
+    this.addOrUpdateFile(newFile);
   }
 
   onFolderToggle(folder: VertexFolder) {
@@ -93,12 +175,26 @@ export class App {
   }
 
   onSave() {
-    const file = this.activeFile();
-    if (file && file.content !== undefined) {
-      this.fileService.writeFile(file.path, file.content).subscribe(() => {
-        file.isDirty = false;
-        this.activeFile.set({ ...file });
+    const activeFile = this.getActiveFile();
+    if (activeFile && activeFile.content !== undefined) {
+      this.fileService.writeFile(activeFile.path, activeFile.content).subscribe(() => {
+        activeFile.isDirty = false;
+        this.addOrUpdateFile(activeFile);
       });
     }
+  }
+
+  onContentChange(content: string) {
+    const activeFile = this.getActiveFile();
+    if (activeFile) {
+      const updatedFile = { ...activeFile, content, isDirty: true };
+      this.addOrUpdateFile(updatedFile);
+    }
+  }
+
+  protected getActiveFile(): VertexFile | null {
+    const id = this.activeFileId();
+    if (!id) return null;
+    return this.openFiles().find((f) => f.id === id) || null;
   }
 }

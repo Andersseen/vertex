@@ -1,108 +1,145 @@
 @use "../../styles/theme" as *;
 
-.tabs-container {
+// Block: Tabs
+.tabs {
   background-color: $surface-900;
   border-bottom: 1px solid $surface-800;
   height: 36px;
-}
 
-.tabs-header-vx {
-  height: 100%;
-  display: flex !important;
-  align-items: center !important;
-  overflow-x: auto;
-  
-  &::-webkit-scrollbar { display: none; }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+  // Element: Header
+  &__header {
+    @include flex;
+    @include items-center;
+    height: 100%;
+    @include overflow-x-auto;
+    @include custom-scrollbar;
 
-.tab-item-vx {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem;
-  padding: 0 1rem;
-  height: 100% !important;
-  cursor: pointer;
-  border-right: 1px solid $surface-800;
-  position: relative;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: $surface-800;
-    .tab-name { color: $surface-100; }
+    // Hide scrollbar but keep functionality
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-  &.active {
-    background-color: $surface-950;
-    .tab-name { color: $surface-0; }
-    
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: $primary-500;
-      box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+  // Element: Item (individual tab)
+  &__item {
+    @include flex;
+    @include items-center;
+    gap: $spacing-2;
+    height: 100%;
+    padding: 0 $spacing-4;
+    cursor: pointer;
+    border-right: 1px solid $surface-800;
+    position: relative;
+    @include transition;
+
+    &:hover {
+      background-color: $surface-800;
+
+      .tabs__name {
+        color: $surface-100;
+      }
+    }
+
+    // Modifier: Active
+    &--active {
+      background-color: $surface-950;
+
+      .tabs__name {
+        color: $surface-0;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: $primary-500;
+        box-shadow: 0 0 8px rgba($primary-500, 0.4);
+      }
     }
   }
-}
 
-.tab-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: $surface-400;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  transition: color 0.2s ease;
-}
+  // Element: Icon
+  &__icon {
+    font-size: $font-size-xs;
+    opacity: 0.7;
+    @include transition;
 
-.tab-close {
-  margin-left: 0.5rem;
-  padding: 0.25rem;
-  border-radius: 4px;
-  color: $surface-500;
-  opacity: 0;
-  transition: all 0.2s ease;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: none;
-  border: none;
-
-  .tab-item-vx:hover & {
-    opacity: 1;
+    .tabs__item:hover & {
+      opacity: 1;
+    }
   }
 
-  &:hover {
-    background-color: $surface-700;
-    color: $surface-100;
+  // Element: Name
+  &__name {
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    color: $surface-400;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    @include transition;
+    @include truncate;
+    max-width: 150px;
   }
-}
 
-.new-tab-btn {
-  padding: 0 1rem;
-  height: 100% !important;
-  color: $surface-500;
-  background: none;
-  border: none;
-  display: flex !important;
-  align-items: center !important;
-  transition: all 0.2s ease;
-  cursor: pointer;
-
-  &:hover {
-    color: $surface-100;
-    background-color: $surface-800;
+  // Element: Modified indicator
+  &__modified {
+    width: 6px;
+    height: 6px;
+    background-color: $primary-500;
+    @include rounded(50%);
+    margin-left: $spacing-1;
   }
-}
 
-.modified-dot {
-  width: 6px;
-  height: 6px;
-  background-color: $primary-500;
-  border-radius: 50%;
-  margin-left: 0.25rem;
+  // Element: Close button
+  &__close {
+    @include flex-center;
+    margin-left: $spacing-2;
+    padding: $spacing-1;
+    @include rounded(4px);
+    color: $surface-500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    @include transition;
+    opacity: 0;
+
+    .tabs__item:hover & {
+      opacity: 1;
+    }
+
+    &:hover {
+      background-color: $surface-700;
+      color: $surface-100;
+    }
+
+    i {
+      font-size: 9px;
+    }
+  }
+
+  // Element: New tab button
+  &__new {
+    @include flex-center;
+    padding: 0 $spacing-4;
+    height: 100%;
+    color: $surface-500;
+    background: none;
+    border: none;
+    cursor: pointer;
+    @include transition;
+
+    &:hover {
+      color: $surface-100;
+      background-color: $surface-800;
+    }
+
+    i {
+      font-size: 11px;
+    }
+  }
 }

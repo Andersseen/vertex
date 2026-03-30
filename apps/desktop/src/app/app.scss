@@ -1,0 +1,15 @@
+.editor-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #020617;
+
+  v-tabs {
+    flex-shrink: 0;
+  }
+
+  v-editor {
+    flex: 1;
+    overflow: hidden;
+  }
+}

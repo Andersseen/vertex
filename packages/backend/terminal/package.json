@@ -1,0 +1,17 @@
+{
+  "name": "terminal",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.5.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "hono": "^4.12.9",
+    "node-pty": "^1.1.0"
+  }
+}
