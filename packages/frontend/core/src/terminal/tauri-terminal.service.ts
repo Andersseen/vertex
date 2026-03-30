@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { TerminalBackendAdapter } from "./terminal-backend-adapter";
 import { Subject } from "rxjs";
 import { invoke } from "@tauri-apps/api/core";
@@ -11,11 +11,9 @@ export class TauriTerminalService implements TerminalBackendAdapter {
   private dataSubject = new Subject<string>();
   private unlistenStdout: UnlistenFn | null = null;
   private isConnected = false;
-  private connectionId = 0; // Unique ID for each connection
+  private connectionId = 0;
 
   readonly onData$ = this.dataSubject.asObservable();
-
-  constructor(private ngZone: NgZone) {}
 
   async connect(cwd?: string): Promise<void> {
     // Prevent multiple simultaneous connections
@@ -29,17 +27,19 @@ export class TauriTerminalService implements TerminalBackendAdapter {
     const currentConnectionId = this.connectionId;
 
     try {
-      console.log(`[TauriTerminal] Connecting with ID: ${currentConnectionId}`);
+      console.log(
+        `[TauriTerminal] Connecting with ID: ${currentConnectionId}`,
+      );
 
-      // Listen for stdout events - use connection-specific ID
+      // Listen for stdout events
       this.unlistenStdout = await listen<string>(
         `terminal-stdout-${currentConnectionId}`,
         (event: Event<string>) => {
           // Only process events for current connection
           if (currentConnectionId === this.connectionId) {
-            this.ngZone.run(() => {
-              this.dataSubject.next(event.payload);
-            });
+            // No need for NgZone.run() — zoneless change detection
+            // handles async updates automatically
+            this.dataSubject.next(event.payload);
           }
         },
       );
@@ -64,19 +64,27 @@ export class TauriTerminalService implements TerminalBackendAdapter {
       console.warn("[TauriTerminal] Not connected, cannot write");
       return;
     }
-    await invoke("write_to_terminal", {
-      id: this.connectionId.toString(),
-      data,
-    });
+    try {
+      await invoke("write_to_terminal", {
+        id: this.connectionId.toString(),
+        data,
+      });
+    } catch (error) {
+      console.error("[TauriTerminal] Write error:", error);
+    }
   }
 
   async resize(cols: number, rows: number): Promise<void> {
     if (!this.isConnected) return;
-    await invoke("resize_terminal", {
-      id: this.connectionId.toString(),
-      cols,
-      rows,
-    });
+    try {
+      await invoke("resize_terminal", {
+        id: this.connectionId.toString(),
+        cols,
+        rows,
+      });
+    } catch (error) {
+      // Silently ignore resize errors — can happen during rapid resize
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -84,7 +92,9 @@ export class TauriTerminalService implements TerminalBackendAdapter {
 
     if (this.isConnected) {
       try {
-        await invoke("close_terminal", { id: this.connectionId.toString() });
+        await invoke("close_terminal", {
+          id: this.connectionId.toString(),
+        });
       } catch (e) {
         console.warn("[TauriTerminal] Error closing terminal:", e);
       }

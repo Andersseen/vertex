@@ -1,23 +1,24 @@
-import { Component, signal, input } from "@angular/core";
+import { Component, signal, input, ChangeDetectionStrategy } from "@angular/core";
 import { DividerModule } from "primeng/divider";
 import { TabsModule } from "primeng/tabs";
-import { CommonModule } from "@angular/common";
 import { TerminalPanelComponent } from "@vertex/core";
 
 @Component({
   selector: "v-bottom-panel",
   standalone: true,
-  imports: [CommonModule, TabsModule, DividerModule, TerminalPanelComponent],
+  imports: [TabsModule, DividerModule, TerminalPanelComponent],
   templateUrl: "./bottom-panel.component.html",
   styleUrls: ["./bottom-panel.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BottomPanelComponent {
-  workspacePath = input<string>("");
-  activeTabIndex = signal(3);
-  tabs = ["Problems", "Output", "Debug Console", "Terminal"];
+  readonly workspacePath = input<string>("");
+  readonly activeTabIndex = signal(3);
+
+  readonly tabs = ["Problems", "Output", "Debug Console", "Terminal"];
 
   // Mock content for the panels
-  problems = [
+  readonly problems = [
     {
       type: "error",
       file: "app.ts",
@@ -32,20 +33,20 @@ export class BottomPanelComponent {
     },
   ];
 
-  output = [
+  readonly output = [
     { text: "> Building application...", type: "info" },
     { text: "✓ Compilation successful", type: "success" },
     { text: "✓ Bundle size optimized", type: "success" },
     { text: "Time: 2.3s", type: "info" },
   ];
 
-  debugConsole = [
+  readonly debugConsole = [
     { text: "[HMR] Connected", type: "info" },
     { text: "✓ Module app.component loaded", type: "success" },
     { text: "⚠ Performance: Large component tree", type: "warning" },
   ];
 
-  terminal = [
+  readonly terminal = [
     { text: "➜  ~/vertex", type: "info" },
     { text: "  bun run dev", type: "info" },
     { text: "  Started server on http://localhost:4200", type: "success" },

@@ -1,18 +1,23 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
   OnDestroy,
   OnInit,
-  input,
-  ChangeDetectionStrategy,
-  viewChild,
-  ElementRef,
-  AfterViewInit,
+  signal,
+  ViewChild,
+  ViewEncapsulation,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { TerminalService, TerminalMessage } from "./terminal.service";
-import { Subject, takeUntil } from "rxjs";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { TERMINAL_BACKEND_ADAPTER } from "./terminal-tokens";
+import type { TerminalBackendAdapter } from "./terminal-backend-adapter";
+import { debounceTime, fromEvent } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 interface TerminalInstance {
   id: string;
@@ -23,224 +28,85 @@ interface TerminalInstance {
 
 @Component({
   selector: "v-terminal-panel",
-  imports: [CommonModule],
+  standalone: true,
+  imports: [],
   template: `
     <div class="terminal-panel">
-      <!-- Tabs de terminales -->
-      <div class="terminal-tabs">
-        @for (term of terminals; track term.id) {
-          <div
-            class="terminal-tab"
-            [class.active]="activeTerminalId === term.id"
-            (click)="activateTerminal(term.id)"
-          >
-            <span>Terminal {{ $index + 1 }}</span>
-            <button
-              class="close-btn"
-              (click)="closeTerminal(term.id, $event)"
-              title="Cerrar terminal"
-            >
-              ×
-            </button>
-          </div>
-        }
+      <!-- Terminal wrapper -->
+      <div class="terminal-wrap">
+        <div #terminalContainer class="terminal"></div>
       </div>
 
-      <!-- Contenedor de terminales -->
-      <div class="terminal-container" #terminalContainer></div>
+      <!-- Error overlay -->
+      @if (connectionError()) {
+        <div class="terminal-error">
+          <div class="error-message">
+            <strong>Terminal no disponible</strong>
+            <p>{{ connectionError() }}</p>
+          </div>
+        </div>
+      }
     </div>
   `,
-  styles: [
-    `
-      .terminal-panel {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: #020617;
-      }
-      .terminal-tabs {
-        display: flex;
-        background: #0f172a;
-        border-bottom: 1px solid #1e293b;
-        padding: 4px 4px 0;
-        gap: 4px;
-        flex-shrink: 0;
-      }
-      .terminal-tab {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
-        background: #1e293b;
-        border-radius: 4px 4px 0 0;
-        cursor: pointer;
-        font-size: 12px;
-        color: #94a3b8;
-        transition: all 0.2s;
-      }
-      .terminal-tab:hover {
-        background: #334155;
-      }
-      .terminal-tab.active {
-        background: #020617;
-        color: #f8fafc;
-      }
-      .close-btn {
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-        font-size: 16px;
-        padding: 0 4px;
-        opacity: 0.6;
-      }
-      .close-btn:hover {
-        opacity: 1;
-        color: #ef4444;
-      }
-      .terminal-container {
-        flex: 1;
-        overflow: hidden;
-        position: relative;
-        background: #020617;
-        padding: 8px;
-      }
-      .terminal-instance {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 100%;
-      }
-      .terminal-instance.hidden {
-        display: none;
-      }
-
-      /* Estilos para xterm */
-      :host ::ng-deep .xterm {
-        height: 100% !important;
-        width: 100% !important;
-      }
-      :host ::ng-deep .xterm-screen {
-        width: 100% !important;
-        height: 100% !important;
-      }
-      :host ::ng-deep .xterm-rows {
-        background-color: #020617 !important;
-      }
-      :host ::ng-deep .xterm-viewport {
-        background-color: #020617 !important;
-      }
-      :host ::ng-deep .xterm-text-layer {
-        background-color: #020617 !important;
-      }
-    `,
-  ],
-  // Note: Using Default change detection for dynamic terminal list
-  changeDetection: ChangeDetectionStrategy.Default,
+  styleUrls: ["./terminal-panel.component.scss"],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TerminalPanelComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
-  workingDirectory = input<string>("");
+  readonly workingDirectory = input<string>("");
 
-  protected terminals: TerminalInstance[] = [];
-  protected activeTerminalId: string | null = null;
-  private destroy$ = new Subject<void>();
+  @ViewChild("terminalContainer") terminalEleRef!: ElementRef<HTMLElement>;
 
-  // Referencia al contenedor de terminales
-  private terminalContainerRef =
-    viewChild.required<ElementRef<HTMLDivElement>>("terminalContainer");
+  // Reactive state via signals
+  readonly connectionError = signal<string | null>(null);
 
-  constructor(private terminalService: TerminalService) {}
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly terminalBackend = inject<TerminalBackendAdapter>(
+    TERMINAL_BACKEND_ADAPTER,
+  );
 
-  ngAfterViewInit(): void {
-    // El contenedor está listo, pero las terminales se crean cuando llega el mensaje "created"
-  }
+  private terminal: Terminal | null = null;
+  private fitAddon: FitAddon | null = null;
+  private isConnecting = false;
+  private dataSubscription?: { unsubscribe: () => void };
+  private resizeObserver?: ResizeObserver;
 
   ngOnInit(): void {
-    // Conectar al servicio de terminal
-    this.terminalService.connect();
+    // Nothing here — we need the ViewChild to be ready first
+  }
 
-    // Suscribirse a mensajes
-    this.terminalService.messages$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((message) => this.handleMessage(message));
+  ngAfterViewInit(): void {
+    // Initialize the terminal with a slight delay to ensure the container is rendered
+    requestAnimationFrame(() => {
+      this.initializeTerminal();
+    });
 
-    // Crear primera terminal
-    this.createTerminal();
+    // Global resize handler
+    fromEvent(window, "resize")
+      .pipe(debounceTime(100), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.fitTerminal();
+      });
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-
-    // Limpiar terminales
-    this.terminals.forEach((term) => {
-      term.xterm.dispose();
-    });
-
-    this.terminalService.disconnect();
+    this.dataSubscription?.unsubscribe();
+    this.resizeObserver?.disconnect();
+    this.terminal?.dispose();
+    this.terminalBackend.disconnect();
   }
 
-  private handleMessage(message: TerminalMessage): void {
-    switch (message.type) {
-      case "created":
-        if (message.terminalId) {
-          this.initializeTerminal(message.terminalId);
-        }
-        break;
-
-      case "data":
-        if (message.terminalId && message.data) {
-          const term = this.terminals.find((t) => t.id === message.terminalId);
-          if (term) {
-            term.xterm.write(message.data);
-          }
-        }
-        break;
-
-      case "exit":
-        console.log(`Terminal ${message.terminalId} exited`);
-        break;
-
-      case "error":
-        console.error("Terminal error:", message.error);
-        // Mostrar error en la UI
-        if (this.terminals.length === 0) {
-          // Si no hay terminales, mostrar mensaje de error
-          this.showErrorMessage(message.error || "Failed to create terminal");
-        }
-        break;
+  private initializeTerminal(): void {
+    if (!this.terminalEleRef) {
+      console.error("[TerminalPanel] Container not available");
+      return;
     }
-  }
 
-  private showErrorMessage(error: string): void {
-    console.error("[TerminalPanel]", error);
-    // Aquí podrías mostrar un toast o notificación
-  }
+    const container = this.terminalEleRef.nativeElement;
 
-  createTerminal(): void {
-    const cwd = this.workingDirectory() || undefined;
-    this.terminalService.createTerminal({ cwd });
-  }
-
-  private initializeTerminal(id: string): void {
-    const container = this.terminalContainerRef().nativeElement;
-
-    const div = document.createElement("div");
-    div.className = "terminal-instance";
-    div.style.width = "100%";
-    div.style.height = "100%";
-    div.style.backgroundColor = "#020617";
-    if (this.activeTerminalId) {
-      div.classList.add("hidden");
-    }
-    container.appendChild(div);
-
-    const xterm = new Terminal({
+    this.terminal = new Terminal({
       cursorBlink: true,
       theme: {
         background: "#020617",
@@ -268,80 +134,77 @@ export class TerminalPanelComponent
       fontSize: 14,
       convertEol: true,
       scrollback: 10000,
-      allowProposedApi: true,
       allowTransparency: false,
+      cursorStyle: "block",
     });
 
-    const fitAddon = new FitAddon();
-    xterm.loadAddon(fitAddon);
+    this.fitAddon = new FitAddon();
+    this.terminal.loadAddon(this.fitAddon);
 
-    xterm.open(div);
+    this.terminal.open(container);
 
-    // Esperar a que el DOM esté listo antes de hacer fit
+    // Fit after opening
     requestAnimationFrame(() => {
-      fitAddon.fit();
-      // Notificar al backend del tamaño inicial
-      this.terminalService.resize(id, xterm.cols, xterm.rows);
+      this.fitTerminal();
     });
 
-    // Enviar input al backend
-    xterm.onData((data) => {
-      this.terminalService.write(id, data);
+    // Forward user input to backend
+    this.terminal.onData((data: string) => {
+      this.terminalBackend.write(data);
     });
 
-    // Redimensionar
-    const resizeObserver = new ResizeObserver(() => {
+    // Subscribe to backend output
+    this.dataSubscription = this.terminalBackend.onData$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data) => {
+        this.terminal?.write(data);
+      });
+
+    // Observe container resize
+    this.resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(() => {
-        fitAddon.fit();
-        this.terminalService.resize(id, xterm.cols, xterm.rows);
+        this.fitTerminal();
       });
     });
-    resizeObserver.observe(div);
+    this.resizeObserver.observe(container);
 
-    const instance: TerminalInstance = {
-      id,
-      xterm,
-      fitAddon,
-      container: div,
-    };
-
-    this.terminals.push(instance);
-    this.activateTerminal(id);
+    // Connect to backend
+    this.connect();
   }
 
-  activateTerminal(id: string): void {
-    this.activeTerminalId = id;
+  private fitTerminal(): void {
+    if (!this.fitAddon || !this.terminal) return;
 
-    this.terminals.forEach((term) => {
-      if (term.id === id) {
-        term.container.classList.remove("hidden");
-        term.fitAddon.fit();
-      } else {
-        term.container.classList.add("hidden");
-      }
-    });
+    try {
+      this.fitAddon.fit();
+      this.terminalBackend.resize(this.terminal.cols, this.terminal.rows);
+    } catch {
+      // Ignore fit errors during init/teardown
+    }
   }
 
-  closeTerminal(id: string, event: Event): void {
-    event.stopPropagation();
+  private async connect(): Promise<void> {
+    if (this.isConnecting) return;
+    this.isConnecting = true;
 
-    const index = this.terminals.findIndex((t) => t.id === id);
-    if (index === -1) return;
-
-    const term = this.terminals[index];
-    term.xterm.dispose();
-    term.container.remove();
-    this.terminals.splice(index, 1);
-
-    this.terminalService.kill(id);
-
-    // Activar otra terminal si es necesario
-    if (this.activeTerminalId === id && this.terminals.length > 0) {
-      this.activateTerminal(
-        this.terminals[Math.min(index, this.terminals.length - 1)].id,
+    try {
+      const cwd = this.workingDirectory() || undefined;
+      console.log(
+        `[TerminalPanel] Connecting${cwd ? ` to: ${cwd}` : ""}...`,
       );
-    } else if (this.terminals.length === 0) {
-      this.createTerminal();
+      await this.terminalBackend.connect(cwd);
+      this.connectionError.set(null);
+      console.log("[TerminalPanel] Connected successfully");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to connect";
+      console.error("[TerminalPanel] Connection failed:", message);
+      this.connectionError.set(message);
+      this.terminal?.writeln(
+        `\r\n\x1b[31mTerminal error: ${message}\x1b[0m`,
+      );
+    } finally {
+      this.isConnecting = false;
     }
   }
 }

@@ -1,5 +1,4 @@
 use portable_pty::{native_pty_system, CommandBuilder, PtySize, MasterPty};
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex};
@@ -12,14 +11,6 @@ pub struct TerminalInstance {
 
 pub struct TerminalManager {
     pub instances: Arc<Mutex<HashMap<String, TerminalInstance>>>,
-}
-
-#[derive(Deserialize)]
-#[allow(dead_code)]
-pub struct ResizePayload {
-    pub id: String,
-    pub cols: u16,
-    pub rows: u16,
 }
 
 #[tauri::command]
@@ -42,12 +33,23 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<Strin
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     }
 
-    // Use default shell based on OS
+    // Use default shell based on OS — try multiple fallbacks
     let shell = if cfg!(target_os = "windows") {
         "powershell.exe".to_string()
     } else {
-        std::env::var("SHELL").unwrap_or_else(|_| "zsh".to_string())
+        // Try $SHELL first, then common shell paths
+        std::env::var("SHELL").unwrap_or_else(|_| {
+            // Check if common shells exist
+            for path in &["/bin/zsh", "/bin/bash", "/bin/sh"] {
+                if std::path::Path::new(path).exists() {
+                    return path.to_string();
+                }
+            }
+            "/bin/sh".to_string()
+        })
     };
+
+    println!("[Terminal] Using shell: {}", shell);
 
     let pair = pty_system
         .openpty(PtySize {
@@ -56,25 +58,55 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<Strin
             pixel_width: 0,
             pixel_height: 0,
         })
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Failed to open PTY: {}", e))?;
 
-    let mut cmd = CommandBuilder::new(shell);
+    let mut cmd = CommandBuilder::new(&shell);
     
+    // Pass -l flag for login shell to load profile
+    cmd.arg("-l");
+
     // Set working directory if provided
-    if let Some(working_dir) = cwd {
-        cmd.cwd(std::path::PathBuf::from(working_dir));
+    if let Some(ref working_dir) = cwd {
+        let path = std::path::PathBuf::from(working_dir);
+        if path.exists() && path.is_dir() {
+            cmd.cwd(path);
+        } else {
+            println!("[Terminal] Working directory {} does not exist, using home", working_dir);
+            if let Some(home) = std::env::var("HOME").ok() {
+                cmd.cwd(std::path::PathBuf::from(home));
+            }
+        }
+    } else {
+        // Default to home directory
+        if let Some(home) = std::env::var("HOME").ok() {
+            cmd.cwd(std::path::PathBuf::from(home));
+        }
     }
     
-    let _child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
+    // Ensure PATH is inherited properly
+    if let Ok(path) = std::env::var("PATH") {
+        cmd.env("PATH", path);
+    }
+    if let Ok(home) = std::env::var("HOME") {
+        cmd.env("HOME", home);
+    }
+    if let Ok(user) = std::env::var("USER") {
+        cmd.env("USER", user);
+    }
+    // Set TERM to enable proper terminal features
+    cmd.env("TERM", "xterm-256color");
 
-    let reader = pair.master.try_clone_reader().map_err(|e| e.to_string())?;
-    let writer = pair.master.take_writer().map_err(|e| e.to_string())?;
+    let _child = pair.slave.spawn_command(cmd)
+        .map_err(|e| format!("Failed to spawn shell '{}': {} (try installing the shell or check your PATH)", shell, e))?;
+
+    let reader = pair.master.try_clone_reader().map_err(|e| format!("Failed to clone reader: {}", e))?;
+    let writer = pair.master.take_writer().map_err(|e| format!("Failed to take writer: {}", e))?;
 
     // Store in TerminalManager
     let manager = app_handle.state::<TerminalManager>();
     let mut instances = manager.instances.lock().unwrap();
     instances.insert(id.clone(), TerminalInstance {
-        writer: writer,
+        writer,
         master: pair.master,
     });
     drop(instances); // Release lock before spawning thread
@@ -88,8 +120,7 @@ pub async fn spawn_terminal(app_handle: AppHandle, id: String, cwd: Option<Strin
     // We use tokio::task::spawn_blocking because reading from PTY is blocking
     tokio::task::spawn_blocking(move || {
         let mut reader = reader;
-        // Smaller buffer for better UTF-8 handling
-        let mut buffer = [0u8; 1024];
+        let mut buffer = [0u8; 4096];
         loop {
             match reader.read(&mut buffer) {
                 Ok(0) => {
@@ -162,6 +193,5 @@ pub fn close_terminal(
     if instances.remove(&id).is_some() {
         println!("[Terminal] Closed terminal with ID: {}", id);
     }
-    // The reader thread will eventually terminate when it fails to read or gets EOF
     Ok(())
 }

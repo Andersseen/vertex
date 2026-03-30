@@ -8,10 +8,11 @@ import {
   input,
   effect,
   ChangeDetectionStrategy,
+  ViewEncapsulation,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
 import { TERMINAL_BACKEND_ADAPTER } from "@vertex/core";
 import type { TerminalBackendAdapter } from "@vertex/core";
 import { Subject, takeUntil } from "rxjs";
