@@ -204,6 +204,21 @@
       color: $info;
     }
   }
+
+  // Element: Terminal container
+  &__terminal {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    background-color: $surface-950;
+
+    v-terminal-panel {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+  }
 }
 
 // Animation for modified indicator

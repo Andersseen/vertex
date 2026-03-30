@@ -94,7 +94,9 @@
     <!-- Terminal Tab -->
     @if (activeTabIndex() === 3) {
       <div class="bottom-panel__terminal">
-        <v-terminal [workingDirectory]="workspacePath()"></v-terminal>
+        <v-terminal-panel
+          [workingDirectory]="workspacePath()"
+        ></v-terminal-panel>
       </div>
     }
   </div>

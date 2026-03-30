@@ -2,13 +2,12 @@ import { Component, signal, input } from "@angular/core";
 import { DividerModule } from "primeng/divider";
 import { TabsModule } from "primeng/tabs";
 import { CommonModule } from "@angular/common";
-
-import { TerminalComponent } from "../terminal/terminal.component";
+import { TerminalPanelComponent } from "@vertex/core";
 
 @Component({
   selector: "v-bottom-panel",
   standalone: true,
-  imports: [CommonModule, TabsModule, DividerModule, TerminalComponent],
+  imports: [CommonModule, TabsModule, DividerModule, TerminalPanelComponent],
   templateUrl: "./bottom-panel.component.html",
   styleUrls: ["./bottom-panel.component.scss"],
 })

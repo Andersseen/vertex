@@ -1,17 +1,23 @@
 {
-  "name": "terminal",
-  "module": "index.ts",
+  "name": "@vertex/terminal-sidecar",
+  "version": "1.0.0",
+  "description": "Terminal microservice using Node.js + node-pty",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "^25.5.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "build": "echo 'No build step needed for Node.js'"
   },
   "dependencies": {
+    "@hono/node-server": "^1.11.0",
     "hono": "^4.12.9",
-    "node-pty": "^1.1.0"
+    "node-pty": "^1.1.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
   }
 }

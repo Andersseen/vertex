@@ -39,10 +39,11 @@
     "desktop:build:release": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",
     "sidecar:dev": "cd packages/backend/sidecar && bun run dev",
     "sidecar:build": "cd packages/backend/sidecar && bun run build",
-    "package:desktop": "bun sidecar:build && bun desktop:build:release",
-    "package:desktop:debug": "bun sidecar:build && bun desktop:build:debug",
-    "dev:all": "concurrently \"bun sidecar:dev\" \"bun web:dev\"",
-    "dev:desktop": "concurrently \"bun sidecar:dev\" \"bun desktop:dev\""
+    "terminal:install": "cd packages/backend/terminal && npm install",
+    "terminal:dev": "cd packages/backend/terminal && WORKSPACE_PATH=$(pwd) npm run dev",
+    "terminal:build": "cd packages/backend/terminal && npm run build",
+    "dev:all": "concurrently \"bun sidecar:dev\" \"npm run terminal:dev\" \"bun web:dev\"",
+    "dev:desktop": "concurrently \"bun sidecar:dev\" \"WORKSPACE_PATH=$(pwd) npm run terminal:dev\" \"bun desktop:dev\""
   },
   "devDependencies": {
     "@angular-eslint/eslint-plugin": "^21.3.1",
@@ -74,6 +75,24 @@
     "@angular/animations": "^21.2.5",
     "@angular/common": "^21.2.5",
     "@angular/compiler": "^21.2.5",
-    "@angular/core": "^21.2.5"
+    "@angular/core": "^21.2.5",
+    "@codemirror/autocomplete": "^6.20.1",
+    "@codemirror/commands": "^6.10.3",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lang-rust": "^6.0.2",
+    "@codemirror/language": "^6.12.3",
+    "@codemirror/lint": "^6.9.5",
+    "@codemirror/search": "^6.6.0",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/theme-one-dark": "^6.1.3",
+    "@codemirror/view": "^6.40.0",
+    "codemirror": "^6.0.2",
+    "hono": "^4.12.9",
+    "node-pty": "^1.1.0"
   }
 }
