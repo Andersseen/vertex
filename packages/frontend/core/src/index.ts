@@ -1,61 +1,14 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { VertexConfig, Workspace } from '@vertex/types';
+// Terminal
+export * from "./terminal/terminal-panel.component";
+export * from "./terminal/terminal-backend-adapter";
+export * from "./terminal/terminal-tokens";
+export * from "./terminal/web-terminal.service";
+export * from "./terminal/mock-terminal.service";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ConfigService {
-  private configSubject = new BehaviorSubject<VertexConfig>({
-    editor: {
-      theme: 'dark',
-      fontSize: 14,
-      fontFamily: 'Monaco, Consolas, monospace',
-      tabSize: 2,
-      wordWrap: true,
-      minimap: true
-    },
-    keybindings: {},
-    lastOpenedFiles: [],
-    workspacePath: ''
-  });
+// FS exports
+export * from "./fs/file.service";
+export * from "./fs/tauri.service";
 
-  config$: Observable<VertexConfig> = this.configSubject.asObservable();
-
-  getConfig(): VertexConfig {
-    return this.configSubject.value;
-  }
-
-  updateConfig(updates: Partial<VertexConfig>): void {
-    const currentConfig = this.configSubject.value;
-    this.configSubject.next({ ...currentConfig, ...updates });
-  }
-}
-
-@Injectable({
-  providedIn: 'root'
-})
-export class WorkspaceService {
-  private workspaceSubject = new BehaviorSubject<Workspace | null>(null);
-  
-  workspace$: Observable<Workspace | null> = this.workspaceSubject.asObservable();
-
-  openWorkspace(workspace: Workspace): void {
-    this.workspaceSubject.next(workspace);
-  }
-
-  closeWorkspace(): void {
-    this.workspaceSubject.next(null);
-  }
-
-  getCurrentWorkspace(): Workspace | null {
-    return this.workspaceSubject.value;
-  }
-}
-
-export * from './terminal/terminal-backend-adapter';
-export * from './terminal/terminal-tokens';
-export * from './terminal/tauri-terminal.service';
-export * from './terminal/web-terminal.service';
-export * from './fs/file.service';
-export * from './fs/tauri.service';
+// Services
+export * from "./services/config.service";
+export * from "./services/workspace.service";

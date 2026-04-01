@@ -1,0 +1,40 @@
+// Vertex UI - Main Styles Entry Point
+// Import this file in your global styles to get all design tokens
+
+@forward "theme";
+@forward "layout";
+
+// Global reset and base styles
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: theme.$font-sans;
+  font-size: theme.$font-size-base;
+  line-height: theme.$line-height-normal;
+  color: theme.$surface-200;
+  background: theme.$surface-950;
+}
+
+// Focus visible polyfill
+:focus-visible {
+  outline: 2px solid theme.$primary-500;
+  outline-offset: 2px;
+}
+
+// Selection styling
+::selection {
+  background: theme.$primary-500;
+  color: theme.$surface-0;
+}

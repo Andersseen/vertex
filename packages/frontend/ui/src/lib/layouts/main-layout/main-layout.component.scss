@@ -15,7 +15,7 @@
   flex-direction: column !important;
   background-color: $surface-950;
   color: $surface-0;
-  font-family: $font-inter;
+  font-family: $font-sans;
   overflow: hidden;
 }
 
@@ -32,12 +32,37 @@
   flex-shrink: 0;
 }
 
-.vx-header-left, .vx-header-right {
+.vx-logo-container {
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, $primary-500, $primary-700);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba($primary-500, 0.3);
+}
+
+.vx-logo-text {
+  font-size: 14px;
+  font-weight: 800;
+  color: $surface-0;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.vx-ide-highlight {
+  color: $primary-400;
+}
+
+.vx-header-left,
+.vx-header-right {
   display: flex !important;
   align-items: center !important;
   gap: 0.5rem;
   flex: 1 1 0%; /* Allow shrinking */
-  min-width: 0;   /* Fix for flex-shrink */
+  min-width: 0; /* Fix for flex-shrink */
 }
 
 .vx-header-right {
@@ -85,7 +110,7 @@
   flex: 2 1 auto;
   display: flex !important;
   justify-content: center !important;
-  min-width: 0;   /* Allow shrinking */
+  min-width: 0; /* Allow shrinking */
 }
 
 .vx-search-wrapper {
@@ -102,7 +127,8 @@
   gap: 0.4rem;
   transition: border-color 0.2s;
 
-  &:hover, &:focus-within {
+  &:hover,
+  &:focus-within {
     border-color: $primary-500;
   }
 
@@ -171,7 +197,9 @@
     border-color: $primary-500;
   }
 
-  i { font-size: 10px; }
+  i {
+    font-size: 10px;
+  }
 }
 
 .vx-main-content {
@@ -193,11 +221,19 @@
     }
 
     &.p-splitter-gutter-vertical::after {
-      left: 0; right: 0; top: 50%; height: 1px; transform: translateY(-50%);
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      transform: translateY(-50%);
     }
 
     &.p-splitter-gutter-horizontal::after {
-      top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-50%);
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
     }
 
     &:hover::after {
@@ -211,8 +247,12 @@
 }
 
 @keyframes vx-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .divider-vx {

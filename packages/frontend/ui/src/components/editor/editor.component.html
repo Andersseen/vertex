@@ -1,29 +1,33 @@
-<div class="editor-container vx-h-full vx-w-full vx-flex vx-flex-col">
-  <!-- Editor Header / Tabs -->
-  <div class="editor-header-vx vx-flex vx-items-center vx-justify-between" *ngIf="showHeader">
-    <div class="vx-flex vx-items-center vx-h-full">
-      <div class="active-tab vx-flex vx-items-center vx-gap-2 px-3">
-        <i [class]="getFileIcon(file?.language) + ' text-[12px] opacity-80'"></i>
-        <span class="file-name">{{ file?.name || 'Untitled' }}</span>
-        <div class="modified-dot animate-pulse" *ngIf="isDirty" title="Modified"></div>
-        <button class="ml-2 p-1 hover:vx-bg-800 rounded text-[var(--p-surface-500)] hover:text-[var(--p-surface-200)] transition-all vx-flex vx-items-center vx-justify-center">
-          <i class="pi pi-times text-[8px]"></i>
+<div class="editor">
+  @if (showHeader()) {
+    <!-- Editor Header -->
+    <header class="editor__header">
+      <div class="editor__tab">
+        <i class="editor__tab-icon" [class]="getFileIcon(file()?.language)"></i>
+        <span class="editor__tab-name">{{ file()?.name ?? "Untitled" }}</span>
+        @if (isDirty) {
+          <span class="editor__modified-indicator" title="Modified"></span>
+        }
+        <button class="editor__close-btn" type="button" aria-label="Close file">
+          <i class="pi pi-times"></i>
         </button>
       </div>
-    </div>
-    
-    <div class="editor-actions vx-flex vx-items-center vx-gap-3 px-3">
-      <span class="text-[9px] text-[var(--p-surface-500)] font-bold uppercase tracking-widest opacity-40">{{ file?.language || 'text' }}</span>
-      <button 
-        class="save-btn vx-flex vx-items-center vx-gap-1" 
-        (click)="onSave()" 
-        [disabled]="!isDirty">
-        <i class="pi pi-save text-[9px]"></i>
-        <span>Save</span>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Editor View -->
-  <div #editorHost class="editor-host vx-flex-1"></div>
+
+      <div class="editor__actions">
+        <span class="editor__language">{{ file()?.language ?? "text" }}</span>
+        <button
+          class="editor__save-btn"
+          type="button"
+          (click)="saveFile()"
+          [disabled]="!isDirty"
+        >
+          <i class="pi pi-save"></i>
+          <span>Save</span>
+        </button>
+      </div>
+    </header>
+  }
+
+  <!-- Editor Content -->
+  <div #editorHost class="editor__host"></div>
 </div>

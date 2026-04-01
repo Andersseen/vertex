@@ -2,13 +2,28 @@
   <v-sidebar
     sidebar
     [workspaceFolder]="rootFolder()"
-    [activeFileId]="activeFile()?.id || null"
+    [activeFileId]="activeFileId()"
     (fileSelect)="onFileSelect($event)"
     (folderToggle)="onFolderToggle($event)"
   >
   </v-sidebar>
 
-  <v-editor editor [file]="activeFile()" [showHeader]="true" (save)="onSave()"> </v-editor>
+  <div editor class="editor-area">
+    <v-tabs
+      [files]="openFiles()"
+      [activeFileId]="activeFileId()"
+      (tabSelect)="onTabSelect($event)"
+      (tabClose)="onTabClose($event)"
+      (newTab)="onNewTab()"
+    ></v-tabs>
 
-  <v-bottom-panel bottom></v-bottom-panel>
+    <v-editor
+      [file]="activeFile()"
+      [showHeader]="false"
+      (contentChange)="onContentChange($event)"
+      (save)="onSave()"
+    ></v-editor>
+  </div>
+
+  <v-bottom-panel bottom [workspacePath]="rootFolder()?.path || ''"></v-bottom-panel>
 </v-main-layout>

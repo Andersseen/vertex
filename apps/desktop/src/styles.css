@@ -1,25 +1,54 @@
-@import "tailwindcss";
+@use '../../../packages/frontend/ui/src/styles/theme' as *;
 
 :root {
   --p-primary-500: #6366f1;
   --p-primary-500-rgb: 99, 102, 241;
-  --p-font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color-scheme: dark;
 }
 
-html, body {
-  height: 100%;
+html,
+body {
+  @include full-screen;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: var(--p-surface-950);
-  color: var(--p-surface-0);
-  font-family: var(--p-font-family);
+  background-color: $surface-950;
+  color: $surface-0;
+  font-family: $font-sans;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar for the whole app */
+/* Terminal styles */
+.xterm {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.xterm-screen {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.xterm-viewport {
+  background-color: #020617 !important;
+}
+
+.xterm-rows {
+  background-color: #020617 !important;
+}
+
+.xterm-text-layer {
+  background-color: #020617 !important;
+}
+
+/* Hide scrollbar artifacts in terminal */
+.xterm .xterm-viewport::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -30,13 +59,17 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--p-surface-700);
+  background: $surface-700;
   border-radius: 10px;
+
+  &:hover {
+    background: $surface-600;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--p-surface-600);
+.font-sans {
+  font-family: $font-sans;
 }
-
-.font-inter { font-family: 'Inter', sans-serif; }
-.font-mono { font-family: 'JetBrains Mono', monospace; }
+.font-mono {
+  font-family: $font-mono;
+}

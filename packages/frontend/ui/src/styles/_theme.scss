@@ -1,6 +1,9 @@
 // Vertex IDE Design System - Core Variables
-// This file replaces Tailwind 4 utility tokens with robust SCSS variables
+// Replaces Tailwind utility tokens with robust SCSS variables
 
+// ============================================
+// COLORS - Surfaces
+// ============================================
 $surface-0: #ffffff;
 $surface-50: #f8fafc;
 $surface-100: #f1f5f9;
@@ -15,19 +18,102 @@ $surface-850: #162033;
 $surface-900: #0f172a;
 $surface-950: #020617;
 
+// ============================================
+// COLORS - Brand/Primary
+// ============================================
+$primary-50: #eef2ff;
+$primary-100: #e0e7ff;
+$primary-200: #c7d2fe;
+$primary-300: #a5b4fc;
+$primary-400: #818cf8;
 $primary-500: #6366f1;
 $primary-600: #4f46e5;
 $primary-700: #4338ca;
+$primary-800: #3730a3;
+$primary-900: #312e81;
 
+// ============================================
+// COLORS - Semantic
+// ============================================
 $success: #4ade80;
+$success-light: #86efac;
+$success-dark: #22c55e;
+
 $warning: #fbbf24;
+$warning-light: #fcd34d;
+$warning-dark: #f59e0b;
+
 $error: #f87171;
+$error-light: #fca5a5;
+$error-dark: #ef4444;
+
 $info: #60a5fa;
+$info-light: #93c5fd;
+$info-dark: #3b82f6;
 
-$font-inter: 'Inter', system-ui, -apple-system, sans-serif;
-$font-mono: 'JetBrains Mono', monospace;
+// ============================================
+// TYPOGRAPHY
+// ============================================
+$font-sans:
+  "Inter",
+  system-ui,
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  sans-serif;
+$font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
 
-// Layout Helpers
+$font-size-xs: 0.625rem; // 10px
+$font-size-sm: 0.75rem; // 12px
+$font-size-base: 0.875rem; // 14px
+$font-size-md: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ============================================
+// SPACING SCALE
+// ============================================
+$spacing-0: 0;
+$spacing-px: 1px;
+$spacing-0-5: 0.125rem; // 2px
+$spacing-1: 0.25rem; // 4px
+$spacing-2: 0.5rem; // 8px
+$spacing-3: 0.75rem; // 12px
+$spacing-4: 1rem; // 16px
+$spacing-5: 1.25rem; // 20px
+$spacing-6: 1.5rem; // 24px
+$spacing-8: 2rem; // 32px
+$spacing-10: 2.5rem; // 40px
+$spacing-12: 3rem; // 48px
+
+// ============================================
+// LAYOUT - Common Mixins
+// ============================================
+
+// Flexbox utilities
+@mixin flex {
+  display: flex;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
 @mixin flex-center {
   display: flex;
   align-items: center;
@@ -40,9 +126,269 @@ $font-mono: 'JetBrains Mono', monospace;
   justify-content: space-between;
 }
 
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@mixin items-center {
+  align-items: center;
+}
+
+@mixin items-start {
+  align-items: flex-start;
+}
+
+@mixin items-end {
+  align-items: flex-end;
+}
+
+@mixin justify-center {
+  justify-content: center;
+}
+
+@mixin justify-between {
+  justify-content: space-between;
+}
+
+@mixin justify-start {
+  justify-content: flex-start;
+}
+
+@mixin justify-end {
+  justify-content: flex-end;
+}
+
+@mixin gap($size) {
+  gap: $size;
+}
+
+// Sizing utilities
+@mixin full-width {
+  width: 100%;
+}
+
+@mixin full-height {
+  height: 100%;
+}
+
 @mixin full-screen {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
   width: 100dvw;
 }
+
+// Position utilities
+@mixin relative {
+  position: relative;
+}
+
+@mixin absolute {
+  position: absolute;
+}
+
+@mixin fixed {
+  position: fixed;
+}
+
+// Overflow utilities
+@mixin overflow-auto {
+  overflow: auto;
+}
+
+@mixin overflow-hidden {
+  overflow: hidden;
+}
+
+@mixin overflow-x-auto {
+  overflow-x: auto;
+}
+
+@mixin overflow-y-auto {
+  overflow-y: auto;
+}
+
+// Text utilities
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-center {
+  text-align: center;
+}
+
+@mixin text-left {
+  text-align: left;
+}
+
+@mixin text-right {
+  text-align: right;
+}
+
+@mixin uppercase {
+  text-transform: uppercase;
+}
+
+@mixin capitalize {
+  text-transform: capitalize;
+}
+
+// Interactive utilities
+@mixin clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+@mixin transition($property: all, $duration: 150ms, $timing: ease) {
+  transition: $property $duration $timing;
+}
+
+@mixin rounded($radius: 4px) {
+  border-radius: $radius;
+}
+
+// Focus and accessibility
+@mixin focus-ring {
+  outline: 2px solid $primary-500;
+  outline-offset: 2px;
+}
+
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $surface-600;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $surface-500;
+  }
+}
+
+// ============================================
+// BEM HELPERS
+// ============================================
+
+// Block element
+@mixin block($name) {
+  .#{$name} {
+    @content;
+  }
+}
+
+// Element
+@mixin element($name) {
+  &__#{$name} {
+    @content;
+  }
+}
+
+// Modifier
+@mixin modifier($name) {
+  &--#{$name} {
+    @content;
+  }
+}
+
+// ============================================
+// COMPONENT PATTERNS
+// ============================================
+
+// Button base
+@mixin button-base {
+  @include flex-center;
+  @include clickable;
+  @include rounded(4px);
+  @include transition;
+  padding: $spacing-2 $spacing-3;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $surface-200;
+  gap: $spacing-2;
+
+  &:hover {
+    background: $surface-800;
+    color: $surface-50;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Panel/Card base
+@mixin panel-base {
+  background: $surface-900;
+  border: 1px solid $surface-800;
+  @include rounded(6px);
+}
+
+// Input base
+@mixin input-base {
+  width: 100%;
+  padding: $spacing-2 $spacing-3;
+  background: $surface-800;
+  border: 1px solid $surface-700;
+  @include rounded(4px);
+  color: $surface-100;
+  font-size: $font-size-sm;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-500;
+  }
+
+  &::placeholder {
+    color: $surface-500;
+  }
+}
+
+// ============================================
+// Z-INDEX SCALE
+// ============================================
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-modal: 300;
+$z-popover: 400;
+$z-tooltip: 500;
+$z-toast: 600;
