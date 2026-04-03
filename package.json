@@ -20,7 +20,9 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "build:web-editor": "cd packages/frontend/web-editor && bun run build",
     "dev": "turbo run dev",
+    "dev:web-editor": "cd packages/frontend/web-editor && bun run watch",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

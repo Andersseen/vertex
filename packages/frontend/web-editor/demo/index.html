@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Editor - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      color: #fff;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #252525;
+      border-color: #444;
+    }
+
+    button.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    select {
+      padding: 8px 16px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    web-editor {
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .value-display {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #1a1a1a;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+
+    .value-display h3 {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value-display pre {
+      background: #0a0a0a;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: #a0a0a0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+    }
+
+    .info-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-box h3 {
+      color: #3b82f6;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box code {
+      background: #0a0a0a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+    }
+
+    .info-box pre {
+      background: #0a0a0a;
+      padding: 1rem;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+
+    .info-box pre code {
+      background: none;
+      padding: 0;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .demo-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Web Editor</h1>
+    <p class="subtitle">A lightweight, standalone code editor Web Component built with Angular Elements and CodeMirror 6</p>
+
+    <div class="info-box">
+      <h3>📦 Usage</h3>
+      <p>Simply include the script and use the <code>&lt;web-editor&gt;</code> tag:</p>
+      <pre><code>&lt;script src="dist/web-editor.js"&gt;&lt;/script&gt;
+
+&lt;web-editor
+  language="typescript"
+  theme="dark"
+  value="console.log('Hello World!')"
+  height="400px"&gt;
+&lt;/web-editor&gt;</code></pre>
+    </div>
+
+    <!-- TypeScript Demo -->
+    <div class="demo-section">
+      <div class="demo-header">
+        <h2>TypeScript Example</h2>
+        <div class="controls">
+          <button onclick="toggleTheme('ts')">Toggle Theme</button>
+          <button onclick="getValue('ts')">Get Value</button>
+          <button onclick="setValue('ts')">Set Value</button>
+          <button onclick="insertText('ts')">Insert</button>
+        </div>
+      </div>
+      <web-editor
+        id="editor-ts"
+        language="typescript"
+        theme="dark"
+        height="300px"
+        value="// Welcome to Web Editor!
+interface User {
+  name: string;
+  age: number;
+}
+
+function greet(user: User): string {
+  return `Hello, ${user.name}!`;
+}
+
+const user: User = { name: 'Developer', age: 25 };
+console.log(greet(user));">
+      </web-editor>
+      <div class="value-display">
+        <h3>Output</h3>
+        <pre id="output-ts">Click "Get Value" to see the editor content...</pre>
+      </div>
+    </div>
+
+    <!-- Astro Demo -->
+    <div class="demo-section">
+      <div class="demo-header">
+        <h2>Astro Example</h2>
+        <div class="controls">
+          <button onclick="toggleTheme('astro')">Toggle Theme</button>
+          <button onclick="getValue('astro')">Get Value</button>
+        </div>
+      </div>
+      <web-editor
+        id="editor-astro"
+        language="html"
+        theme="dark"
+        height="250px"
+        value="---
+// Astro component with frontmatter
+const title = 'My Astro Page';
+const items = ['Astro', 'React', 'Vue', 'Svelte'];
+---
+
+<html lang=&quot;en&quot;>
+  <head>
+    <title>{title}</title>
+  </head>
+  <body>
+    <h1>{title}</h1>
+    <ul>
+      {items.map(item => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </body>
+</html>
+
+<style>
+  h1 {
+    color: #ff5d01;
+  }
+</style>">
+      </web-editor>
+      <div class="value-display">
+        <h3>Output</h3>
+        <pre id="output-astro">Click "Get Value" to see the editor content...</pre>
+      </div>
+    </div>
+
+    <!-- Grid of multiple editors -->
+    <div class="demo-section">
+      <h2>Multiple Languages</h2>
+      <div class="grid">
+        <!-- JavaScript -->
+        <div>
+          <div class="demo-header">
+            <h2>JavaScript</h2>
+            <div class="controls">
+              <button onclick="toggleReadonly('js')">Toggle Readonly</button>
+            </div>
+          </div>
+          <web-editor
+            id="editor-js"
+            language="javascript"
+            theme="dark"
+            height="200px"
+            value="const fibonacci = (n) => {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+console.log(fibonacci(10));">
+          </web-editor>
+        </div>
+
+        <!-- CSS -->
+        <div>
+          <div class="demo-header">
+            <h2>CSS</h2>
+          </div>
+          <web-editor
+            id="editor-css"
+            language="css"
+            theme="dark"
+            height="200px"
+            value=".card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}">
+          </web-editor>
+        </div>
+
+        <!-- HTML/Angular -->
+        <div>
+          <div class="demo-header">
+            <h2>Angular Template</h2>
+          </div>
+          <web-editor
+            id="editor-html"
+            language="html"
+            theme="dark"
+            height="200px"
+            value="&lt;div class=&quot;app-container&quot;&gt;
+  &lt;header&gt;
+    &lt;h1&gt;{{ title }}&lt;/h1&gt;
+    &lt;nav&gt;
+      &lt;a routerLink=&quot;/home&quot;&gt;Home&lt;/a&gt;
+      &lt;a routerLink=&quot;/about&quot;&gt;About&lt;/a&gt;
+    &lt;/nav&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;div *ngIf=&quot;user$ | async as user&quot;&gt;
+      &lt;p&gt;Welcome, {{ user.name }}!&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/main&gt;
+&lt;/div&gt;">
+          </web-editor>
+        </div>
+
+        <!-- JSON -->
+        <div>
+          <div class="demo-header">
+            <h2>JSON</h2>
+          </div>
+          <web-editor
+            id="editor-json"
+            language="json"
+            theme="dark"
+            height="200px"
+            value="{
+  &quot;name&quot;: &quot;web-editor&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;description&quot;: &quot;A standalone code editor Web Component&quot;,
+  &quot;keywords&quot;: [&quot;editor&quot;, &quot;codemirror&quot;, &quot;web-component&quot;],
+  &quot;author&quot;: &quot;Andrii Pap&quot;,
+  &quot;license&quot;: &quot;MIT&quot;
+}">
+          </web-editor>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event handling demo -->
+    <div class="demo-section">
+      <div class="demo-header">
+        <h2>Event Handling</h2>
+        <div class="controls">
+          <button id="event-btn" onclick="toggleEvents()">Enable Events</button>
+        </div>
+      </div>
+      <web-editor
+        id="editor-events"
+        language="typescript"
+        theme="dark"
+        height="200px"
+        value="// Type here to trigger events...">
+      </web-editor>
+      <div class="value-display">
+        <h3>Event Log</h3>
+        <pre id="event-log">Events will appear here...</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the web editor bundle -->
+  <script src="../dist/web-editor.js"></script>
+
+  <script>
+    // Demo functionality
+    const themes = ['dark', 'light'];
+
+    function toggleTheme(id) {
+      const editor = document.getElementById(`editor-${id}`);
+      const currentTheme = editor.getAttribute('theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      editor.setAttribute('theme', newTheme);
+    }
+
+    function getValue(id) {
+      const editor = document.getElementById(`editor-${id}`);
+      const value = editor.getValue();
+      document.getElementById(`output-${id}`).textContent = value;
+    }
+
+    function setValue(id) {
+      const editor = document.getElementById(`editor-${id}`);
+      const newCode = `// Code updated at ${new Date().toLocaleTimeString()}
+const random = Math.random();
+console.log(random);`;
+      editor.setValue(newCode);
+    }
+
+    function insertText(id) {
+      const editor = document.getElementById(`editor-${id}`);
+      editor.insertText('\n// Inserted at ' + new Date().toLocaleTimeString());
+    }
+
+    function toggleReadonly(id) {
+      const editor = document.getElementById(`editor-${id}`);
+      const current = editor.getAttribute('readonly');
+      editor.setAttribute('readonly', current === 'true' ? 'false' : 'true');
+    }
+
+    let eventsEnabled = false;
+    function toggleEvents() {
+      const editor = document.getElementById('editor-events');
+      const btn = document.getElementById('event-btn');
+      const log = document.getElementById('event-log');
+
+      if (!eventsEnabled) {
+        eventsEnabled = true;
+        btn.textContent = 'Disable Events';
+        btn.classList.add('active');
+
+        editor.addEventListener('value-change', (e) => {
+          log.textContent = `value-change: ${e.detail.value.length} chars`;
+        });
+
+        editor.addEventListener('focus', () => {
+          log.textContent += '\nfocus event';
+        });
+
+        editor.addEventListener('blur', () => {
+          log.textContent += '\nblur event';
+        });
+
+        editor.addEventListener('ready', () => {
+          log.textContent = 'ready event - editor initialized';
+        });
+
+        log.textContent = 'Events enabled. Start typing...';
+      } else {
+        eventsEnabled = false;
+        btn.textContent = 'Enable Events';
+        btn.classList.remove('active');
+        log.textContent = 'Events disabled';
+      }
+    }
+
+    // Log when editors are ready
+    document.querySelectorAll('web-editor').forEach(editor => {
+      editor.addEventListener('ready', () => {
+        console.log(`Editor ${editor.id} is ready`);
+      });
+    });
+  </script>
+</body>
+</html>
