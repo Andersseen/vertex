@@ -20,7 +20,8 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "build:web-editor": "cd packages/frontend/web-editor && bun run build",
+    "web-editor:build": "cd packages/frontend/web-editor && bun run build",
+    "web-editor:serve": "bun run web-editor:build && bun packages/frontend/web-editor/server.ts",
     "dev": "turbo run dev",
     "dev:web-editor": "cd packages/frontend/web-editor && bun run watch",
     "lint": "turbo run lint",
