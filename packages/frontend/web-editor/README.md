@@ -13,38 +13,58 @@ A lightweight, standalone code editor Web Component built with Angular Elements 
 - 🔧 **Customizable** - Line numbers, read-only mode, word wrap, and more
 - 🎯 **Zoneless Angular** - Uses signals, no zone.js overhead
 
-## Quick Installation
+## Installation
 
-### Option 1: npx (Easiest - No install needed)
+### Option 1: One-liner with curl (Recommended)
 
 ```bash
-# Install directly from GitHub to your project
-npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./public
+# Install directly from GitHub to ./public
+curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
 
 # Or specify a different directory
-npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./static
+curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./static
 ```
 
-### Option 2: Local Server (For development)
+### Option 2: Download and run
 
 ```bash
-# Terminal 1: Start server from vertex monorepo
+# Download the installer
+curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs
+
+# Run it
+node install.mjs ./public
+
+# With options
+node install.mjs ./public --remote
+node install.mjs ./public --url=https://your-cdn.com/web-editor.min.js
+```
+
+### Option 3: Clone and install locally
+
+```bash
+# Clone the repo
+git clone https://github.com/andersseen/vertex.git
+cd vertex
+
+# Install dependencies and build
 cd packages/frontend/web-editor
-node bin/serve-worker.mjs 8080
+npm install
+npm run build
 
-# Terminal 2: Download to your project
-curl http://localhost:8080/web-editor.min.js -o ./public/web-editor.min.js
+# Install to your project
+cd /path/to/your/project
+node /path/to/vertex/scripts/install.mjs ./public --local
 ```
 
-### Option 3: Manual Download
+### Option 4: Direct download (no installer)
 
 ```bash
-# Download directly from GitHub raw
-curl -L https://raw.githubusercontent.com/your-username/vertex/main/packages/frontend/web-editor/dist/web-editor.min.js \
-  -o ./public/web-editor.min.js
+# Download just the file
+curl -L -o ./public/web-editor.min.js \
+  https://raw.githubusercontent.com/andersseen/vertex/main/packages/frontend/web-editor/dist/web-editor.min.js
 ```
 
-### Option 4: npm (Coming Soon)
+### Option 5: npm (Coming Soon)
 
 ```bash
 npm install @vertex/web-editor
@@ -220,24 +240,6 @@ const code = `const sum = (a, b) => a + b;`;
 |-------|-------------|
 | `ready` | Fired when the editor is initialized and ready |
 
-## CLI Options
-
-See [CLI.md](./CLI.md) for detailed CLI documentation.
-
-```bash
-# Install from GitHub (default)
-npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./public
-
-# Use local monorepo build
-node bin/install.mjs ./public --local
-
-# Use custom URL
-node bin/install.mjs ./public --url=https://your-cdn.com/web-editor.min.js
-
-# Start local server
-node bin/serve-worker.mjs 8080
-```
-
 ## Styling
 
 The editor exposes CSS custom properties for customization:
@@ -271,7 +273,7 @@ vertex-editor[theme="light"] {
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/vertex.git
+git clone https://github.com/andersseen/vertex.git
 cd vertex/packages/frontend/web-editor
 
 # Install dependencies
@@ -280,8 +282,8 @@ npm install
 # Build
 npm run build
 
-# Start dev server
-node bin/serve-worker.mjs
+# Install locally to test
+node ../../scripts/install.mjs /tmp/test --local
 ```
 
 ## More Examples

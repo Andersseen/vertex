@@ -1,87 +1,81 @@
-# Vertex IDE 🌌
+# Vertex
 
-**Vertex** is not just another code editor; it is a "point of convergence" designed for speed, modularity, and precision. Built with the most cutting-edge technologies of the modern web ecosystem: **Angular 21**, **Bun**, **Tauri**, and **CodeMirror 6**.
+A modern IDE built with Tauri, Angular, and CodeMirror 6.
 
----
+## Quick Install - Vertex Editor Web Component
 
-## ⚡ The Vertex Philosophy
+Install the standalone web component to any project:
 
-### Why does Vertex exist?
-Most modern editors have fallen into the "software obesity" trap. They have become heavy platforms trying to solve every problem at once. Vertex is born with a different premise: **an IDE should be a surgical tool, not an operating system.**
+```bash
+# One-liner installation
+curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
+```
 
-Vertex (from Latin *vĕrtex*: summit, point of union) is the intersection between native performance and web flexibility.
+Then use it in your HTML:
+```html
+<script src="web-editor.min.js"></script>
+<vertex-editor 
+  value="const x = 1;" 
+  language="typescript"
+  theme="dark"
+></vertex-editor>
+```
 
-### Why is it not "another VSCode clone"?
-VSCode is an incredible tool, but its architecture is deeply tied to a monolithic model based on Electron and the Monaco editor. Vertex breaks away from this to offer:
-- **True Lightweight Performance**: Thanks to **Tauri (Rust)**, Vertex consumes a fraction of the memory used by Electron-based editors.
-- **Total Control**: We don't inherit VSCode's design decisions. Every pixel and every interaction is designed for a "Zen" experience.
+## Installation Methods
 
----
+### 1. curl + node (Recommended)
+```bash
+curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
+```
 
-## 🛠️ Technical Decisions: The "Why"
+### 2. Download and run
+```bash
+curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs
+node install.mjs ./public
+```
 
-### CodeMirror 6 vs. Monaco
-This is the most critical technical decision in Vertex. While Monaco is the engine behind VSCode (powerful but rigid and heavy), we chose **CodeMirror 6** for its:
-- **Extreme Modularity**: CM6 is designed as a system of functional extensions. We can build exactly what we need without the overhead of a full desktop editor inside a tab.
-- **Accessibility & Mobile-Friendly**: CM6 behaves natively in the DOM, allowing for a much more fluid integration with **Angular** templates.
-- **Modernity**: Its functional state management and handling of large documents make it ideal for the "Push-Pull" reactivity architecture we are implementing.
+### 3. Clone and build locally
+```bash
+git clone https://github.com/andersseen/vertex.git
+cd vertex/packages/frontend/web-editor
+npm install
+npm run build
+node ../../scripts/install.mjs ~/my-project/public --local
+```
 
-### Angular 21 + Signals
-We use the latest version of Angular to leverage the new **Signals** model. This allows for granular reactivity: only what actually changes is updated, eliminating unnecessary change detection cycles and ensuring constant 60fps in the UI.
-
-### The Sidecar (Bun + Hono)
-Instead of a heavy Node.js process, we use a specialized **Sidecar** compiled with **Bun**. This provides an ultra-fast local API for file system operations and heavy processing, keeping the frontend lightweight and responsive.
-
----
-
-## 📂 Monorepo Structure
+## Project Structure
 
 ```
 vertex/
 ├── apps/
-│   ├── web/              # Web Application (Cloudflare Pages ready)
-│   └── desktop/          # Desktop Application (Tauri + Rust)
+│   └── desktop/          # Tauri desktop app
 ├── packages/
-│   ├── frontend/         # Shared libraries
-│   │   ├── types/        # Unified type contracts
-│   │   ├── core/         # Reactivity engine and base services
-│   │   └── ui/           # SCSS design system and components
+│   ├── frontend/
+│   │   └── web-editor/   # Standalone web component
 │   └── backend/
-│       └── sidecar/      # Minimalist Bun + Hono backend
+└── scripts/
+    └── install.mjs       # CLI installer
 ```
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- [Bun](https://bun.sh) (v1.1+)
-- Rust (for the desktop build)
-
-### Main Commands
+## Development
 
 ```bash
-# Installation
-bun install
+# Install dependencies
+npm install
 
-# Web Development (Angular) - http://localhost:4200
-bun web:dev
+# Build web-editor
+cd packages/frontend/web-editor
+npm run build
 
-# Desktop Development (Tauri)
-bun desktop:dev
-
-# Run Everything (Frontend + Sidecar)
-bun dev:all
+# Run desktop app
+cd apps/desktop
+npm run tauri dev
 ```
 
----
+## Web Component Documentation
 
-## 🧪 Quality Strategy
+See [packages/frontend/web-editor/README.md](./packages/frontend/web-editor/README.md) for full API documentation and examples.
 
-- **Unit Testing**: Vitest for business logic and Angular CLI for components.
-- **E2E Testing**: Playwright to ensure the user flow is perfect in Chrome, Firefox, and Safari.
-- **CI/CD**: Automated pipeline that validates types, lint, and tests on every push.
+## License
 
----
-
-*Vertex is an evolving project. We seek perfection in simplicity.* 🚀
+MIT
