@@ -1,0 +1,59 @@
+name: Release Web Editor
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/frontend/web-editor/**'
+      - '.github/workflows/release-web-editor.yml'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      working-directory: packages/frontend/web-editor
+      run: npm ci
+
+    - name: Build
+      working-directory: packages/frontend/web-editor
+      run: npm run build
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: web-editor-latest
+        name: Web Editor (Latest)
+        body: |
+          Latest build of Vertex Web Editor
+          
+          ## Installation
+          
+          ### curl
+          ```bash
+          curl -L -o web-editor.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor.min.js
+          ```
+          
+          ### CLI
+          ```bash
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.mjs | node -
+          ```
+        files: |
+          packages/frontend/web-editor/dist/web-editor.min.js
+          packages/frontend/web-editor/dist/web-editor.min.js.map
+          packages/frontend/web-editor/dist/web-editor.js
+        fail_on_unmatched_files: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -18,14 +18,22 @@ A lightweight, standalone code editor Web Component built with Angular Elements 
 ### Option 1: One-liner with curl (Recommended)
 
 ```bash
-# Install directly from GitHub to ./public
+# Installs from GitHub Releases to ./public
 curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
 
-# Or specify a different directory
+# Custom directory
 curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./static
 ```
 
-### Option 2: Download and run
+### Option 2: Direct download from GitHub Releases
+
+```bash
+# Download just the file (no examples)
+curl -L -o ./public/web-editor.min.js \
+  https://github.com/andersseen/vertex/releases/download/web-editor-latest/web-editor.min.js
+```
+
+### Option 3: Download installer and run
 
 ```bash
 # Download the installer
@@ -33,41 +41,24 @@ curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install
 
 # Run it
 node install.mjs ./public
-
-# With options
-node install.mjs ./public --remote
-node install.mjs ./public --url=https://your-cdn.com/web-editor.min.js
 ```
 
-### Option 3: Clone and install locally
+### Option 4: npm script in your project
 
-```bash
-# Clone the repo
-git clone https://github.com/andersseen/vertex.git
-cd vertex
+Add to your `package.json`:
 
-# Install dependencies and build
-cd packages/frontend/web-editor
-npm install
-npm run build
-
-# Install to your project
-cd /path/to/your/project
-node /path/to/vertex/scripts/install.mjs ./public --local
+```json
+{
+  "scripts": {
+    "setup:editor": "curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public"
+  }
+}
 ```
 
-### Option 4: Direct download (no installer)
+Then run:
 
 ```bash
-# Download just the file
-curl -L -o ./public/web-editor.min.js \
-  https://raw.githubusercontent.com/andersseen/vertex/main/packages/frontend/web-editor/dist/web-editor.min.js
-```
-
-### Option 5: npm (Coming Soon)
-
-```bash
-npm install @vertex/web-editor
+npm run setup:editor
 ```
 
 ## Quick Start
@@ -271,20 +262,22 @@ vertex-editor[theme="light"] {
 
 ## Development
 
+If you want to modify the web component:
+
 ```bash
 # Clone the repo
 git clone https://github.com/andersseen/vertex.git
 cd vertex/packages/frontend/web-editor
 
-# Install dependencies
+# Install and build
 npm install
-
-# Build
 npm run build
 
-# Install locally to test
-node ../../scripts/install.mjs /tmp/test --local
+# Install locally to another project
+node ../../scripts/install.mjs ~/my-project/public --local
 ```
+
+The CI automatically builds and publishes to GitHub Releases on every push to main.
 
 ## More Examples
 

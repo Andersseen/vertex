@@ -3,21 +3,13 @@
 /**
  * Vertex Editor Installer
  * 
- * Installs the Vertex Editor web component to any project.
+ * Installs the Vertex Editor web component from GitHub Releases.
  * 
- * Usage:
- *   node install.mjs [target-directory] [options]
- * 
- * Install from GitHub (recommended):
+ * Quick install:
  *   curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
  * 
- * Or download first:
- *   curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs
- *   node install.mjs ./public
- * 
  * Options:
- *   --local     Force local build (if inside monorepo)
- *   --remote    Force remote download from GitHub
+ *   --local     Use local build (if inside monorepo)
  *   --url=URL   Use custom URL
  */
 
@@ -29,81 +21,36 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Check if running from stdin/pipe
-const isPiped = !process.stdin.isTTY;
-
 // GitHub configuration
 const GITHUB_USER = 'andersseen';
 const GITHUB_REPO = 'vertex';
-const GITHUB_BRANCH = 'main';
+const RELEASE_TAG = 'web-editor-latest';
 
-// Remote URLs
-const REMOTE_JS_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor.min.js`;
-const REMOTE_MAP_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor.min.js.map`;
-const REMOTE_SCRIPT_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/scripts/install.mjs`;
+// Release download URLs (from GitHub Releases)
+const RELEASE_JS_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/web-editor.min.js`;
+const RELEASE_MAP_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/web-editor.min.js.map`;
 
-// Parse arguments (handle both piped and direct execution)
+// Parse arguments
 const args = process.argv.slice(2);
 let targetDir = './public';
 let useLocal = false;
-let useRemote = false;
 let customUrl = null;
-let showHelp = false;
 
 for (const arg of args) {
-  if (arg === '--help' || arg === '-h') showHelp = true;
-  else if (arg === '--local') useLocal = true;
-  else if (arg === '--remote') useRemote = true;
+  if (arg === '--local') useLocal = true;
   else if (arg.startsWith('--url=')) customUrl = arg.replace('--url=', '');
   else if (!arg.startsWith('--') && arg.length > 0) targetDir = arg;
-}
-
-// Show help
-if (showHelp) {
-  console.log(`
-Vertex Editor Installer
-
-Usage:
-  node install.mjs [target-directory] [options]
-
-Install Methods:
-  1. Direct from GitHub (recommended):
-     curl -fsSL ${REMOTE_SCRIPT_URL} | node - ./public
-
-  2. Download then run:
-     curl -O ${REMOTE_SCRIPT_URL}
-     node install.mjs ./public
-
-  3. From local monorepo:
-     git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git
-     cd ${GITHUB_REPO}
-     node scripts/install.mjs ./public --local
-
-Options:
-  --local       Use local build (if inside monorepo)
-  --remote      Force download from GitHub
-  --url=URL     Use custom URL to download web-editor.min.js
-  --help, -h    Show this help
-
-Examples:
-  node install.mjs ./public
-  node install.mjs ./static --remote
-  node install.mjs ./public --url=https://example.com/editor.min.js
-`);
-  process.exit(0);
 }
 
 // Detect if we're inside the vertex monorepo
 const isInsideMonorepo = fs.existsSync(path.join(__dirname, '..', 'package.json')) && 
                          fs.existsSync(path.join(__dirname, '..', 'packages', 'frontend', 'web-editor'));
 
-// Determine source
-if (!useLocal && !useRemote && !customUrl) {
+if (!useLocal && !customUrl) {
   useLocal = isInsideMonorepo;
-  useRemote = !isInsideMonorepo;
 }
 
-// Colors for terminal
+// Colors
 const C = {
   reset: '\x1b[0m',
   green: '\x1b[32m',
@@ -116,16 +63,24 @@ const C = {
 
 const log = (msg, color = 'reset') => console.log(`${C[color]}${msg}${C.reset}`);
 
-// Helper: Download file
+// Download with redirect support
 function download(url, dest) {
   return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
     const file = fs.createWriteStream(dest);
-    https.get(url, (res) => {
+    
+    client.get(url, { headers: { 'Accept': 'application/octet-stream' } }, (res) => {
+      // Handle redirects
+      if (res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307) {
+        file.close();
+        fs.unlink(dest, () => {});
+        download(res.headers.location, dest).then(resolve).catch(reject);
+        return;
+      }
+      
       if (res.statusCode === 200) {
         res.pipe(file);
         file.on('finish', () => { file.close(); resolve(); });
-      } else if (res.statusCode === 301 || res.statusCode === 302) {
-        download(res.headers.location, dest).then(resolve).catch(reject);
       } else {
         reject(new Error(`HTTP ${res.statusCode}`));
       }
@@ -136,21 +91,16 @@ function download(url, dest) {
   });
 }
 
-// Helper: Copy file
 function copy(src, dest) {
   return new Promise((resolve, reject) => {
     fs.copyFile(src, dest, (err) => err ? reject(err) : resolve());
   });
 }
 
-// Helper: Create example file
 function createExample(dir, filename, content) {
-  const filePath = path.join(dir, filename);
-  fs.writeFileSync(filePath, content);
-  return filePath;
+  fs.writeFileSync(path.join(dir, filename), content);
 }
 
-// Example templates
 const getHtmlExample = () => `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,14 +145,11 @@ const getHtmlExample = () => `<!DOCTYPE html>
 const getReactExample = () => `import { useRef, useEffect } from 'react';
 import './web-editor.min.js';
 
-export function CodeEditor({ code, language = 'typescript', onChange }) {
+export function CodeEditor({ code, language = 'typescript' }) {
   const editorRef = useRef(null);
   
   useEffect(() => {
-    const editor = editorRef.current;
-    if (editor && code) {
-      editor.setValue(code);
-    }
+    editorRef.current?.setValue(code);
   }, [code]);
 
   return (
@@ -221,29 +168,16 @@ const getVueExample = () => `<script setup>
 import { ref, onMounted } from 'vue';
 import './web-editor.min.js';
 
-const props = defineProps({ 
-  code: String,
-  language: { type: String, default: 'typescript' }
-});
-
+const props = defineProps({ code: String });
 const editor = ref(null);
 
 onMounted(() => {
-  if (props.code) {
-    editor.value?.setValue(props.code);
-  }
+  if (props.code) editor.value?.setValue(props.code);
 });
 <\/script>
 
 <template>
-  <vertex-editor 
-    ref="editor" 
-    :value="code" 
-    :language="language" 
-    theme="dark"
-    lineNumbers="true"
-    height="400px"
-  />
+  <vertex-editor ref="editor" :value="code" language="typescript" theme="dark" />
 </template>`;
 
 // Main
@@ -263,59 +197,50 @@ async function main() {
     // Install from source
     if (useLocal) {
       const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', 'web-editor.min.js');
-      const localMapPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', 'web-editor.min.js.map');
       
       if (!fs.existsSync(localPath)) {
         log('❌ Local build not found!', 'red');
-        log('\\nTo build locally:', 'yellow');
-        log('  cd packages/frontend/web-editor', 'gray');
-        log('  npm install', 'gray');
-        log('  npm run build\\n', 'gray');
+        log('\\nRun: cd packages/frontend/web-editor && npm run build', 'gray');
         process.exit(1);
       }
       
       log('📦 Installing from local build...', 'blue');
       await copy(localPath, jsDest);
-      if (fs.existsSync(localMapPath)) await copy(localMapPath, mapDest);
-      log('✓ Installed from local build', 'green');
+      log('✓ Installed', 'green');
       
     } else if (customUrl) {
       log(`📦 Downloading from custom URL...`, 'blue');
-      log(`  ${customUrl}`, 'gray');
       await download(customUrl, jsDest);
       log('✓ Downloaded', 'green');
       
     } else {
-      log('📦 Downloading from GitHub...', 'blue');
-      log(`  ${REMOTE_JS_URL.replace('https://', '')}`, 'gray');
+      log('📦 Downloading from GitHub Releases...', 'blue');
+      log(`  ${RELEASE_JS_URL.replace('https://', '')}`, 'gray');
+      
       try {
-        await download(REMOTE_JS_URL, jsDest);
+        await download(RELEASE_JS_URL, jsDest);
         try {
-          await download(REMOTE_MAP_URL, mapDest);
+          await download(RELEASE_MAP_URL, mapDest);
         } catch {
-          // Sourcemap is optional
+          // Sourcemap optional
         }
-        log('✓ Downloaded from GitHub', 'green');
+        log('✓ Downloaded from GitHub Releases', 'green');
       } catch (err) {
         if (isInsideMonorepo) {
-          log('⚠️  Remote download failed, trying local build...', 'yellow');
+          log('⚠️  Download failed, using local build...', 'yellow');
           const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', 'web-editor.min.js');
-          if (fs.existsSync(localPath)) {
-            await copy(localPath, jsDest);
-            log('✓ Installed from local build', 'green');
-          } else {
-            throw new Error('Neither remote nor local build available');
-          }
+          await copy(localPath, jsDest);
+          log('✓ Installed from local build', 'green');
         } else {
-          log('\\n❌ Failed to download from GitHub', 'red');
-          log('\\nPossible solutions:', 'yellow');
-          log('  1. Check your internet connection', 'gray');
-          log('  2. Clone the repo and use --local flag:', 'gray');
+          log('\\n❌ Failed to download from GitHub Releases', 'red');
+          log('\\nThe release may not exist yet. Options:', 'yellow');
+          log('  1. Wait for CI to create the release (push to main)', 'gray');
+          log('  2. Clone and build locally:', 'gray');
           log(`     git clone https://github.com/${GITHUB_USER}/${GITHUB_REPO}.git`, 'cyan');
-          log(`     cd ${GITHUB_REPO}`, 'cyan');
-          log('     node scripts/install.mjs ./public --local', 'cyan');
-          log('  3. Download manually:', 'gray');
-          log(`     ${REMOTE_JS_URL}`, 'cyan');
+          log('     cd vertex && npm install', 'cyan');
+          log('     cd packages/frontend/web-editor && npm run build', 'cyan');
+          log('  3. Download manually from:', 'gray');
+          log(`     https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases`, 'cyan');
           process.exit(1);
         }
       }
@@ -323,14 +248,12 @@ async function main() {
 
     // Create examples
     log('\\n📄 Creating examples...', 'blue');
-    const htmlPath = createExample(target, 'vertex-editor-example.html', getHtmlExample());
-    const reactPath = createExample(target, 'ReactExample.jsx', getReactExample());
-    const vuePath = createExample(target, 'VueExample.vue', getVueExample());
-    log('✓ vertex-editor-example.html', 'green');
-    log('✓ ReactExample.jsx', 'green');
-    log('✓ VueExample.vue', 'green');
+    createExample(target, 'vertex-editor-example.html', getHtmlExample());
+    createExample(target, 'ReactExample.jsx', getReactExample());
+    createExample(target, 'VueExample.vue', getVueExample());
+    log('✓ Examples created', 'green');
 
-    // File sizes
+    // File size
     const jsStats = fs.statSync(jsDest);
     log(`\\n📊 File size: ${(jsStats.size / 1024 / 1024).toFixed(2)} MB`, 'blue');
 
@@ -339,12 +262,7 @@ async function main() {
     log('\\n📖 Quick Start:', 'cyan');
     log('  <script src="web-editor.min.js"></script>');
     log('  <vertex-editor value="const x = 1;" language="typescript"></vertex-editor>');
-    log(`\\n🎉 Open ${path.relative(process.cwd(), htmlPath)} in your browser!`, 'cyan');
-
-    // Show next steps based on installation method
-    if (useRemote) {
-      log('\\n💡 Tip: To update, run the install command again', 'gray');
-    }
+    log(`\\n🎉 Open ${targetDir}/vertex-editor-example.html to test!`, 'cyan');
 
   } catch (err) {
     log(`\\n❌ Error: ${err.message}`, 'red');
