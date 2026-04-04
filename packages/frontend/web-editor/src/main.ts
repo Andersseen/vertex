@@ -1,4 +1,5 @@
 import "zone.js";
+import "@angular/compiler";
 import { createApplication } from "@angular/platform-browser";
 import { createCustomElement } from "@angular/elements";
 import { WebEditorComponent } from "./lib/web-editor.component";
