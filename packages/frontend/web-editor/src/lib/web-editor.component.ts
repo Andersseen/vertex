@@ -9,13 +9,13 @@ import {
   input,
   output,
   inject,
-} from '@angular/core';
-import { EditorView } from '@codemirror/view';
-import { SupportedLanguage, getLanguageSupport } from './language-support';
-import { EditorConfigurator } from './editor-config';
-import { AttributeObserver } from './attribute-observer';
+} from "@angular/core";
+import { EditorView, lineNumbers } from "@codemirror/view";
+import { SupportedLanguage, getLanguageSupport } from "./language-support";
+import { EditorConfigurator } from "./editor-config";
+import { AttributeObserver } from "./attribute-observer";
 
-export type EditorTheme = 'light' | 'dark';
+export type EditorTheme = "light" | "dark";
 
 export interface CursorPosition {
   line: number;
@@ -23,7 +23,7 @@ export interface CursorPosition {
 }
 
 @Component({
-  selector: 'vertex-editor-internal',
+  selector: "vertex-editor-internal",
   template: `<div #editorContainer class="vertex-editor-container"></div>`,
   styles: `
     :host {
@@ -67,20 +67,20 @@ export interface CursorPosition {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WebEditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('editorContainer', { static: true })
+  @ViewChild("editorContainer", { static: true })
   editorContainer!: ElementRef<HTMLDivElement>;
 
   private hostElement = inject(ElementRef).nativeElement as HTMLElement;
 
   // Inputs
-  readonly value = input<string>('');
-  readonly language = input<SupportedLanguage>('typescript');
-  readonly theme = input<EditorTheme>('dark');
+  readonly value = input<string>("");
+  readonly language = input<SupportedLanguage>("typescript");
+  readonly theme = input<EditorTheme>("dark");
   readonly readonly = input<boolean>(false);
   readonly lineNumbers = input<boolean>(true);
-  readonly height = input<string>('300px');
-  readonly fontSize = input<string>('14');
-  readonly placeholder = input<string>('');
+  readonly height = input<string>("300px");
+  readonly fontSize = input<string>("14");
+  readonly placeholder = input<string>("");
   readonly tabSize = input<number>(2);
   readonly wordWrap = input<boolean>(false);
 
@@ -127,8 +127,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       if (this.editorView) {
         this.editorView.dispatch({
           effects: this.configurator.readonlyCompartment.reconfigure(
-            // @ts-ignore - CM internal type
-            EditorView.editable.of(!readonly)
+            EditorView.editable.of(!readonly),
           ),
         });
       }
@@ -139,7 +138,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       if (this.editorView) {
         this.editorView.dispatch({
           effects: this.configurator.lineNumbersCompartment.reconfigure(
-            showLineNumbers ? this.getLineNumbersExtension() : []
+            showLineNumbers ? this.getLineNumbersExtension() : [],
           ),
         });
       }
@@ -150,7 +149,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       if (this.editorView) {
         this.editorView.dispatch({
           effects: this.configurator.wordWrapCompartment.reconfigure(
-            wrap ? EditorView.lineWrapping : []
+            wrap ? EditorView.lineWrapping : [],
           ),
         });
       }
@@ -167,15 +166,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       const fontSize = this.fontSize();
       if (this.editorContainer?.nativeElement) {
         this.editorContainer.nativeElement.style.setProperty(
-          '--vertex-editor-font-size',
-          `${fontSize}px`
+          "--vertex-editor-font-size",
+          `${fontSize}px`,
         );
       }
     });
   }
 
   private getLineNumbersExtension() {
-    const { lineNumbers } = require('@codemirror/view');
     return lineNumbers();
   }
 
@@ -196,11 +194,11 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private getInitialValue(): string {
-    const attrValue = this.hostElement.getAttribute('value');
-    if (attrValue !== null && attrValue !== '') {
+    const attrValue = this.hostElement.getAttribute("value");
+    if (attrValue !== null && attrValue !== "") {
       return attrValue;
     }
-    return this.value() || '';
+    return this.value() || "";
   }
 
   private async initializeEditor(initialValue: string): Promise<void> {
@@ -224,15 +222,15 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
     this.editorContainer.nativeElement.style.height = this.height();
     this.editorContainer.nativeElement.style.setProperty(
-      '--vertex-editor-font-size',
-      `${this.fontSize()}px`
+      "--vertex-editor-font-size",
+      `${this.fontSize()}px`,
     );
 
     this._isInitialized = true;
     this.attributeObserver?.stopPolling();
 
     // Check if value changed during initialization
-    const currentAttrValue = this.hostElement.getAttribute('value');
+    const currentAttrValue = this.hostElement.getAttribute("value");
     if (currentAttrValue && currentAttrValue !== initialValue) {
       this.updateEditorValue(currentAttrValue);
     }
@@ -271,7 +269,8 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     const languageSupport = await getLanguageSupport(this.language());
     if (languageSupport) {
       this.editorView.dispatch({
-        effects: this.configurator.languageCompartment.reconfigure(languageSupport),
+        effects:
+          this.configurator.languageCompartment.reconfigure(languageSupport),
       });
     }
   }
@@ -281,14 +280,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
     this.editorView.dispatch({
       effects: this.configurator.themeCompartment.reconfigure(
-        this.configurator.getThemeExtension(this.theme())
+        this.configurator.getThemeExtension(this.theme()),
       ),
     });
   }
 
   // Public API methods
   getValue(): string {
-    return this.editorView?.state.doc.toString() || '';
+    return this.editorView?.state.doc.toString() || "";
   }
 
   setValue(value: string): void {

@@ -1,112 +1,112 @@
-# @vertex/web-editor
+# Vertex Editor
 
 A lightweight, standalone code editor Web Component built with Angular Elements and CodeMirror 6.
 
 ## Features
 
-- 🚀 **Framework-agnostic** - Use with any framework or vanilla HTML/JS
-- 📝 **CodeMirror 6** - Modern, high-performance editor
-- 🎨 **Theming** - Light and dark themes built-in
-- 🔤 **Multiple languages** - TypeScript, JavaScript, TSX, JSX, HTML, CSS, JSON, Markdown
-- 📦 **Zero dependencies** - Single bundled file, no external dependencies needed
-- 🔧 **Configurable** - Extensive customization options
-- 💡 **Smart editing** - Autocompletion, syntax highlighting, bracket matching
-- ⌨️ **Keyboard shortcuts** - Full keymap support
+- 🚀 **Zero dependencies** - Single JS file, no build step required
+- 📦 **Web Component** - Works with any framework or vanilla JS
+- 🎨 **Multiple themes** - Dark and light modes
+- 🔤 **Language support** - TypeScript, JavaScript, HTML, CSS, JSON, Markdown
+- 📱 **Responsive** - Adapts to container size
+- ⚡ **Lazy loading** - Languages load on demand
+- 🔧 **Customizable** - Line numbers, read-only mode, word wrap, and more
 
 ## Installation
 
-### Via CDN (Recommended for quick start)
+### Option 1: CDN (Recommended)
 
 ```html
-<script src="https://unpkg.com/@vertex/web-editor@latest/dist/web-editor.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vertex/web-editor/dist/web-editor.min.js"></script>
 ```
 
-### Via npm
+### Option 2: NPM
 
 ```bash
 npm install @vertex/web-editor
 ```
 
+Then import in your project:
+
 ```javascript
 import '@vertex/web-editor';
 ```
 
-## Usage
+Or include the script:
 
-### HTML
+```html
+<script src="./node_modules/@vertex/web-editor/dist/web-editor.min.js"></script>
+```
+
+### Option 3: CLI Installer
+
+```bash
+npx @vertex/web-editor install
+```
+
+## Quick Start
+
+### Vanilla HTML/JS
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://unpkg.com/@vertex/web-editor@latest/dist/web-editor.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vertex/web-editor/dist/web-editor.min.js"></script>
 </head>
 <body>
-  <web-editor
-    language="typescript"
+  <vertex-editor
+    value="console.log('Hello World!');"
+    language="javascript"
     theme="dark"
-    value="console.log('Hello World!')"
-    height="400px"
-    line-numbers="true">
-  </web-editor>
+    height="300px"
+  ></vertex-editor>
 </body>
 </html>
-```
-
-### JavaScript API
-
-```javascript
-const editor = document.querySelector('web-editor');
-
-// Get value
-const code = editor.getValue();
-
-// Set value
-editor.setValue('const x = 42;');
-
-// Insert text at cursor
-editor.insertText('// comment');
-
-// Focus editor
-editor.focus();
 ```
 
 ### React
 
 ```jsx
+import { useEffect, useRef } from 'react';
 import '@vertex/web-editor';
-import { useRef, useEffect } from 'react';
 
-function CodeEditor() {
+function CodeEditor({ code, language = 'typescript' }) {
   const editorRef = useRef(null);
-  
+
   useEffect(() => {
     const editor = editorRef.current;
-    editor.addEventListener('value-change', (e) => {
-      console.log('Code:', e.detail.value);
-    });
-  }, []);
+    if (editor) {
+      editor.setValue(code);
+    }
+  }, [code]);
 
   return (
-    <web-editor
+    <vertex-editor
       ref={editorRef}
-      language="typescript"
+      language={language}
       theme="dark"
-      value="const x = 1;"
+      lineNumbers="true"
+      height="400px"
+      style={{ display: 'block' }}
     />
   );
 }
+
+export default CodeEditor;
 ```
 
-### Vue
+### Vue 3
 
 ```vue
 <template>
-  <web-editor
+  <vertex-editor
     ref="editor"
+    :value="code"
     language="typescript"
     theme="dark"
-    @value-change="onChange"
+    lineNumbers="true"
+    height="400px"
   />
 </template>
 
@@ -114,108 +114,259 @@ function CodeEditor() {
 import { ref, onMounted } from 'vue';
 import '@vertex/web-editor';
 
+const props = defineProps({
+  code: String
+});
+
 const editor = ref(null);
 
-const onChange = (e) => {
-  console.log('Code:', e.detail.value);
-};
+onMounted(() => {
+  // Access editor methods
+  console.log(editor.value.getValue());
+});
 </script>
 ```
 
-## Attributes
+### Angular
+
+```typescript
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import '@vertex/web-editor';
+
+@Component({
+  selector: 'app-code-display',
+  standalone: true,
+  template: `
+    <vertex-editor
+      #editor
+      [attr.value]="code"
+      language="typescript"
+      theme="dark"
+      lineNumbers="true"
+      readonly="true"
+      height="400px"
+    />
+  `,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class CodeDisplayComponent implements AfterViewInit {
+  @ViewChild('editor') editorRef!: ElementRef;
+  code = `const greeting = 'Hello World!';`;
+
+  ngAfterViewInit() {
+    // Editor is ready
+    const editor = this.editorRef.nativeElement;
+    console.log('Editor value:', editor.getValue());
+  }
+}
+```
+
+### Astro
+
+```astro
+---
+const code = `const sum = (a, b) => a + b;`;
+---
+
+<script>
+  import '@vertex/web-editor';
+</script>
+
+<vertex-editor
+  value={code}
+  language="javascript"
+  theme="dark"
+  lineNumbers="true"
+  height="300px"
+/>
+```
+
+## API Reference
+
+### Attributes
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `language` | `string` | `'typescript'` | Programming language (ts, js, tsx, jsx, html, css, json, markdown) |
-| `theme` | `'light' \| 'dark'` | `'dark'` | Editor color theme |
-| `value` | `string` | `''` | Initial editor content |
-| `readonly` | `boolean` | `false` | Make editor read-only |
-| `line-numbers` | `boolean` | `true` | Show line numbers |
-| `height` | `string` | `'300px'` | Editor height (CSS value) |
-| `font-size` | `string` | `'14'` | Font size in pixels |
-| `placeholder` | `string` | `''` | Placeholder text |
-| `tab-size` | `number` | `2` | Number of spaces per tab |
-| `word-wrap` | `boolean` | `false` | Enable word wrapping |
+| `value` | string | `""` | Editor content |
+| `language` | string | `"typescript"` | Language mode (javascript, typescript, html, css, json, markdown) |
+| `theme` | string | `"dark"` | Editor theme (`dark` or `light`) |
+| `lineNumbers` | boolean | `true` | Show line numbers |
+| `readonly` | boolean | `false` | Read-only mode |
+| `wordWrap` | boolean | `false` | Enable word wrapping |
+| `height` | string | `"300px"` | Editor height |
+| `fontSize` | string | `"14"` | Font size in pixels |
+| `tabSize` | number | `2` | Tab size |
+| `placeholder` | string | `""` | Placeholder text |
 
-## Events
-
-| Event | Description | Detail |
-|-------|-------------|--------|
-| `value-change` | Content changed | `{ value: string }` |
-| `focus` | Editor focused | - |
-| `blur` | Editor lost focus | - |
-| `ready` | Editor initialized | - |
-| `cursor-activity` | Cursor moved | `{ line: number, column: number }` |
-
-## Methods
+### Methods
 
 | Method | Description |
 |--------|-------------|
-| `getValue(): string` | Get current editor content |
-| `setValue(value: string)` | Set editor content |
-| `insertText(text: string)` | Insert text at cursor position |
-| `focus()` | Focus the editor |
-| `format()` | Format code (if available) |
+| `getValue()` | Returns the current editor content |
+| `setValue(value: string)` | Sets the editor content |
+| `insertText(text: string)` | Inserts text at cursor position |
+| `focus()` | Focuses the editor |
 
-## Supported Languages
+### Events
 
-- `typescript` / `ts`
-- `javascript` / `js`
-- `tsx`
-- `jsx`
-- `html`
-- `angular` (HTML templates)
-- `astro` (treated as HTML)
-- `css`
-- `json`
-- `markdown` / `md`
+| Event | Description |
+|-------|-------------|
+| `ready` | Fired when the editor is initialized and ready |
 
-## CSS Customization
+## Examples
+
+### Code Display with Copy Button
+
+```html
+<div class="code-block">
+  <div class="code-header">
+    <span>example.ts</span>
+    <button onclick="copyCode()">Copy</button>
+  </div>
+  <vertex-editor
+    id="code-editor"
+    value="const greeting = 'Hello';"
+    language="typescript"
+    theme="dark"
+    readonly="true"
+    lineNumbers="true"
+    height="200px"
+  ></vertex-editor>
+</div>
+
+<script>
+  function copyCode() {
+    const editor = document.getElementById('code-editor');
+    navigator.clipboard.writeText(editor.getValue());
+  }
+</script>
+
+<style>
+  .code-block {
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #1a1a1a;
+    color: #888;
+    font-size: 14px;
+  }
+  .code-header button {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+</style>
+```
+
+### Interactive Playground
+
+```html
+<div class="playground">
+  <div class="toolbar">
+    <select id="language">
+      <option value="javascript">JavaScript</option>
+      <option value="typescript">TypeScript</option>
+      <option value="html">HTML</option>
+      <option value="css">CSS</option>
+    </select>
+    <button onclick="runCode()">Run</button>
+  </div>
+  <vertex-editor
+    id="playground-editor"
+    value="console.log('Hello!');"
+    language="javascript"
+    theme="dark"
+    height="300px"
+  ></vertex-editor>
+  <div id="output"></div>
+</div>
+
+<script>
+  const editor = document.getElementById('playground-editor');
+  const languageSelect = document.getElementById('language');
+  
+  languageSelect.addEventListener('change', (e) => {
+    editor.setAttribute('language', e.target.value);
+  });
+
+  function runCode() {
+    const code = editor.getValue();
+    console.log('Running:', code);
+    // Execute or evaluate code here
+  }
+</script>
+```
+
+### Documentation with Tabs
+
+```html
+<div class="doc-example">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('preview')">Preview</button>
+    <button class="tab" onclick="showTab('code')">Code</button>
+  </div>
+  
+  <div id="preview-panel" class="panel active">
+    <!-- Preview content -->
+  </div>
+  
+  <div id="code-panel" class="panel">
+    <vertex-editor
+      value="<!-- Your HTML here -->"
+      language="html"
+      theme="dark"
+      readonly="true"
+      height="300px"
+    ></vertex-editor>
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(tab + '-panel').classList.add('active');
+  }
+</script>
+```
+
+## Styling
+
+The editor exposes CSS custom properties for customization:
 
 ```css
-web-editor {
-  --web-editor-font-size: 16px;
-  --web-editor-line-height: 1.6;
-  --web-editor-border-radius: 12px;
-  border-radius: var(--web-editor-border-radius);
+vertex-editor {
+  --vertex-editor-font-size: 16px;
+  --vertex-editor-line-height: 1.6;
+  border-radius: 8px;
+  border: 1px solid #333;
 }
 
-/* Dark theme variables */
-web-editor[theme="dark"] {
-  --editor-bg: #1e1e1e;
-  --editor-fg: #d4d4d4;
+/* Dark theme (default) */
+vertex-editor[theme="dark"] {
+  border-color: #444;
 }
 
-/* Light theme variables */
-web-editor[theme="light"] {
-  --editor-bg: #ffffff;
-  --editor-fg: #2c2c2c;
+/* Light theme */
+vertex-editor[theme="light"] {
+  border-color: #ddd;
 }
 ```
 
 ## Browser Support
 
-- Chrome 80+
+- Chrome/Edge 80+
 - Firefox 75+
 - Safari 13.1+
-- Edge 80+
-
-## Development
-
-```bash
-# Install dependencies
-bun install
-
-# Build for development
-bun run build:dev
-
-# Build for production
-bun run build
-
-# Watch mode
-bun run watch
-```
 
 ## License
 
-MIT © Andrii Pap
+MIT

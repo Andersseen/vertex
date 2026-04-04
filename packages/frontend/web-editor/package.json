@@ -1,12 +1,17 @@
 {
   "name": "@vertex/web-editor",
   "version": "0.1.0",
-  "description": "Web Component standalone editor built with Angular Elements and CodeMirror 6",
+  "description": "A lightweight, standalone code editor Web Component built with Angular Elements and CodeMirror 6",
   "main": "dist/web-editor.js",
   "module": "dist/web-editor.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "vertex-editor": "./bin/install.mjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin",
+    "README.md"
   ],
   "scripts": {
     "build": "bun run clean && bun run compile && bun run bundle",
@@ -17,7 +22,8 @@
     "bundle:min": "esbuild dist/main.js --bundle --outfile=dist/web-editor.min.js --format=iife --global-name=WebEditor --minify --sourcemap --platform=browser --external:fs --external:path --external:os",
     "watch": "bun run build && chokidar 'src/**/*.ts' -c 'bun run build'",
     "lint": "eslint src",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
     "web-component",
@@ -25,10 +31,30 @@
     "codemirror",
     "angular-elements",
     "typescript",
-    "astro"
+    "javascript",
+    "html",
+    "css",
+    "json",
+    "markdown",
+    "code-editor",
+    "syntax-highlighting",
+    "standalone",
+    "vanilla-js",
+    "react",
+    "vue",
+    "astro",
+    "angular"
   ],
   "author": "Andrii Pap",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/vertex-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/vertex-editor/issues"
+  },
+  "homepage": "https://github.com/your-username/vertex-editor#readme",
   "dependencies": {
     "@angular/animations": "^21.2.0",
     "@angular/common": "^21.2.0",
