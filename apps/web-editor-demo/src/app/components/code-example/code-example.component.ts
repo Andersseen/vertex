@@ -2,17 +2,14 @@ import {
   Component,
   input,
   signal,
-  viewChild,
-  ElementRef,
   CUSTOM_ELEMENTS_SCHEMA,
-  AfterViewInit,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-type Tab = "preview" | "code";
+type Tab = 'preview' | 'code';
 
 @Component({
-  selector: "demo-code-example",
+  selector: 'demo-code-example',
   standalone: true,
   imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -24,7 +21,6 @@ type Tab = "preview" | "code";
       </header>
 
       <div class="example-content">
-        <!-- Tabs -->
         <div class="tabs">
           <div class="tab-list">
             <button
@@ -43,7 +39,7 @@ type Tab = "preview" | "code";
             </button>
           </div>
 
-          @if (activeTab() === "code") {
+          @if (activeTab() === 'code') {
             <button class="copy-btn" (click)="copyCode()">
               @if (copied()) {
                 <span>✓ Copied</span>
@@ -54,9 +50,8 @@ type Tab = "preview" | "code";
           }
         </div>
 
-        <!-- Content -->
         <div class="tab-content">
-          @if (activeTab() === "preview") {
+          @if (activeTab() === 'preview') {
             <div class="preview-pane">
               <div class="preview-buttons">
                 <button class="btn btn-primary">Primary Button</button>
@@ -69,7 +64,6 @@ type Tab = "preview" | "code";
             <div class="code-pane">
               <div class="editor-wrapper">
                 <vertex-editor
-                  #editor
                   [attr.value]="code()"
                   language="typescript"
                   theme="dark"
@@ -119,7 +113,6 @@ type Tab = "preview" | "code";
       padding: 1.5rem;
     }
 
-    /* Tabs */
     .tabs {
       display: flex;
       align-items: center;
@@ -171,14 +164,12 @@ type Tab = "preview" | "code";
       color: #e5e5e5;
     }
 
-    /* Tab Content */
     .tab-content {
       background: #0a0a0f;
       border-radius: 0 0 10px 10px;
       min-height: 350px;
     }
 
-    /* Preview Pane */
     .preview-pane {
       display: flex;
       align-items: center;
@@ -187,7 +178,6 @@ type Tab = "preview" | "code";
       padding: 2rem;
     }
 
-    /* Button Preview */
     .preview-buttons {
       display: flex;
       flex-wrap: wrap;
@@ -234,7 +224,6 @@ type Tab = "preview" | "code";
       font-size: 1.0625rem;
     }
 
-    /* Code Pane */
     .code-pane {
       height: 350px;
       overflow: hidden;
@@ -244,7 +233,6 @@ type Tab = "preview" | "code";
       height: 100%;
     }
 
-    /* Web Editor Custom Styles */
     ::ng-deep vertex-editor {
       height: 100%;
       display: block;
@@ -266,20 +254,20 @@ export class CodeExampleComponent {
   description = input.required<string>();
   code = input.required<string>();
 
-  readonly activeTab = signal<Tab>("preview");
+  readonly activeTab = signal<Tab>('preview');
   readonly copied = signal(false);
 
-  setTab(tab: Tab) {
+  setTab(tab: Tab): void {
     this.activeTab.set(tab);
   }
 
-  async copyCode() {
+  async copyCode(): Promise<void> {
     try {
       await navigator.clipboard.writeText(this.code());
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err);
+      console.error('Failed to copy:', err);
     }
   }
 }

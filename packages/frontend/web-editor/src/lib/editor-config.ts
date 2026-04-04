@@ -1,29 +1,37 @@
-import { EditorState, Extension, Compartment } from '@codemirror/state';
-import { EditorView, keymap, placeholder, ViewUpdate } from '@codemirror/view';
-import { oneDark } from '@codemirror/theme-one-dark';
 import {
   autocompletion,
   closeBrackets,
   closeBracketsKeymap,
   completionKeymap,
-} from '@codemirror/autocomplete';
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
+} from "@codemirror/autocomplete";
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import {
   bracketMatching,
   defaultHighlightStyle,
   foldKeymap,
   indentOnInput,
-  syntaxHighlighting,
   LanguageSupport,
-} from '@codemirror/language';
-import { lintKeymap } from '@codemirror/lint';
-import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
-import { lineNumbers } from '@codemirror/view';
+  syntaxHighlighting,
+} from "@codemirror/language";
+import { lintKeymap } from "@codemirror/lint";
+import { searchKeymap } from "@codemirror/search";
+import { Compartment, EditorState, Extension } from "@codemirror/state";
+import { oneDark } from "@codemirror/theme-one-dark";
+import {
+  drawSelection,
+  dropCursor,
+  EditorView,
+  keymap,
+  lineNumbers,
+  placeholder,
+  rectangularSelection,
+  ViewUpdate,
+} from "@codemirror/view";
 
 export interface EditorConfig {
   value: string;
   language: LanguageSupport | null;
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   readonly: boolean;
   lineNumbers: boolean;
   wordWrap: boolean;
@@ -51,14 +59,14 @@ export class EditorConfigurator {
       closeBrackets(),
       autocompletion(),
       rectangularSelection(),
-      
+
       // Syntax highlighting
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      
+
       // Editor behavior
       EditorState.allowMultipleSelections.of(true),
       EditorState.tabSize.of(config.tabSize),
-      
+
       // Keymaps
       keymap.of([
         ...closeBracketsKeymap,
@@ -76,7 +84,7 @@ export class EditorConfigurator {
       this.readonlyCompartment.of(EditorState.readOnly.of(config.readonly)),
       this.lineNumbersCompartment.of(config.lineNumbers ? lineNumbers() : []),
       this.wordWrapCompartment.of(
-        config.wordWrap ? EditorView.lineWrapping : []
+        config.wordWrap ? EditorView.lineWrapping : [],
       ),
 
       // Event handlers
@@ -110,10 +118,10 @@ export class EditorConfigurator {
     });
   }
 
-  getThemeExtension(theme: 'light' | 'dark'): Extension {
-    return theme === 'dark' ? oneDark : [];
+  getThemeExtension(theme: "light" | "dark"): Extension {
+    return theme === "dark" ? oneDark : [];
   }
 }
 
 // Re-export needed types
-export { Compartment, EditorState, Extension, EditorView };
+export { Compartment, EditorState, EditorView, Extension };
