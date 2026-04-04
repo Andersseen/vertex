@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    defaults:
+      run:
+        working-directory: packages/frontend/web-editor
     
     steps:
     - name: Checkout
@@ -21,14 +24,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
 
     - name: Install dependencies
-      working-directory: packages/frontend/web-editor
-      run: npm ci
+      run: npm install
 
     - name: Build
-      working-directory: packages/frontend/web-editor
       run: npm run build
 
     - name: Create Release
@@ -41,19 +41,18 @@ jobs:
           
           ## Installation
           
-          ### curl
+          ### Quick install (curl)
           ```bash
-          curl -L -o web-editor.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor.min.js
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.mjs | node - ./public
           ```
           
-          ### CLI
+          ### Direct download
           ```bash
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/install.mjs | node -
+          curl -L -o web-editor.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor.min.js
           ```
         files: |
           packages/frontend/web-editor/dist/web-editor.min.js
           packages/frontend/web-editor/dist/web-editor.min.js.map
-          packages/frontend/web-editor/dist/web-editor.js
         fail_on_unmatched_files: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
