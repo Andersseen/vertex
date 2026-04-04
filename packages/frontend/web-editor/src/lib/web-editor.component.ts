@@ -8,58 +8,23 @@ import {
   effect,
   input,
   output,
-} from "@angular/core";
-import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-  completionKeymap,
-} from "@codemirror/autocomplete";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import {
-  bracketMatching,
-  defaultHighlightStyle,
-  foldKeymap,
-  indentOnInput,
-  syntaxHighlighting,
-} from "@codemirror/language";
-import { lintKeymap } from "@codemirror/lint";
-import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { Compartment, EditorState, Extension } from "@codemirror/state";
-import { oneDark } from "@codemirror/theme-one-dark";
-import {
-  EditorView,
-  ViewUpdate,
-  keymap as cmKeymap,
-  placeholder as cmPlaceholder,
-  crosshairCursor,
-  drawSelection,
-  dropCursor,
-  highlightActiveLine,
-  highlightSpecialChars,
-  lineNumbers,
-  rectangularSelection,
-} from "@codemirror/view";
-import { SupportedLanguage, getLanguageSupport } from "./language-support";
+  inject,
+} from '@angular/core';
+import { EditorView } from '@codemirror/view';
+import { SupportedLanguage, getLanguageSupport } from './language-support';
+import { EditorConfigurator } from './editor-config';
+import { AttributeObserver } from './attribute-observer';
 
-export type EditorTheme = "light" | "dark";
+export type EditorTheme = 'light' | 'dark';
 
 export interface CursorPosition {
   line: number;
   column: number;
 }
 
-/**
- * WebEditorComponent - A standalone CodeMirror 6 editor as an Angular component
- *
- * Modern Angular v20+ approach:
- * - Standalone by default (no standalone: true needed)
- * - Uses input() and output() functions
- * - OnPush change detection
- */
 @Component({
-  selector: "web-editor-internal",
-  template: `<div #editorContainer class="web-editor-container"></div>`,
+  selector: 'vertex-editor-internal',
+  template: `<div #editorContainer class="vertex-editor-container"></div>`,
   styles: `
     :host {
       display: block;
@@ -67,22 +32,22 @@ export interface CursorPosition {
       height: 100%;
     }
 
-    .web-editor-container {
+    .vertex-editor-container {
       width: 100%;
       height: 100%;
       overflow: hidden;
       font-family:
         "JetBrains Mono", "Fira Code", "Source Code Pro", "Monaco", "Consolas",
         monospace;
-      font-size: var(--web-editor-font-size, 14px);
-      line-height: var(--web-editor-line-height, 1.5);
+      font-size: var(--vertex-editor-font-size, 14px);
+      line-height: var(--vertex-editor-line-height, 1.5);
     }
 
-    :host([theme="dark"]) .web-editor-container {
+    :host([theme="dark"]) .vertex-editor-container {
       background: #1e1e1e;
     }
 
-    :host([theme="light"]) .web-editor-container {
+    :host([theme="light"]) .vertex-editor-container {
       background: #ffffff;
     }
 
@@ -102,46 +67,48 @@ export interface CursorPosition {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WebEditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild("editorContainer", { static: true })
+  @ViewChild('editorContainer', { static: true })
   editorContainer!: ElementRef<HTMLDivElement>;
 
-  // Inputs using input() function (Angular v20+)
-  readonly value = input<string>("");
-  readonly language = input<SupportedLanguage>("typescript");
-  readonly theme = input<EditorTheme>("dark");
+  private hostElement = inject(ElementRef).nativeElement as HTMLElement;
+
+  // Inputs
+  readonly value = input<string>('');
+  readonly language = input<SupportedLanguage>('typescript');
+  readonly theme = input<EditorTheme>('dark');
   readonly readonly = input<boolean>(false);
   readonly lineNumbers = input<boolean>(true);
-  readonly height = input<string>("300px");
-  readonly fontSize = input<string>("14");
-  readonly placeholder = input<string>("");
+  readonly height = input<string>('300px');
+  readonly fontSize = input<string>('14');
+  readonly placeholder = input<string>('');
   readonly tabSize = input<number>(2);
   readonly wordWrap = input<boolean>(false);
 
-  // Outputs using output() function
+  // Outputs
   readonly valueChange = output<string>();
-  readonly focusEvent = output<void>();
-  readonly blurEvent = output<void>();
-  readonly ready = output<void>();
   readonly cursorActivity = output<CursorPosition>();
+  readonly ready = output<void>();
 
+  // Private state
   private editorView: EditorView | null = null;
-  private readonly languageCompartment = new Compartment();
-  private readonly themeCompartment = new Compartment();
-  private readonly readonlyCompartment = new Compartment();
-  private readonly lineNumbersCompartment = new Compartment();
-  private readonly wordWrapCompartment = new Compartment();
+  private configurator = new EditorConfigurator();
+  private attributeObserver: AttributeObserver | null = null;
+  private _isInitialized = false;
+  private pendingValue: string | null = null;
+
+  get isInitialized(): boolean {
+    return this._isInitialized;
+  }
 
   constructor() {
-    // Effects to handle input changes
+    this.setupEffects();
+  }
+
+  private setupEffects(): void {
     effect(() => {
       const newValue = this.value();
-      if (this.editorView) {
-        const currentValue = this.editorView.state.doc.toString();
-        if (currentValue !== newValue) {
-          this.editorView.dispatch({
-            changes: { from: 0, to: currentValue.length, insert: newValue },
-          });
-        }
+      if (this.editorView && this._isInitialized) {
+        this.updateEditorValue(newValue);
       }
     });
 
@@ -159,8 +126,9 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       const readonly = this.readonly();
       if (this.editorView) {
         this.editorView.dispatch({
-          effects: this.readonlyCompartment.reconfigure(
-            EditorState.readOnly.of(readonly),
+          effects: this.configurator.readonlyCompartment.reconfigure(
+            // @ts-ignore - CM internal type
+            EditorView.editable.of(!readonly)
           ),
         });
       }
@@ -170,8 +138,8 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       const showLineNumbers = this.lineNumbers();
       if (this.editorView) {
         this.editorView.dispatch({
-          effects: this.lineNumbersCompartment.reconfigure(
-            showLineNumbers ? lineNumbers() : [],
+          effects: this.configurator.lineNumbersCompartment.reconfigure(
+            showLineNumbers ? this.getLineNumbersExtension() : []
           ),
         });
       }
@@ -181,8 +149,8 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       const wrap = this.wordWrap();
       if (this.editorView) {
         this.editorView.dispatch({
-          effects: this.wordWrapCompartment.reconfigure(
-            wrap ? EditorView.lineWrapping : [],
+          effects: this.configurator.wordWrapCompartment.reconfigure(
+            wrap ? EditorView.lineWrapping : []
           ),
         });
       }
@@ -199,160 +167,148 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       const fontSize = this.fontSize();
       if (this.editorContainer?.nativeElement) {
         this.editorContainer.nativeElement.style.setProperty(
-          "--web-editor-font-size",
-          `${fontSize}px`,
+          '--vertex-editor-font-size',
+          `${fontSize}px`
         );
       }
     });
   }
 
+  private getLineNumbersExtension() {
+    const { lineNumbers } = require('@codemirror/view');
+    return lineNumbers();
+  }
+
   ngAfterViewInit(): void {
-    this.initializeEditor();
-    this.ready.emit();
+    const initialValue = this.getInitialValue();
+
+    this.attributeObserver = new AttributeObserver(this.hostElement, {
+      onValueChange: (value) => this.handleAttributeValueChange(value),
+    });
+    this.attributeObserver.start();
+
+    this.initializeEditor(initialValue);
   }
 
   ngOnDestroy(): void {
+    this.attributeObserver?.stop();
     this.editorView?.destroy();
   }
 
-  private async initializeEditor(): Promise<void> {
-    const languageSupport = await getLanguageSupport(this.language());
-    const placeholderText = this.placeholder();
-
-    const extensions: Extension[] = [
-      // Basic setup
-      highlightSpecialChars(),
-      history(),
-      drawSelection(),
-      dropCursor(),
-      EditorState.allowMultipleSelections.of(true),
-      indentOnInput(),
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      bracketMatching(),
-      closeBrackets(),
-      autocompletion(),
-      rectangularSelection(),
-      crosshairCursor(),
-      highlightActiveLine(),
-      highlightSelectionMatches(),
-
-      // Keymaps
-      cmKeymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...completionKeymap,
-        ...lintKeymap,
-      ]),
-
-      // Language
-      this.languageCompartment.of(languageSupport || []),
-
-      // Theme
-      this.themeCompartment.of(this.getThemeExtension()),
-
-      // Readonly
-      this.readonlyCompartment.of(EditorState.readOnly.of(this.readonly())),
-
-      // Line numbers
-      this.lineNumbersCompartment.of(this.lineNumbers() ? lineNumbers() : []),
-
-      // Word wrap
-      this.wordWrapCompartment.of(
-        this.wordWrap() ? EditorView.lineWrapping : [],
-      ),
-
-      // Tab size
-      EditorState.tabSize.of(this.tabSize()),
-
-      // Update listener
-      EditorView.updateListener.of((update: ViewUpdate) => {
-        if (update.docChanged) {
-          this.valueChange.emit(update.state.doc.toString());
-        }
-
-        // Cursor activity
-        const { head } = update.state.selection.main;
-        const line = update.state.doc.lineAt(head);
-        this.cursorActivity.emit({
-          line: line.number,
-          column: head - line.from,
-        });
-      }),
-    ];
-
-    // Add placeholder if provided
-    if (placeholderText) {
-      extensions.push(cmPlaceholder(placeholderText));
+  private getInitialValue(): string {
+    const attrValue = this.hostElement.getAttribute('value');
+    if (attrValue !== null && attrValue !== '') {
+      return attrValue;
     }
+    return this.value() || '';
+  }
+
+  private async initializeEditor(initialValue: string): Promise<void> {
+    const languageSupport = await getLanguageSupport(this.language());
 
     this.editorView = new EditorView({
-      state: EditorState.create({
-        doc: this.value(),
-        extensions,
+      state: this.configurator.createState({
+        value: initialValue,
+        language: languageSupport,
+        theme: this.theme(),
+        readonly: this.readonly(),
+        lineNumbers: this.lineNumbers(),
+        wordWrap: this.wordWrap(),
+        tabSize: this.tabSize(),
+        placeholder: this.placeholder(),
+        onChange: (value) => this.valueChange.emit(value),
+        onCursorActivity: (pos) => this.cursorActivity.emit(pos),
       }),
       parent: this.editorContainer.nativeElement,
     });
 
-    // Apply initial styles
     this.editorContainer.nativeElement.style.height = this.height();
     this.editorContainer.nativeElement.style.setProperty(
-      "--web-editor-font-size",
-      `${this.fontSize()}px`,
+      '--vertex-editor-font-size',
+      `${this.fontSize()}px`
     );
+
+    this._isInitialized = true;
+    this.attributeObserver?.stopPolling();
+
+    // Check if value changed during initialization
+    const currentAttrValue = this.hostElement.getAttribute('value');
+    if (currentAttrValue && currentAttrValue !== initialValue) {
+      this.updateEditorValue(currentAttrValue);
+    }
+
+    // Process pending value
+    if (this.pendingValue !== null) {
+      this.updateEditorValue(this.pendingValue);
+      this.pendingValue = null;
+    }
+
+    this.ready.emit();
   }
 
-  private async updateLanguage(): Promise<void> {
-    if (!this.editorView) return;
-    const languageSupport = await getLanguageSupport(this.language());
-    if (languageSupport) {
-      this.editorView.dispatch({
-        effects: this.languageCompartment.reconfigure(languageSupport),
-      });
+  private handleAttributeValueChange(newValue: string): void {
+    if (this.editorView && this._isInitialized) {
+      this.updateEditorValue(newValue);
+    } else {
+      this.pendingValue = newValue;
     }
   }
 
-  private updateTheme(): void {
+  private updateEditorValue(value: string): void {
     if (!this.editorView) return;
-    this.editorView.dispatch({
-      effects: this.themeCompartment.reconfigure(this.getThemeExtension()),
-    });
-  }
 
-  private getThemeExtension(): Extension {
-    return this.theme() === "dark" ? oneDark : [];
-  }
-
-  // Public API methods
-  getValue(): string {
-    return this.editorView?.state.doc.toString() || "";
-  }
-
-  setValue(value: string): void {
-    if (this.editorView) {
-      const currentValue = this.editorView.state.doc.toString();
+    const currentValue = this.editorView.state.doc.toString();
+    if (value !== currentValue) {
       this.editorView.dispatch({
         changes: { from: 0, to: currentValue.length, insert: value },
       });
     }
   }
 
-  insertText(text: string): void {
-    if (this.editorView) {
-      const { from } = this.editorView.state.selection.main;
+  private async updateLanguage(): Promise<void> {
+    if (!this.editorView) return;
+
+    const languageSupport = await getLanguageSupport(this.language());
+    if (languageSupport) {
       this.editorView.dispatch({
-        changes: { from, insert: text },
+        effects: this.configurator.languageCompartment.reconfigure(languageSupport),
       });
     }
   }
 
-  focus(): void {
-    this.editorView?.focus();
+  private updateTheme(): void {
+    if (!this.editorView) return;
+
+    this.editorView.dispatch({
+      effects: this.configurator.themeCompartment.reconfigure(
+        this.configurator.getThemeExtension(this.theme())
+      ),
+    });
   }
 
-  async format(): Promise<void> {
-    console.log("Format functionality - to be implemented");
+  // Public API methods
+  getValue(): string {
+    return this.editorView?.state.doc.toString() || '';
+  }
+
+  setValue(value: string): void {
+    if (this.editorView && this._isInitialized) {
+      this.updateEditorValue(value);
+    } else {
+      this.pendingValue = value;
+    }
+  }
+
+  insertText(text: string): void {
+    if (!this.editorView) return;
+
+    const { from } = this.editorView.state.selection.main;
+    this.editorView.dispatch({
+      changes: { from, insert: text },
+    });
+  }
+
+  focus(): void {
+    this.editorView?.focus();
   }
 }
