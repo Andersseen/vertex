@@ -1,0 +1,243 @@
+// Web Editor Styles
+// These styles are bundled with the component
+
+// CSS Variables for theming
+:root {
+  --web-editor-font-size: 14px;
+  --web-editor-line-height: 1.5;
+  --web-editor-border-radius: 8px;
+  --web-editor-padding: 0;
+  --scrollbar-color: rgba(128, 128, 128, 0.4);
+  --scrollbar-hover-color: rgba(128, 128, 128, 0.6);
+}
+
+// Dark theme variables (applied when theme="dark")
+web-editor[theme="dark"] {
+  --editor-bg: #1e1e1e;
+  --editor-fg: #d4d4d4;
+  --gutter-bg: #1e1e1e;
+  --gutter-fg: #858585;
+  --selection-bg: #264f78;
+  --line-highlight-bg: rgba(255, 255, 255, 0.05);
+  --cursor-color: #aeafad;
+  --matching-bracket-bg: rgba(128, 128, 128, 0.3);
+}
+
+// Light theme variables (applied when theme="light")
+web-editor[theme="light"] {
+  --editor-bg: #ffffff;
+  --editor-fg: #2c2c2c;
+  --gutter-bg: #f5f5f5;
+  --gutter-fg: #6e6e6e;
+  --selection-bg: #add6ff;
+  --line-highlight-bg: rgba(0, 0, 0, 0.03);
+  --cursor-color: #000000;
+  --matching-bracket-bg: rgba(0, 0, 0, 0.1);
+}
+
+// Base web-editor styles
+web-editor {
+  display: block;
+  width: 100%;
+  height: 300px; // default height
+  border-radius: var(--web-editor-border-radius);
+  overflow: hidden;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Monaco', 'Consolas', monospace;
+  font-size: var(--web-editor-font-size);
+  line-height: var(--web-editor-line-height);
+
+  // Default dark theme
+  background: var(--editor-bg, #1e1e1e);
+  color: var(--editor-fg, #d4d4d4);
+}
+
+// Ensure the editor takes full space
+web-editor .web-editor-container {
+  width: 100%;
+  height: 100%;
+}
+
+// CodeMirror 6 specific customizations
+web-editor {
+  .cm-editor {
+    height: 100% !important;
+    background: transparent;
+  }
+
+  .cm-scroller {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+  }
+
+  .cm-content {
+    padding: 8px 0;
+  }
+
+  .cm-line {
+    padding: 0 4px;
+  }
+
+  .cm-gutters {
+    font-family: inherit !important;
+    font-size: 0.9em;
+    background: var(--gutter-bg, #1e1e1e);
+    border-right: 1px solid rgba(128, 128, 128, 0.2);
+  }
+
+  .cm-gutterElement {
+    padding: 0 8px 0 16px;
+    color: var(--gutter-fg, #858585);
+  }
+
+  .cm-activeLineGutter {
+    background: var(--line-highlight-bg, rgba(255, 255, 255, 0.05));
+  }
+
+  .cm-selectionBackground {
+    background: var(--selection-bg, #264f78) !important;
+  }
+
+  .cm-cursor {
+    border-left-color: var(--cursor-color, #aeafad);
+  }
+
+  .cm-matchingBracket {
+    background: var(--matching-bracket-bg, rgba(128, 128, 128, 0.3));
+  }
+
+  .cm-nonmatchingBracket {
+    background: rgba(255, 0, 0, 0.3);
+  }
+
+  .cm-placeholder {
+    color: rgba(128, 128, 128, 0.6);
+  }
+
+  // Autocomplete dropdown
+  .cm-tooltip {
+    border: none;
+    border-radius: 6px;
+    background: var(--editor-bg, #1e1e1e);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+
+  .cm-tooltip.cm-tooltip-autocomplete > ul {
+    font-family: inherit;
+    max-height: 300px;
+
+    > li {
+      padding: 6px 12px;
+      color: var(--editor-fg, #d4d4d4);
+
+      &[aria-selected] {
+        background: var(--selection-bg, #264f78);
+      }
+    }
+  }
+
+  // Panel styles (search, etc.)
+  .cm-panel {
+    background: var(--gutter-bg, #1e1e1e);
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    padding: 8px;
+
+    input {
+      background: var(--editor-bg, #2d2d2d);
+      border: 1px solid rgba(128, 128, 128, 0.3);
+      border-radius: 4px;
+      color: var(--editor-fg, #d4d4d4);
+      padding: 4px 8px;
+      font-family: inherit;
+
+      &:focus {
+        outline: none;
+        border-color: var(--selection-bg, #264f78);
+      }
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid rgba(128, 128, 128, 0.3);
+      border-radius: 4px;
+      color: var(--editor-fg, #d4d4d4);
+      padding: 4px 12px;
+      cursor: pointer;
+      font-family: inherit;
+
+      &:hover {
+        background: var(--line-highlight-bg, rgba(255, 255, 255, 0.05));
+      }
+    }
+  }
+
+  // Scrollbars
+  .cm-scroller::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .cm-scroller::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cm-scroller::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color);
+    border-radius: 5px;
+
+    &:hover {
+      background: var(--scrollbar-hover-color);
+    }
+  }
+
+  // Light theme specific overrides
+  &[theme="light"] {
+    .cm-gutters {
+      border-right-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .cm-tooltip {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .cm-panel {
+      border-top-color: rgba(0, 0, 0, 0.1);
+
+      input {
+        border-color: rgba(0, 0, 0, 0.2);
+        background: #ffffff;
+        color: #2c2c2c;
+      }
+
+      button {
+        border-color: rgba(0, 0, 0, 0.2);
+        color: #2c2c2c;
+
+        &:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
+  }
+}
+
+// Animation for focus state
+web-editor {
+  transition: box-shadow 0.2s ease;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  web-editor {
+    --web-editor-font-size: 12px;
+
+    .cm-gutterElement {
+      padding: 0 4px 0 8px;
+    }
+  }
+}

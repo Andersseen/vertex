@@ -1,0 +1,94 @@
+/* Global Styles for Web Editor Demo */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0a;
+  color: #e5e5e5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3d3d4a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4d4d5a;
+}
+
+/* Selection */
+::selection {
+  background: #7c3aed40;
+  color: #e5e5e5;
+}
+
+/* Focus Visible */
+:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* Web Editor Global Styles */
+web-editor {
+  --web-editor-font-size: 13px;
+  --web-editor-line-height: 1.6;
+  --editor-bg: #0a0a0f;
+  --editor-fg: #e5e5e5;
+  --gutter-bg: #0a0a0f;
+  --gutter-fg: #555;
+  --selection-bg: #7c3aed40;
+  --line-highlight-bg: rgba(124, 58, 237, 0.05);
+  --cursor-color: #7c3aed;
+}
+
+web-editor[theme="dark"] {
+  .cm-editor {
+    background: #0a0a0f;
+  }
+
+  .cm-gutters {
+    background: #0a0a0f;
+    border-right: 1px solid #1a1a2e;
+  }
+
+  .cm-gutterElement {
+    color: #555;
+  }
+
+  .cm-activeLineGutter {
+    background: rgba(124, 58, 237, 0.1);
+    color: #888;
+  }
+
+  .cm-activeLine {
+    background: rgba(124, 58, 237, 0.03);
+  }
+
+  .cm-selectionBackground {
+    background: #7c3aed40 !important;
+  }
+
+  .cm-cursor {
+    border-left-color: #7c3aed;
+  }
+}
