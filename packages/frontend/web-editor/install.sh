@@ -1,34 +1,40 @@
 #!/bin/bash
 
 # Vertex Editor Quick Install Script
-# Usage: curl -sSL https://raw.githubusercontent.com/your-repo/vertex-editor/main/install.sh | bash
+# Usage: ./install.sh [target-directory]
+# 
+# This script copies the built web-editor.min.js from the monorepo
+# to your project's public directory.
 
 set -e
 
-CDN_URL="https://cdn.jsdelivr.net/npm/@vertex/web-editor@latest/dist/web-editor.min.js"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_BUILD_PATH="$SCRIPT_DIR/dist/web-editor.min.js"
 TARGET_DIR="${1:-./public}"
 FILE_NAME="web-editor.min.js"
 
 echo "🚀 Vertex Editor Installer"
 echo ""
 
+# Check if build exists
+if [ ! -f "$LOCAL_BUILD_PATH" ]; then
+    echo "❌ Build not found!"
+    echo ""
+    echo "Please build the web-editor first:"
+    echo "  cd packages/frontend/web-editor"
+    echo "  npm run build"
+    echo ""
+    exit 1
+fi
+
 # Create target directory
 mkdir -p "$TARGET_DIR"
 echo "📁 Target directory: $TARGET_DIR"
 
-# Download the file
-if command -v curl &> /dev/null; then
-    echo "📦 Downloading..."
-    curl -sSL "$CDN_URL" -o "$TARGET_DIR/$FILE_NAME"
-elif command -v wget &> /dev/null; then
-    echo "📦 Downloading..."
-    wget -q "$CDN_URL" -O "$TARGET_DIR/$FILE_NAME"
-else
-    echo "❌ Error: curl or wget is required"
-    exit 1
-fi
-
-echo "✅ Downloaded: $TARGET_DIR/$FILE_NAME"
+# Copy the file
+echo "📦 Copying Vertex Editor..."
+cp "$LOCAL_BUILD_PATH" "$TARGET_DIR/$FILE_NAME"
+echo "✅ Copied: $TARGET_DIR/$FILE_NAME"
 
 # Create a simple example
 cat > "$TARGET_DIR/example.html" << 'EOF'
@@ -79,6 +85,8 @@ echo ""
 echo "📖 Usage:"
 echo "  1. Open $TARGET_DIR/example.html in your browser"
 echo "  2. Include the script in your project:"
-echo "     <script src=\"$TARGET_DIR/$FILE_NAME\"></script>"
+echo "     <script src=\"$FILE_NAME\"></script>"
+echo "  3. Use the component:"
+echo "     <vertex-editor language=\"typescript\" theme=\"dark\"></vertex-editor>"
 echo ""
 echo "🎉 Done!"

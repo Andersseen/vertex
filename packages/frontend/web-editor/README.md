@@ -11,48 +11,54 @@ A lightweight, standalone code editor Web Component built with Angular Elements 
 - 📱 **Responsive** - Adapts to container size
 - ⚡ **Lazy loading** - Languages load on demand
 - 🔧 **Customizable** - Line numbers, read-only mode, word wrap, and more
+- 🎯 **Zoneless Angular** - Uses signals, no zone.js overhead
 
-## Installation
+## Quick Installation
 
-### Option 1: CDN (Recommended)
+### Option 1: npx (Easiest - No install needed)
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/@vertex/web-editor/dist/web-editor.min.js"></script>
+```bash
+# Install directly from GitHub to your project
+npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./public
+
+# Or specify a different directory
+npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./static
 ```
 
-### Option 2: NPM
+### Option 2: Local Server (For development)
+
+```bash
+# Terminal 1: Start server from vertex monorepo
+cd packages/frontend/web-editor
+node bin/serve-worker.mjs 8080
+
+# Terminal 2: Download to your project
+curl http://localhost:8080/web-editor.min.js -o ./public/web-editor.min.js
+```
+
+### Option 3: Manual Download
+
+```bash
+# Download directly from GitHub raw
+curl -L https://raw.githubusercontent.com/your-username/vertex/main/packages/frontend/web-editor/dist/web-editor.min.js \
+  -o ./public/web-editor.min.js
+```
+
+### Option 4: npm (Coming Soon)
 
 ```bash
 npm install @vertex/web-editor
 ```
 
-Then import in your project:
-
-```javascript
-import '@vertex/web-editor';
-```
-
-Or include the script:
-
-```html
-<script src="./node_modules/@vertex/web-editor/dist/web-editor.min.js"></script>
-```
-
-### Option 3: CLI Installer
-
-```bash
-npx @vertex/web-editor install
-```
-
 ## Quick Start
 
-### Vanilla HTML/JS
+After installation, include the script in your HTML:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/@vertex/web-editor/dist/web-editor.min.js"></script>
+  <script src="web-editor.min.js"></script>
 </head>
 <body>
   <vertex-editor
@@ -65,11 +71,13 @@ npx @vertex/web-editor install
 </html>
 ```
 
+## Framework Examples
+
 ### React
 
 ```jsx
 import { useEffect, useRef } from 'react';
-import '@vertex/web-editor';
+import './web-editor.min.js';
 
 function CodeEditor({ code, language = 'typescript' }) {
   const editorRef = useRef(null);
@@ -112,7 +120,7 @@ export default CodeEditor;
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import '@vertex/web-editor';
+import './web-editor.min.js';
 
 const props = defineProps({
   code: String
@@ -121,7 +129,6 @@ const props = defineProps({
 const editor = ref(null);
 
 onMounted(() => {
-  // Access editor methods
   console.log(editor.value.getValue());
 });
 </script>
@@ -132,7 +139,7 @@ onMounted(() => {
 ```typescript
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import '@vertex/web-editor';
+import './web-editor.min.js';
 
 @Component({
   selector: 'app-code-display',
@@ -155,7 +162,6 @@ export class CodeDisplayComponent implements AfterViewInit {
   code = `const greeting = 'Hello World!';`;
 
   ngAfterViewInit() {
-    // Editor is ready
     const editor = this.editorRef.nativeElement;
     console.log('Editor value:', editor.getValue());
   }
@@ -170,7 +176,7 @@ const code = `const sum = (a, b) => a + b;`;
 ---
 
 <script>
-  import '@vertex/web-editor';
+  import './web-editor.min.js';
 </script>
 
 <vertex-editor
@@ -214,128 +220,22 @@ const code = `const sum = (a, b) => a + b;`;
 |-------|-------------|
 | `ready` | Fired when the editor is initialized and ready |
 
-## Examples
+## CLI Options
 
-### Code Display with Copy Button
+See [CLI.md](./CLI.md) for detailed CLI documentation.
 
-```html
-<div class="code-block">
-  <div class="code-header">
-    <span>example.ts</span>
-    <button onclick="copyCode()">Copy</button>
-  </div>
-  <vertex-editor
-    id="code-editor"
-    value="const greeting = 'Hello';"
-    language="typescript"
-    theme="dark"
-    readonly="true"
-    lineNumbers="true"
-    height="200px"
-  ></vertex-editor>
-</div>
+```bash
+# Install from GitHub (default)
+npx github:your-username/vertex/packages/frontend/web-editor/bin/install.mjs ./public
 
-<script>
-  function copyCode() {
-    const editor = document.getElementById('code-editor');
-    navigator.clipboard.writeText(editor.getValue());
-  }
-</script>
+# Use local monorepo build
+node bin/install.mjs ./public --local
 
-<style>
-  .code-block {
-    border: 1px solid #333;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .code-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 16px;
-    background: #1a1a1a;
-    color: #888;
-    font-size: 14px;
-  }
-  .code-header button {
-    background: transparent;
-    border: 1px solid #444;
-    color: #888;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-</style>
-```
+# Use custom URL
+node bin/install.mjs ./public --url=https://your-cdn.com/web-editor.min.js
 
-### Interactive Playground
-
-```html
-<div class="playground">
-  <div class="toolbar">
-    <select id="language">
-      <option value="javascript">JavaScript</option>
-      <option value="typescript">TypeScript</option>
-      <option value="html">HTML</option>
-      <option value="css">CSS</option>
-    </select>
-    <button onclick="runCode()">Run</button>
-  </div>
-  <vertex-editor
-    id="playground-editor"
-    value="console.log('Hello!');"
-    language="javascript"
-    theme="dark"
-    height="300px"
-  ></vertex-editor>
-  <div id="output"></div>
-</div>
-
-<script>
-  const editor = document.getElementById('playground-editor');
-  const languageSelect = document.getElementById('language');
-  
-  languageSelect.addEventListener('change', (e) => {
-    editor.setAttribute('language', e.target.value);
-  });
-
-  function runCode() {
-    const code = editor.getValue();
-    console.log('Running:', code);
-    // Execute or evaluate code here
-  }
-</script>
-```
-
-### Documentation with Tabs
-
-```html
-<div class="doc-example">
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('preview')">Preview</button>
-    <button class="tab" onclick="showTab('code')">Code</button>
-  </div>
-  
-  <div id="preview-panel" class="panel active">
-    <!-- Preview content -->
-  </div>
-  
-  <div id="code-panel" class="panel">
-    <vertex-editor
-      value="<!-- Your HTML here -->"
-      language="html"
-      theme="dark"
-      readonly="true"
-      height="300px"
-    ></vertex-editor>
-  </div>
-</div>
-
-<script>
-  function showTab(tab) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(tab + '-panel').classList.add('active');
-  }
-</script>
+# Start local server
+node bin/serve-worker.mjs 8080
 ```
 
 ## Styling
@@ -366,6 +266,32 @@ vertex-editor[theme="light"] {
 - Chrome/Edge 80+
 - Firefox 75+
 - Safari 13.1+
+
+## Development
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/vertex.git
+cd vertex/packages/frontend/web-editor
+
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Start dev server
+node bin/serve-worker.mjs
+```
+
+## More Examples
+
+See [EXAMPLES.md](./EXAMPLES.md) for more detailed examples including:
+- Code display with copy button
+- Interactive playground
+- Documentation with tabs
+- Code diff viewer
+- Collaborative editor
 
 ## License
 
