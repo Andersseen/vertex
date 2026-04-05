@@ -201,6 +201,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     return this.value() || "";
   }
 
+  private getInitialTheme(): EditorTheme {
+    const attrTheme = this.hostElement.getAttribute("theme");
+    if (attrTheme === "light" || attrTheme === "dark") {
+      return attrTheme;
+    }
+    return this.theme();
+  }
+
   private async initializeEditor(initialValue: string): Promise<void> {
     const languageSupport = await getLanguageSupport(this.language());
 
@@ -208,7 +216,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       state: this.configurator.createState({
         value: initialValue,
         language: languageSupport,
-        theme: this.theme(),
+        theme: this.getInitialTheme(),
         readonly: this.readonly(),
         lineNumbers: this.lineNumbers(),
         wordWrap: this.wordWrap(),
