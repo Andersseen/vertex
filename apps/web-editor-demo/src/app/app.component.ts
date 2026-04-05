@@ -16,6 +16,19 @@ import { CodeExampleComponent } from "./components/code-example/code-example.com
             Angular Elements and CodeMirror 6
           </p>
         </div>
+        <div class="theme-toggle">
+          <span class="theme-label">Theme:</span>
+          <button
+            class="toggle-btn"
+            [class.active]="theme() === 'light'"
+            (click)="setTheme('light')"
+          >Light</button>
+          <button
+            class="toggle-btn"
+            [class.active]="theme() === 'dark'"
+            (click)="setTheme('dark')"
+          >Dark</button>
+        </div>
       </header>
 
       <main class="main">
@@ -23,6 +36,7 @@ import { CodeExampleComponent } from "./components/code-example/code-example.com
           title="Button Component"
           description="A versatile button component with multiple variants and sizes."
           [code]="buttonCode"
+          [theme]="theme()"
         />
       </main>
 
@@ -90,6 +104,35 @@ import { CodeExampleComponent } from "./components/code-example/code-example.com
       gap: 3rem;
     }
 
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .theme-label {
+      font-size: 0.875rem;
+      color: #888;
+    }
+
+    .toggle-btn {
+      padding: 0.375rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #888;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: #fff;
+    }
+
     .footer {
       padding: 2rem;
       text-align: center;
@@ -118,6 +161,12 @@ import { CodeExampleComponent } from "./components/code-example/code-example.com
   `,
 })
 export class AppComponent {
+  readonly theme = signal<'light' | 'dark'>('dark');
+
+  setTheme(t: 'light' | 'dark'): void {
+    this.theme.set(t);
+  }
+
   // Button component source code as a string
   readonly buttonCode = [
     "import { Component, input, output } from '@angular/core';",

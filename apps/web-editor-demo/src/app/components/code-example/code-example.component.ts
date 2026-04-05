@@ -66,7 +66,7 @@ type Tab = 'preview' | 'code';
                 <vertex-editor
                   [attr.value]="code()"
                   language="typescript"
-                  theme="dark"
+                  [attr.theme]="theme()"
                   lineNumbers="true"
                   readonly="true"
                   height="350px"
@@ -253,6 +253,7 @@ export class CodeExampleComponent {
   title = input.required<string>();
   description = input.required<string>();
   code = input.required<string>();
+  theme = input<'light' | 'dark'>('dark');
 
   readonly activeTab = signal<Tab>('preview');
   readonly copied = signal(false);

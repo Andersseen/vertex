@@ -1,5 +1,6 @@
 export interface AttributeObserverCallbacks {
   onValueChange: (value: string) => void;
+  onThemeChange?: (theme: string) => void;
 }
 
 export class AttributeObserver {
@@ -28,18 +29,25 @@ export class AttributeObserver {
   }
 
   private setupMutationObserver(): void {
+    const attributeFilter = ['value'];
+    if (this.callbacks.onThemeChange) attributeFilter.push('theme');
+
     this.mutationObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+        if (mutation.type !== 'attributes') continue;
+        if (mutation.attributeName === 'value') {
           const newValue = this.hostElement.getAttribute('value') || '';
           this.callbacks.onValueChange(newValue);
+        } else if (mutation.attributeName === 'theme' && this.callbacks.onThemeChange) {
+          const newTheme = this.hostElement.getAttribute('theme') || 'dark';
+          this.callbacks.onThemeChange(newTheme);
         }
       }
     });
 
     this.mutationObserver.observe(this.hostElement, {
       attributes: true,
-      attributeFilter: ['value']
+      attributeFilter,
     });
   }
 

@@ -182,6 +182,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
     this.attributeObserver = new AttributeObserver(this.hostElement, {
       onValueChange: (value) => this.handleAttributeValueChange(value),
+      onThemeChange: (theme) => this.handleAttributeThemeChange(theme as EditorTheme),
     });
     this.attributeObserver.start();
 
@@ -250,6 +251,15 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     this.ready.emit();
+  }
+
+  private handleAttributeThemeChange(theme: EditorTheme): void {
+    if (!this.editorView) return;
+    this.editorView.dispatch({
+      effects: this.configurator.themeCompartment.reconfigure(
+        this.configurator.getThemeExtension(theme),
+      ),
+    });
   }
 
   private handleAttributeValueChange(newValue: string): void {
