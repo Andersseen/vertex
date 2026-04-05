@@ -67,6 +67,7 @@
     "typescript-eslint": "^8.57.2"
   },
   "bin": {
+    "vertex": "./packages/frontend/web-editor/bin/install.mjs",
     "vertex-editor": "./packages/frontend/web-editor/bin/install.mjs"
   },
   "engines": {
