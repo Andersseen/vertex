@@ -66,6 +66,9 @@
     "typescript": "5.9.2",
     "typescript-eslint": "^8.57.2"
   },
+  "bin": {
+    "vertex-editor": "./packages/frontend/web-editor/bin/install.mjs"
+  },
   "engines": {
     "node": ">=18"
   },
