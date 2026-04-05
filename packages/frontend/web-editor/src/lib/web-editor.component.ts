@@ -78,7 +78,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   readonly theme = input<EditorTheme>("dark");
   readonly readonly = input<boolean>(false);
   readonly lineNumbers = input<boolean>(true);
-  readonly height = input<string>("300px");
+  readonly height = input<string>("100%");
   readonly fontSize = input<string>("14");
   readonly placeholder = input<string>("");
   readonly tabSize = input<number>(2);
@@ -201,6 +201,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     return this.value() || "";
   }
 
+  private getInitialTheme(): EditorTheme {
+    const attrTheme = this.hostElement.getAttribute("theme");
+    if (attrTheme === "light" || attrTheme === "dark") {
+      return attrTheme;
+    }
+    return this.theme();
+  }
+
   private async initializeEditor(initialValue: string): Promise<void> {
     const languageSupport = await getLanguageSupport(this.language());
 
@@ -208,7 +216,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       state: this.configurator.createState({
         value: initialValue,
         language: languageSupport,
-        theme: this.theme(),
+        theme: this.getInitialTheme(),
         readonly: this.readonly(),
         lineNumbers: this.lineNumbers(),
         wordWrap: this.wordWrap(),
