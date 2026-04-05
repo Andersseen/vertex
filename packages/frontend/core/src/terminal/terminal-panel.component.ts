@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   input,
@@ -72,6 +73,17 @@ export class TerminalPanelComponent
   private isConnecting = false;
   private dataSubscription?: { unsubscribe: () => void };
   private resizeObserver?: ResizeObserver;
+  private terminalInitialized = false;
+
+  constructor() {
+    // React to workspace changes after the terminal is running
+    effect(() => {
+      const dir = this.workingDirectory();
+      if (this.terminalInitialized && dir) {
+        this.terminalBackend.write(`cd "${dir}"\n`);
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Nothing here — we need the ViewChild to be ready first
@@ -169,7 +181,9 @@ export class TerminalPanelComponent
     this.resizeObserver.observe(container);
 
     // Connect to backend
-    this.connect();
+    this.connect().then(() => {
+      this.terminalInitialized = true;
+    });
   }
 
   private fitTerminal(): void {
