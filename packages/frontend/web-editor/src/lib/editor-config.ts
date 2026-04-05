@@ -41,6 +41,11 @@ export interface EditorConfig {
   onCursorActivity?: (position: { line: number; column: number }) => void;
 }
 
+const scrollTheme = EditorView.theme({
+  "&": { height: "100%" },
+  ".cm-scroller": { overflow: "auto" },
+});
+
 export class EditorConfigurator {
   readonly languageCompartment = new Compartment();
   readonly themeCompartment = new Compartment();
@@ -50,6 +55,8 @@ export class EditorConfigurator {
 
   createExtensions(config: EditorConfig): Extension[] {
     const extensions: Extension[] = [
+      scrollTheme,
+
       // Basic editing features
       history(),
       drawSelection(),

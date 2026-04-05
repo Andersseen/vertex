@@ -78,7 +78,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   readonly theme = input<EditorTheme>("dark");
   readonly readonly = input<boolean>(false);
   readonly lineNumbers = input<boolean>(true);
-  readonly height = input<string>("300px");
+  readonly height = input<string>("100%");
   readonly fontSize = input<string>("14");
   readonly placeholder = input<string>("");
   readonly tabSize = input<number>(2);
