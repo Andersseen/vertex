@@ -1,9 +1,15 @@
+import { EditorState, Extension, Compartment } from "@codemirror/state";
 import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-  completionKeymap,
-} from "@codemirror/autocomplete";
+  drawSelection,
+  dropCursor,
+  EditorView,
+  keymap,
+  lineNumbers,
+  placeholder,
+  ViewUpdate,
+  rectangularSelection,
+} from "@codemirror/view";
+import { oneDark } from "@codemirror/theme-one-dark";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import {
   bracketMatching,
@@ -13,20 +19,37 @@ import {
   LanguageSupport,
   syntaxHighlighting,
 } from "@codemirror/language";
-import { lintKeymap } from "@codemirror/lint";
-import { searchKeymap } from "@codemirror/search";
-import { Compartment, EditorState, Extension } from "@codemirror/state";
-import { oneDark } from "@codemirror/theme-one-dark";
-import {
-  drawSelection,
-  dropCursor,
-  EditorView,
-  keymap,
-  lineNumbers,
-  placeholder,
-  rectangularSelection,
-  ViewUpdate,
-} from "@codemirror/view";
+
+// Optional features - loaded only when needed
+let searchExtension: Extension | null = null;
+let autocompleteExtension: Extension | null = null;
+
+async function getSearchExtension(): Promise<Extension> {
+  if (!searchExtension) {
+    const { searchKeymap, highlightSelectionMatches } = await import(
+      "@codemirror/search"
+    );
+    searchExtension = keymap.of(searchKeymap);
+  }
+  return searchExtension;
+}
+
+async function getAutocompleteExtension(): Promise<Extension> {
+  if (!autocompleteExtension) {
+    const {
+      autocompletion,
+      closeBrackets,
+      closeBracketsKeymap,
+      completionKeymap,
+    } = await import("@codemirror/autocomplete");
+    autocompleteExtension = [
+      autocompletion(),
+      closeBrackets(),
+      keymap.of([...closeBracketsKeymap, ...completionKeymap]),
+    ];
+  }
+  return autocompleteExtension;
+}
 
 export interface EditorConfig {
   value: string;
@@ -37,6 +60,8 @@ export interface EditorConfig {
   wordWrap: boolean;
   tabSize: number;
   placeholder?: string;
+  enableSearch?: boolean;
+  enableAutocomplete?: boolean;
   onChange?: (value: string) => void;
   onCursorActivity?: (position: { line: number; column: number }) => void;
 }
@@ -46,6 +71,22 @@ const scrollTheme = EditorView.theme({
   ".cm-scroller": { overflow: "auto" },
 });
 
+// Core extensions always included
+function getCoreExtensions(): Extension[] {
+  return [
+    scrollTheme,
+    history(),
+    drawSelection(),
+    dropCursor(),
+    indentOnInput(),
+    bracketMatching(),
+    rectangularSelection(),
+    syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+    EditorState.allowMultipleSelections.of(true),
+    keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
+  ];
+}
+
 export class EditorConfigurator {
   readonly languageCompartment = new Compartment();
   readonly themeCompartment = new Compartment();
@@ -53,45 +94,22 @@ export class EditorConfigurator {
   readonly lineNumbersCompartment = new Compartment();
   readonly wordWrapCompartment = new Compartment();
 
-  createExtensions(config: EditorConfig): Extension[] {
+  async createExtensions(config: EditorConfig): Promise<Extension[]> {
     const extensions: Extension[] = [
-      scrollTheme,
-
-      // Basic editing features
-      history(),
-      drawSelection(),
-      dropCursor(),
-      indentOnInput(),
-      bracketMatching(),
-      closeBrackets(),
-      autocompletion(),
-      rectangularSelection(),
-
-      // Syntax highlighting
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      ...getCoreExtensions(),
 
       // Editor behavior
-      EditorState.allowMultipleSelections.of(true),
       EditorState.tabSize.of(config.tabSize),
-
-      // Keymaps
-      keymap.of([
-        ...closeBracketsKeymap,
-        ...defaultKeymap,
-        ...searchKeymap,
-        ...historyKeymap,
-        ...foldKeymap,
-        ...completionKeymap,
-        ...lintKeymap,
-      ]),
 
       // Dynamic compartments
       this.languageCompartment.of(config.language || []),
       this.themeCompartment.of(this.getThemeExtension(config.theme)),
       this.readonlyCompartment.of(EditorState.readOnly.of(config.readonly)),
-      this.lineNumbersCompartment.of(config.lineNumbers ? lineNumbers() : []),
+      this.lineNumbersCompartment.of(
+        config.lineNumbers ? lineNumbers() : []
+      ),
       this.wordWrapCompartment.of(
-        config.wordWrap ? EditorView.lineWrapping : [],
+        config.wordWrap ? EditorView.lineWrapping : []
       ),
 
       // Event handlers
@@ -111,6 +129,16 @@ export class EditorConfigurator {
       }),
     ];
 
+    // Optional: Search
+    if (config.enableSearch) {
+      extensions.push(await getSearchExtension());
+    }
+
+    // Optional: Autocomplete
+    if (config.enableAutocomplete) {
+      extensions.push(await getAutocompleteExtension());
+    }
+
     if (config.placeholder) {
       extensions.push(placeholder(config.placeholder));
     }
@@ -118,10 +146,11 @@ export class EditorConfigurator {
     return extensions;
   }
 
-  createState(config: EditorConfig): EditorState {
+  async createState(config: EditorConfig): Promise<EditorState> {
+    const extensions = await this.createExtensions(config);
     return EditorState.create({
       doc: config.value,
-      extensions: this.createExtensions(config),
+      extensions,
     });
   }
 

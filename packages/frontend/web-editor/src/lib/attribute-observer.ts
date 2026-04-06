@@ -3,10 +3,14 @@ export interface AttributeObserverCallbacks {
   onThemeChange?: (theme: string) => void;
 }
 
+/**
+ * Attribute Observer - Lite version
+ * 
+ * Simplified for read-only code display.
+ * Uses only MutationObserver, no polling needed.
+ */
 export class AttributeObserver {
   private mutationObserver: MutationObserver | null = null;
-  private pollingInterval: number | null = null;
-  private lastKnownValue: string = '';
   private readonly hostElement: HTMLElement;
   private readonly callbacks: AttributeObserverCallbacks;
 
@@ -17,15 +21,18 @@ export class AttributeObserver {
 
   start(): void {
     this.setupMutationObserver();
-    this.setupPolling();
   }
 
   stop(): void {
     this.mutationObserver?.disconnect();
-    if (this.pollingInterval !== null) {
-      window.clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
+  }
+
+  /**
+   * @deprecated No longer needed in lite version
+   * Kept for API compatibility
+   */
+  stopPolling(): void {
+    // No-op in lite version
   }
 
   private setupMutationObserver(): void {
@@ -50,22 +57,11 @@ export class AttributeObserver {
       attributeFilter,
     });
   }
-
-  private setupPolling(): void {
-    this.lastKnownValue = this.hostElement.getAttribute('value') || '';
-    this.pollingInterval = window.setInterval(() => {
-      const currentValue = this.hostElement.getAttribute('value') || '';
-      if (currentValue !== this.lastKnownValue) {
-        this.lastKnownValue = currentValue;
-        this.callbacks.onValueChange(currentValue);
-      }
-    }, 50);
-  }
-
-  stopPolling(): void {
-    if (this.pollingInterval !== null) {
-      window.clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
-  }
 }
+
+/**
+ * CHANGES from full version:
+ * - Removed polling mechanism (not needed for display)
+ * - Simplified to MutationObserver only
+ * - Reduced memory footprint
+ */

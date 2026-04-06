@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "importHelpers": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "src/main-lite.ts",
+    "src/lib/web-editor-lite.component.ts",
+    "src/lib/language-support-lite.ts",
+    "src/lib/attribute-observer.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "demo",
+    "src/main.ts",
+    "src/lib/web-editor.component.ts",
+    "src/lib/language-support.ts"
+  ],
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+    "enableI18nLegacyMessageIdFormat": false
+  }
+}

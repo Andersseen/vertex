@@ -42,6 +42,34 @@
               "namedChunks": false,
               "extractLicenses": true
             },
+            "production-lite": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "800kb"
+                }
+              ],
+              "outputHashing": "none",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": true
+              },
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/main.ts",
+                  "with": "src/main-lite.ts"
+                },
+                {
+                  "replace": "src/lib/web-editor.component.ts",
+                  "with": "src/lib/web-editor-lite.component.ts"
+                }
+              ]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
