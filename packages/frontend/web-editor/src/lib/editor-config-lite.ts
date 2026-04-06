@@ -1,9 +1,9 @@
 /**
  * Vertex Editor Lite - Configuration for read-only code display
- * 
+ *
  * This is a minimal configuration optimized for displaying code only.
  * All editing features have been removed to reduce bundle size.
- * 
+ *
  * To re-enable features later, see editor-config-full.ts for reference.
  */
 
@@ -64,24 +64,23 @@ export class EditorConfigurator {
       // Minimal keymap (only navigation)
       keymap.of([
         // Basic navigation only
-        ...defaultKeymap.filter(k => 
-          k.key === "ArrowUp" || 
-          k.key === "ArrowDown" || 
-          k.key === "ArrowLeft" || 
-          k.key === "ArrowRight" ||
-          k.key === "PageUp" ||
-          k.key === "PageDown" ||
-          k.key === "Home" ||
-          k.key === "End"
+        ...defaultKeymap.filter(
+          (k) =>
+            k.key === "ArrowUp" ||
+            k.key === "ArrowDown" ||
+            k.key === "ArrowLeft" ||
+            k.key === "ArrowRight" ||
+            k.key === "PageUp" ||
+            k.key === "PageDown" ||
+            k.key === "Home" ||
+            k.key === "End",
         ),
       ]),
 
       // Dynamic compartments
       this.languageCompartment.of(config.language || []),
       this.themeCompartment.of(this.getThemeExtension(config.theme)),
-      this.lineNumbersCompartment.of(
-        config.lineNumbers ? lineNumbers() : []
-      ),
+      this.lineNumbersCompartment.of(config.lineNumbers ? lineNumbers() : []),
 
       // Optional change listener (for copy detection)
       EditorView.updateListener.of((update: ViewUpdate) => {
@@ -108,7 +107,7 @@ export { Compartment, EditorState, EditorView, Extension };
 
 /**
  * FEATURES REMOVED in Lite version:
- * 
+ *
  * 1. @codemirror/autocomplete - Autocompletion (not needed for read-only)
  * 2. @codemirror/search - Search functionality (can be added via browser Ctrl+F)
  * 3. @codemirror/lint - Linting (not editing)
@@ -118,7 +117,7 @@ export { Compartment, EditorState, EditorView, Extension };
  * 7. dropCursor - Drag & drop (not editing)
  * 8. indentOnInput - Auto-indent (not editing)
  * 9. placeholder - Not needed if always has content
- * 
+ *
  * TO RE-ENABLE LATER:
  * Copy the createExtensions function from editor-config.ts and merge features back.
  */

@@ -1,28 +1,32 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
   input,
   OnDestroy,
   output,
-  signal,
-  ViewChild,
-  ChangeDetectionStrategy,
+  viewChild,
 } from "@angular/core";
-import { EditorView, lineNumbers, drawSelection, highlightSpecialChars } from "@codemirror/view";
-import { Compartment, EditorState, Extension } from "@codemirror/state";
 import {
   defaultHighlightStyle,
+  indentOnInput,
   syntaxHighlighting,
 } from "@codemirror/language";
+import { Compartment, EditorState, Extension } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { indentOnInput } from "@codemirror/language";
+import {
+  drawSelection,
+  EditorView,
+  highlightSpecialChars,
+  lineNumbers,
+} from "@codemirror/view";
+import { AttributeObserver } from "./attribute-observer";
 import type { SupportedLanguage } from "./language-support-lite";
 import { getLanguageSupport } from "./language-support-lite";
-import { AttributeObserver } from "./attribute-observer";
 
-export type EditorTheme = 'dark' | 'light';
+export type EditorTheme = "dark" | "light";
 
 export interface CursorPosition {
   line: number;
@@ -32,12 +36,12 @@ export interface CursorPosition {
 
 /**
  * Vertex Editor Lite - Read-only code display component
- * 
+ *
  * Optimized for:
  * - Bundle size (minimal dependencies)
  * - Performance (no polling, no editing features)
  * - Simple usage (just display code)
- * 
+ *
  * REMOVED vs Full Version:
  * - Search functionality
  * - Autocomplete
@@ -46,34 +50,36 @@ export interface CursorPosition {
  * - Command palette
  * - Markdown support
  * - Polling for attribute changes
- * 
+ *
  * SIZE: ~500KB minified (vs ~1.6MB full version)
  */
 @Component({
   selector: "vertex-editor-internal",
   template: `<div #editorContainer class="vertex-editor-container"></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    :host {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    .vertex-editor-container {
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-    }
-    /* Line numbers styling */
-    :host ::ng-deep .cm-gutters {
-      background: transparent;
-      border-right: 1px solid var(--editor-border, #ddd);
-    }
-    /* Dark theme line numbers */
-    :host ::ng-deep .cm-dark .cm-gutters {
-      border-color: var(--editor-border-dark, #444);
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .vertex-editor-container {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      }
+      /* Line numbers styling */
+      :host ::ng-deep .cm-gutters {
+        background: transparent;
+        border-right: 1px solid var(--editor-border, #ddd);
+      }
+      /* Dark theme line numbers */
+      :host ::ng-deep .cm-dark .cm-gutters {
+        border-color: var(--editor-border-dark, #444);
+      }
+    `,
+  ],
 })
 export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
   // Signals for reactive inputs
@@ -83,28 +89,28 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
   readonly lineNumbers = input<boolean>(true);
   readonly wordWrap = input<boolean>(false);
   readonly readOnly = input<boolean>(true); // Always read-only in lite version
-  
+
   readonly cursorActivity = output<CursorPosition>();
   readonly ready = output<void>();
 
-  @ViewChild("editorContainer", { static: true }) editorContainer!: ElementRef<HTMLDivElement>;
-  
+  editorContainer = viewChild<ElementRef<HTMLDivElement>>("editorContainer");
   private hostElement = inject(ElementRef).nativeElement as HTMLElement;
   private editorView: EditorView | null = null;
-  
+
   // Compartments for dynamic updates
   private languageCompartment = new Compartment();
   private themeCompartment = new Compartment();
   private lineNumbersCompartment = new Compartment();
   private wordWrapCompartment = new Compartment();
-  
+
   private attributeObserver: AttributeObserver | null = null;
   private isInitialized = false;
 
   ngAfterViewInit(): void {
     // Get initial value from attribute (handles async loading)
-    const initialValue = this.hostElement.getAttribute('value') || this.value() || '';
-    
+    const initialValue =
+      this.hostElement.getAttribute("value") || this.value() || "";
+
     // Setup attribute observer (MutationObserver only, no polling)
     this.attributeObserver = new AttributeObserver(this.hostElement, {
       onValueChange: (v) => this.handleValueChange(v),
@@ -123,7 +129,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
   private async initializeEditor(initialValue: string): Promise<void> {
     const extensions = await this.createExtensions();
-    
+
     const state = EditorState.create({
       doc: initialValue,
       extensions,
@@ -131,7 +137,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
     this.editorView = new EditorView({
       state,
-      parent: this.editorContainer.nativeElement,
+      parent: this.editorContainer().nativeElement,
     });
 
     this.isInitialized = true;
@@ -145,10 +151,10 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
       drawSelection(),
       indentOnInput(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-      
+
       // Always read-only in lite version
       EditorState.readOnly.of(true),
-      
+
       // Dynamic compartments
       this.themeCompartment.of(this.getThemeExtension()),
       this.lineNumbersCompartment.of(this.getLineNumbersExtension()),
@@ -157,7 +163,9 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
     // Language support (async)
     const langSupport = await getLanguageSupport(this.language());
-    extensions.push(this.languageCompartment.of(langSupport ? [langSupport] : []));
+    extensions.push(
+      this.languageCompartment.of(langSupport ? [langSupport] : []),
+    );
 
     // Cursor activity tracking
     extensions.push(
@@ -165,7 +173,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
         if (update.selectionSet) {
           this.emitCursorPosition();
         }
-      })
+      }),
     );
 
     return extensions;
@@ -173,7 +181,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
   private getThemeExtension(): Extension {
     const theme = this.theme();
-    if (theme === 'dark') {
+    if (theme === "dark") {
       return oneDark;
     }
     // Light theme is default (no extension needed)
@@ -192,7 +200,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
   private handleValueChange(newValue: string): void {
     if (!this.editorView || !this.isInitialized) return;
-    
+
     const currentDoc = this.editorView.state.doc.toString();
     if (newValue !== currentDoc) {
       this.editorView.dispatch({
@@ -207,7 +215,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
   private handleThemeChange(newTheme: EditorTheme): void {
     if (!this.editorView) return;
-    
+
     this.editorView.dispatch({
       effects: this.themeCompartment.reconfigure(this.getThemeExtension()),
     });
@@ -215,10 +223,10 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
   private emitCursorPosition(): void {
     if (!this.editorView) return;
-    
+
     const { head } = this.editorView.state.selection.main;
     const line = this.editorView.state.doc.lineAt(head);
-    
+
     this.cursorActivity.emit({
       line: line.number,
       column: head - line.from + 1,
@@ -236,6 +244,6 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
   }
 
   getValue(): string {
-    return this.editorView?.state.doc.toString() || '';
+    return this.editorView?.state.doc.toString() || "";
   }
 }

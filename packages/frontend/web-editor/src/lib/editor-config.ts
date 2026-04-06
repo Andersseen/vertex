@@ -26,9 +26,8 @@ let autocompleteExtension: Extension | null = null;
 
 async function getSearchExtension(): Promise<Extension> {
   if (!searchExtension) {
-    const { searchKeymap, highlightSelectionMatches } = await import(
-      "@codemirror/search"
-    );
+    const { searchKeymap, highlightSelectionMatches } =
+      await import("@codemirror/search");
     searchExtension = keymap.of(searchKeymap);
   }
   return searchExtension;
@@ -105,11 +104,9 @@ export class EditorConfigurator {
       this.languageCompartment.of(config.language || []),
       this.themeCompartment.of(this.getThemeExtension(config.theme)),
       this.readonlyCompartment.of(EditorState.readOnly.of(config.readonly)),
-      this.lineNumbersCompartment.of(
-        config.lineNumbers ? lineNumbers() : []
-      ),
+      this.lineNumbersCompartment.of(config.lineNumbers ? lineNumbers() : []),
       this.wordWrapCompartment.of(
-        config.wordWrap ? EditorView.lineWrapping : []
+        config.wordWrap ? EditorView.lineWrapping : [],
       ),
 
       // Event handlers

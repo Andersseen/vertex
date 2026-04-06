@@ -4,16 +4,16 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  ViewChild,
   effect,
+  inject,
   input,
   output,
-  inject,
+  viewChild,
 } from "@angular/core";
 import { EditorView, lineNumbers } from "@codemirror/view";
-import { SupportedLanguage, getLanguageSupport } from "./language-support";
-import { EditorConfigurator } from "./editor-config-lite";
 import { AttributeObserver } from "./attribute-observer";
+import { EditorConfigurator } from "./editor-config-lite";
+import { SupportedLanguage, getLanguageSupport } from "./language-support";
 
 export type EditorTheme = "light" | "dark";
 
@@ -24,10 +24,10 @@ export interface CursorPosition {
 
 /**
  * Vertex Editor Lite - Read-only code display component
- * 
+ *
  * Optimized for displaying code with syntax highlighting.
  * All editing features have been removed to reduce bundle size.
- * 
+ *
  * @usageNotes
  * Use this component when you only need to display code, not edit it.
  * For a full editing experience, consider using the full version.
@@ -82,8 +82,7 @@ export interface CursorPosition {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WebEditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild("editorContainer", { static: true })
-  editorContainer!: ElementRef<HTMLDivElement>;
+  editorContainer = viewChild<ElementRef<HTMLDivElement>>("editorContainer");
 
   private hostElement = inject(ElementRef).nativeElement as HTMLElement;
 
@@ -142,7 +141,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
         // lineNumbers already imported statically
         this.editorView.dispatch({
           effects: this.configurator.lineNumbersCompartment.reconfigure(
-            showLineNumbers ? lineNumbers() : []
+            showLineNumbers ? lineNumbers() : [],
           ),
         });
       }
@@ -151,18 +150,20 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     // Update height
     effect(() => {
       const height = this.height();
-      if (this.editorContainer?.nativeElement) {
-        this.editorContainer.nativeElement.style.height = height;
+      const container = this.editorContainer();
+      if (container?.nativeElement) {
+        container.nativeElement.style.height = height;
       }
     });
 
     // Update font size
     effect(() => {
       const fontSize = this.fontSize();
-      if (this.editorContainer?.nativeElement) {
-        this.editorContainer.nativeElement.style.setProperty(
+      const container = this.editorContainer();
+      if (container?.nativeElement) {
+        container.nativeElement.style.setProperty(
           "--vertex-editor-font-size",
-          `${fontSize}px`
+          `${fontSize}px`,
         );
       }
     });
@@ -173,7 +174,8 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
     this.attributeObserver = new AttributeObserver(this.hostElement, {
       onValueChange: (value) => this.handleAttributeValueChange(value),
-      onThemeChange: (theme) => this.handleAttributeThemeChange(theme as EditorTheme),
+      onThemeChange: (theme) =>
+        this.handleAttributeThemeChange(theme as EditorTheme),
     });
     this.attributeObserver.start();
 
@@ -216,14 +218,16 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
           // This can be used to detect copy operations
         },
       }),
-      parent: this.editorContainer.nativeElement,
+      parent: this.editorContainer()?.nativeElement,
     });
-
-    this.editorContainer.nativeElement.style.height = this.height();
-    this.editorContainer.nativeElement.style.setProperty(
-      "--vertex-editor-font-size",
-      `${this.fontSize()}px`
-    );
+    const container = this.editorContainer();
+    if (container?.nativeElement.style) {
+      container.nativeElement.style.height = this.height();
+      container.nativeElement.style.setProperty(
+        "--vertex-editor-font-size",
+        `${this.fontSize()}px`,
+      );
+    }
 
     this._isInitialized = true;
     this.attributeObserver?.stopPolling();
@@ -266,7 +270,8 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     const languageSupport = await getLanguageSupport(this.language());
     if (languageSupport) {
       this.editorView.dispatch({
-        effects: this.configurator.languageCompartment.reconfigure(languageSupport),
+        effects:
+          this.configurator.languageCompartment.reconfigure(languageSupport),
       });
     }
   }
@@ -277,13 +282,13 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     const themeValue = theme || this.theme();
     this.editorView.dispatch({
       effects: this.configurator.themeCompartment.reconfigure(
-        this.configurator.getThemeExtension(themeValue)
+        this.configurator.getThemeExtension(themeValue),
       ),
     });
   }
 
   // Public API methods
-  
+
   /**
    * Get the current value of the editor
    */
@@ -310,13 +315,13 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
 /**
  * FEATURES REMOVED in Lite version:
- * 
+ *
  * 1. wordWrap input - Not essential for code display
  * 2. placeholder input - Code display always has content
  * 3. readonly input - Always read-only in lite version
  * 4. valueChange output - Use getValue() instead
  * 5. insertText() method - Not applicable for read-only
- * 
+ *
  * TO RE-ENABLE EDITING FEATURES:
  * 1. Import from editor-config.ts instead of editor-config-lite.ts
  * 2. Add back: wordWrap, placeholder, readonly inputs
