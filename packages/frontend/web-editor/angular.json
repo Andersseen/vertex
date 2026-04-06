@@ -12,7 +12,7 @@
       },
       "root": "",
       "sourceRoot": "src",
-      "prefix": "web",
+      "prefix": "vertex",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
@@ -23,62 +23,41 @@
             "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "styles": ["src/styles/editor.scss"],
+            "styles": [],
             "scripts": [],
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            "aot": true,
+            "optimization": {
+              "scripts": true,
+              "styles": true,
+              "fonts": true
+            },
+            "sourceMap": false,
+            "namedChunks": false,
+            "extractLicenses": false,
+            "outputHashing": "none"
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1MB",
-                  "maximumError": "2MB"
-                }
-              ],
-              "outputHashing": "none",
-              "optimization": true,
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true
-            },
-            "production-lite": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "800kb"
-                }
-              ],
-              "outputHashing": "none",
-              "optimization": {
-                "scripts": true,
-                "styles": true,
-                "fonts": true
-              },
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": false,
-              "fileReplacements": [
-                {
-                  "replace": "src/main.ts",
-                  "with": "src/main-lite.ts"
-                },
-                {
-                  "replace": "src/lib/web-editor.component.ts",
-                  "with": "src/lib/web-editor-lite.component.ts"
+                  "maximumWarning": "1mb",
+                  "maximumError": "1.5mb"
                 }
               ]
             },
             "development": {
               "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "namedChunks": true
             }
           },
           "defaultConfiguration": "production"
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

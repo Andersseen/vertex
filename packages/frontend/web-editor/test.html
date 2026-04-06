@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Editor Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    vertex-editor { 
+      display: block; 
+      width: 100%; 
+      height: 300px; 
+      border: 1px solid #ccc;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vertex Editor Test</h1>
+  <p>If the editor works, you should see code below with syntax highlighting:</p>
+  
+  <vertex-editor 
+    id="editor"
+    value="const greeting = 'Hello World';
+console.log(greeting);
+
+function add(a: number, b: number): number {
+  return a + b;
+}"
+    language="typescript"
+    theme="dark"
+    line-numbers="true">
+  </vertex-editor>
+
+  <script src="dist/web-editor-aot.min.js"></script>
+  
+  <script>
+    // Check if component loaded
+    setTimeout(() => {
+      const editor = document.getElementById('editor');
+      const shadowRoot = editor?.shadowRoot;
+      console.log('Editor element:', editor);
+      console.log('Shadow root:', shadowRoot);
+      console.log('Custom element defined:', customElements.get('vertex-editor'));
+    }, 2000);
+  </script>
+</body>
+</html>

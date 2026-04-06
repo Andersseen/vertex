@@ -10,7 +10,7 @@ import {
   output,
   inject,
 } from "@angular/core";
-import { EditorView } from "@codemirror/view";
+import { EditorView, lineNumbers } from "@codemirror/view";
 import { SupportedLanguage, getLanguageSupport } from "./language-support";
 import { EditorConfigurator } from "./editor-config-lite";
 import { AttributeObserver } from "./attribute-observer";
@@ -139,7 +139,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const showLineNumbers = this.lineNumbers();
       if (this.editorView) {
-        const { lineNumbers } = require("@codemirror/view");
+        // lineNumbers already imported statically
         this.editorView.dispatch({
           effects: this.configurator.lineNumbersCompartment.reconfigure(
             showLineNumbers ? lineNumbers() : []

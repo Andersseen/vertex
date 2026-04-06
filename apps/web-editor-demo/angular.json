@@ -30,7 +30,7 @@
                 "input": "public"
               },
               {
-                "glob": "web-editor.js",
+                "glob": "web-editor-aot.min.js",
                 "input": "../../packages/frontend/web-editor/dist",
                 "output": "."
               }
