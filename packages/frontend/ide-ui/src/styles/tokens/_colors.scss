@@ -1,0 +1,49 @@
+// ── Vertex IDE Dark Theme Tokens ──
+// Designed for long coding sessions with high contrast and minimal eye strain.
+
+:root {
+  // Backgrounds (layered depth)
+  --ide-bg-base: #090b10;
+  --ide-bg-surface: #0f1117;
+  --ide-bg-elevated: #161922;
+  --ide-bg-hover: #1c1f2a;
+  --ide-bg-active: #232736;
+  --ide-bg-overlay: rgba(0, 0, 0, 0.6);
+
+  // Borders
+  --ide-border-subtle: #1e2230;
+  --ide-border-default: #2a2f3d;
+  --ide-border-strong: #3b4254;
+
+  // Text
+  --ide-text-primary: #e2e5ec;
+  --ide-text-secondary: #9ca3b0;
+  --ide-text-muted: #5b6270;
+  --ide-text-inverse: #090b10;
+
+  // Accents (IDE chrome)
+  --ide-accent: #3b82f6;
+  --ide-accent-hover: #2563eb;
+  --ide-accent-subtle: rgba(59, 130, 246, 0.15);
+
+  --ide-cyan: #22d3ee;
+  --ide-cyan-subtle: rgba(34, 211, 238, 0.12);
+
+  --ide-purple: #a78bfa;
+  --ide-purple-subtle: rgba(167, 139, 250, 0.12);
+
+  // Semantic
+  --ide-success: #22c55e;
+  --ide-success-subtle: rgba(34, 197, 94, 0.12);
+  --ide-warning: #f59e0b;
+  --ide-warning-subtle: rgba(245, 158, 11, 0.12);
+  --ide-error: #ef4444;
+  --ide-error-subtle: rgba(239, 68, 68, 0.12);
+
+  // Syntax (optional overrides for CodeMirror integration)
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-function: #61afef;
+  --syntax-comment: #5b6270;
+  --syntax-number: #d19a66;
+}

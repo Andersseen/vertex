@@ -82,6 +82,7 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
+    "@andersseen/headless-components": "^0.1.1",
     "@angular/animations": "^21.2.5",
     "@angular/common": "^21.2.5",
     "@angular/compiler": "^21.2.5",

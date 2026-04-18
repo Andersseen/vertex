@@ -5,6 +5,7 @@
     "": {
       "name": "vertex",
       "dependencies": {
+        "@andersseen/headless-components": "^0.1.1",
         "@angular/animations": "^21.2.5",
         "@angular/common": "^21.2.5",
         "@angular/compiler": "^21.2.5",
@@ -114,6 +115,7 @@
         "@primeng/themes": "^21.0.4",
         "@tauri-apps/api": "2.0.0-rc.0",
         "@vertex/core": "*",
+        "@vertex/ide-ui": "workspace:*",
         "@vertex/runtime": "*",
         "@vertex/types": "*",
         "@vertex/ui": "*",
@@ -206,6 +208,25 @@
         "@types/bun": "latest",
         "typescript": "5.9.2",
         "vitest": "^4.0.8",
+      },
+    },
+    "packages/frontend/ide-ui": {
+      "name": "@vertex/ide-ui",
+      "version": "0.1.0",
+      "dependencies": {
+        "@andersseen/headless-components": "^0.1.1",
+        "@angular/common": "^21.2.0",
+        "@angular/core": "^21.2.0",
+        "@vertex/types": "workspace:*",
+        "rxjs": "~7.8.0",
+        "tslib": "^2.6.2",
+      },
+      "devDependencies": {
+        "typescript": "~5.9.2",
+      },
+      "peerDependencies": {
+        "@angular/common": "^21.2.0",
+        "@angular/core": "^21.2.0",
       },
     },
     "packages/frontend/runtime": {
@@ -343,6 +364,8 @@
     "@algolia/requester-node-http": ["@algolia/requester-node-http@5.48.1", "", { "dependencies": { "@algolia/client-common": "5.48.1" } }, "sha512-xcaCqbhupVWhuBP1nwbk1XNvwrGljozutEiLx06mvqDf3o8cHyEgQSHS4fKJM+UAggaWVnnFW+Nne5aQ8SUJXg=="],
 
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
+
+    "@andersseen/headless-components": ["@andersseen/headless-components@0.1.1", "", {}, "sha512-j+R1JxqoYuvFyl3eX+sPk+vOy+qaozz0K6dLedbiLGK4jbQbJWa7xxQ8OUlQhrC5MrKZbk6WIch0iw210MMueQ=="],
 
     "@angular-devkit/architect": ["@angular-devkit/architect@0.2102.6", "", { "dependencies": { "@angular-devkit/core": "21.2.6", "rxjs": "7.8.2" }, "bin": { "architect": "bin/cli.js" } }, "sha512-h4qybKypR7OuwcTHPQI1zRm7abXgmPiV49vI2UeMtVVY/GKzru9gMexcYmWabzEyBY8w6VSfWjV2X+eit2EhDQ=="],
 
@@ -1251,6 +1274,8 @@
     "@typescript-eslint/visitor-keys": ["@typescript-eslint/visitor-keys@8.57.2", "", { "dependencies": { "@typescript-eslint/types": "8.57.2", "eslint-visitor-keys": "^5.0.0" } }, "sha512-zhahknjobV2FiD6Ee9iLbS7OV9zi10rG26odsQdfBO/hjSzUQbkIYgda+iNKK1zNiW2ey+Lf8MU5btN17V3dUw=="],
 
     "@vertex/core": ["@vertex/core@workspace:packages/frontend/core"],
+
+    "@vertex/ide-ui": ["@vertex/ide-ui@workspace:packages/frontend/ide-ui"],
 
     "@vertex/runtime": ["@vertex/runtime@workspace:packages/frontend/runtime"],
 
