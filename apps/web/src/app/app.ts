@@ -11,8 +11,7 @@ import { SidebarComponent } from '@vertex/ui';
 import { BottomPanelComponent } from '@vertex/ui';
 import { TabsComponent } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
-import { FileService } from '@vertex/core';
-import { RuntimeService } from './services/runtime.service';
+import { FileService, RuntimeService } from '@vertex/core';
 import { CloneDialogComponent } from './components/clone-dialog/clone-dialog.component';
 
 @Component({

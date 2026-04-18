@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { VirtualFS, GitClient, OPFSFS } from '@vertex/runtime';
-import type { GitCloneOptions } from '@vertex/runtime';
+import type { GitCloneOptions, IVirtualFS } from '@vertex/runtime';
 import type { VertexFile, VertexFolder } from '@vertex/types';
 
 export interface CloneProgress {
@@ -30,6 +30,16 @@ export class RuntimeService {
   readonly cloneProgress = signal<CloneProgress | null>(null);
   readonly cloneError = signal<string | null>(null);
   readonly repoName = signal<string>('');
+
+  /** Acceso directo al filesystem virtual para integraciones (ej: terminal) */
+  get fs(): IVirtualFS | null {
+    return this.virtualFs;
+  }
+
+  /** Acceso directo al cliente Git */
+  get git(): GitClient | null {
+    return this.gitClient;
+  }
 
   async clone(options: GitCloneOptions): Promise<VertexFolder> {
     this.isCloning.set(true);

@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MessageModule } from 'primeng/message';
 import type { VertexFolder } from '@vertex/types';
-import { RuntimeService } from '../../services/runtime.service';
+import { RuntimeService } from '@vertex/core';
 
 @Component({
   selector: 'app-clone-dialog',
