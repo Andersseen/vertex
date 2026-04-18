@@ -19,6 +19,7 @@ export class GitClient implements IGitClient {
       http,
       dir,
       url,
+      corsProxy: 'https://cors.isomorphic-git.org',
       ref: branch,
       singleBranch: true,
       depth,

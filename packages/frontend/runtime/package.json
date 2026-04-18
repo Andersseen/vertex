@@ -3,21 +3,21 @@
   "version": "0.1.0",
   "description": "Browser-native runtime: VirtualFS, Git, Build, Preview, Deploy",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
     },
     "./fs": {
-      "import": "./dist/fs/index.js",
-      "types": "./dist/fs/index.d.ts"
+      "import": "./src/fs/index.ts",
+      "types": "./src/fs/index.ts"
     },
     "./git": {
-      "import": "./dist/git/index.js",
-      "types": "./dist/git/index.d.ts"
+      "import": "./src/git/index.ts",
+      "types": "./src/git/index.ts"
     }
   },
   "files": ["dist", "README.md"],

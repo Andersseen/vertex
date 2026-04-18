@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from "@angular/core";
+import { Component, output } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { SplitterModule } from "primeng/splitter";
 import { ToolbarModule } from "primeng/toolbar";
@@ -11,5 +11,6 @@ import { ToolbarModule } from "primeng/toolbar";
   styleUrls: ["./main-layout.component.scss"],
 })
 export class MainLayoutComponent {
-  @Output() openFolder = new EventEmitter<void>();
+  readonly openFolder = output<void>();
+  readonly cloneRepo = output<void>();
 }

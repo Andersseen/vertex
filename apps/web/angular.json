@@ -31,7 +31,14 @@
                 "input": "public"
               }
             ],
-            "styles": ["primeicons/primeicons.css", "@xterm/xterm/css/xterm.css", "src/styles.scss"]
+            "styles": [
+              "primeicons/primeicons.css",
+              "@xterm/xterm/css/xterm.css",
+              "src/styles.scss"
+            ],
+            "polyfills": [
+              "src/polyfills.ts"
+            ]
           },
           "configurations": {
             "production": {

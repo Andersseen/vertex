@@ -18,7 +18,8 @@
     "paths": {
       "@vertex/ui": ["../../packages/frontend/ui/src/index.ts"],
       "@vertex/core": ["../../packages/frontend/core/src/index.ts"],
-      "@vertex/types": ["../../packages/frontend/types/src/index.ts"]
+      "@vertex/types": ["../../packages/frontend/types/src/index.ts"],
+      "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

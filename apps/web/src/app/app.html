@@ -1,10 +1,11 @@
-<v-main-layout (openFolder)="openFolder()">
+<v-main-layout (openFolder)="openFolder()" (cloneRepo)="openCloneDialog()">
   <!-- Left Sidebar: File Explorer -->
   <v-sidebar
     sidebar
     [workspaceFolder]="rootFolder()"
     [activeFileId]="activeFileId()"
     (fileSelect)="onFileSelect($event)"
+    (folderToggle)="onFolderToggle($event)"
     (newFile)="onNewFile()"
     (newFolder)="onNewFile()"
   ></v-sidebar>
@@ -33,3 +34,10 @@
   <!-- Bottom Panel Slot -->
   <v-bottom-panel bottom [workspacePath]="workspacePath()"></v-bottom-panel>
 </v-main-layout>
+
+<!-- Clone Repository Dialog -->
+<app-clone-dialog
+  [visible]="showCloneDialog()"
+  (visibleChange)="showCloneDialog.set($event)"
+  (cloneSuccess)="onCloneSuccess($event)"
+/>
