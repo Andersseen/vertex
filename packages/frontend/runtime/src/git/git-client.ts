@@ -1,0 +1,100 @@
+import git from 'isomorphic-git'
+import http from 'isomorphic-git/http/web'
+import type { OPFSFS } from '../fs/opfs-adapter'
+import type {
+  GitCloneOptions,
+  GitCommitOptions,
+  GitStatus,
+  GitLogEntry,
+  IGitClient,
+} from '../types/git.types'
+
+export class GitClient implements IGitClient {
+  constructor(private fs: OPFSFS) {}
+
+  async clone(options: GitCloneOptions): Promise<void> {
+    const { url, dir = '/', branch, depth = 1, token, onProgress } = options
+    await git.clone({
+      fs: this.fs.rawFs,
+      http,
+      dir,
+      url,
+      ref: branch,
+      singleBranch: true,
+      depth,
+      headers: token ? { Authorization: `token ${token}` } : {},
+      onProgress: onProgress
+        ? ({ phase, loaded, total }) => onProgress(phase, loaded, total ?? 0)
+        : undefined,
+    })
+  }
+
+  async pull(dir: string, token?: string): Promise<void> {
+    await git.pull({
+      fs: this.fs.rawFs,
+      http,
+      dir,
+      headers: token ? { Authorization: `token ${token}` } : {},
+    })
+  }
+
+  async push(dir: string, token: string): Promise<void> {
+    await git.push({
+      fs: this.fs.rawFs,
+      http,
+      dir,
+      headers: { Authorization: `token ${token}` },
+    })
+  }
+
+  async commit(dir: string, options: GitCommitOptions): Promise<string> {
+    const { message, author, files } = options
+    if (files?.length) {
+      for (const file of files) {
+        await git.add({ fs: this.fs.rawFs, dir, filepath: file })
+      }
+    } else {
+      await git.add({ fs: this.fs.rawFs, dir, filepath: '.' })
+    }
+    return git.commit({ fs: this.fs.rawFs, dir, message, author })
+  }
+
+  async status(dir: string): Promise<GitStatus> {
+    const matrix = await git.statusMatrix({ fs: this.fs.rawFs, dir })
+    const result: GitStatus = { modified: [], added: [], deleted: [], untracked: [] }
+
+    for (const [filepath, head, workdir, stage] of matrix) {
+      if (head === 1 && workdir === 2) result.modified.push(filepath)
+      else if (head === 0 && workdir === 2 && stage === 2) result.added.push(filepath)
+      else if (head === 1 && workdir === 0) result.deleted.push(filepath)
+      else if (head === 0 && workdir === 2 && stage === 0) result.untracked.push(filepath)
+    }
+
+    return result
+  }
+
+  async log(dir: string, limit = 20): Promise<GitLogEntry[]> {
+    const commits = await git.log({ fs: this.fs.rawFs, dir, depth: limit })
+    return commits.map(c => ({
+      oid: c.oid,
+      message: c.commit.message,
+      author: {
+        name: c.commit.author.name,
+        email: c.commit.author.email,
+        timestamp: c.commit.author.timestamp,
+      },
+    }))
+  }
+
+  async currentBranch(dir: string): Promise<string> {
+    return (await git.currentBranch({ fs: this.fs.rawFs, dir })) ?? 'HEAD'
+  }
+
+  async listBranches(dir: string): Promise<string[]> {
+    return git.listBranches({ fs: this.fs.rawFs, dir })
+  }
+
+  async checkout(dir: string, branch: string): Promise<void> {
+    await git.checkout({ fs: this.fs.rawFs, dir, ref: branch })
+  }
+}
