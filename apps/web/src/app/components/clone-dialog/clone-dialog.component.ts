@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import type { VertexFolder } from '@vertex/types';
-import { RuntimeService } from '@vertex/core';
+import { RuntimeService } from '@vertex/core/web';
 import {
   IdeDialogComponent,
   IdeInputComponent,

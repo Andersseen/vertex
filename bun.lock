@@ -62,6 +62,7 @@
         "@tauri-apps/api": "2.0.0-rc.0",
         "@tauri-apps/plugin-log": "2.0.0-rc.0",
         "@vertex/core": "*",
+        "@vertex/ide-ui": "workspace:*",
         "@vertex/types": "*",
         "@vertex/ui": "*",
         "primeicons": "^7.0.0",

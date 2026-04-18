@@ -8,7 +8,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 
-import { TERMINAL_BACKEND_ADAPTER, VirtualTerminalService } from '@vertex/core';
+import { TERMINAL_BACKEND_ADAPTER } from '@vertex/core';
+import { VirtualTerminalService } from '@vertex/core/web';
 
 export const appConfig: ApplicationConfig = {
   providers: [

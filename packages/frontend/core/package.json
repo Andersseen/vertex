@@ -4,6 +4,16 @@
   "description": "Vertex IDE - Core services and utilities",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./web": {
+      "import": "./src/web/index.ts",
+      "types": "./src/web/index.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest",
