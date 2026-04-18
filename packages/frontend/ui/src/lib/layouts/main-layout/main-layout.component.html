@@ -1,7 +1,7 @@
 <div class="vx-layout">
-  <!-- Custom Header -->
-  <header class="vx-header">
-    <div class="vx-header-left">
+  <!-- Header with IdeToolbar -->
+  <ide-toolbar>
+    <div ideToolbarStart class="vx-header-left">
       <div class="vx-logo-container">
         <span class="vx-logo-text">V</span>
       </div>
@@ -10,30 +10,46 @@
       </span>
       <div class="vx-header-divider"></div>
       <nav class="vx-header-menu">
-        <button class="vx-menu-item" (click)="openFolder.emit()">Open Folder...</button>
-        <button class="vx-menu-item" (click)="cloneRepo.emit()">Clone Repo...</button>
-        <button class="vx-menu-item">File</button>
-        <button class="vx-menu-item">Edit</button>
-        <button class="vx-menu-item">View</button>
+        <ide-button variant="ghost" (clicked)="openFolder.emit()">Open Folder...</ide-button>
+        <ide-button variant="ghost" (clicked)="cloneRepo.emit()">Clone Repo...</ide-button>
+        <ide-button variant="ghost">File</ide-button>
+        <ide-button variant="ghost">Edit</ide-button>
+        <ide-button variant="ghost">View</ide-button>
       </nav>
     </div>
 
-    <div class="vx-header-center">
+    <div ideToolbarCenter class="vx-header-center">
       <div class="vx-search-wrapper group">
-        <i class="pi pi-search"></i>
+        <svg class="vx-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
         <input type="text" placeholder="Search files, commands..." class="vx-search-input" />
         <span class="vx-search-kbd">⌘K</span>
       </div>
     </div>
 
-    <div class="vx-header-right">
-      <button class="vx-icon-btn"><i class="pi pi-bell"></i></button>
-      <button class="vx-icon-btn"><i class="pi pi-cog"></i></button>
+    <div ideToolbarEnd class="vx-header-right">
+      <ide-button variant="ghost" ariaLabel="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+      </ide-button>
+      <ide-button variant="ghost" ariaLabel="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </ide-button>
       <div class="vx-user-avatar">
-        <i class="pi pi-user"></i>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
       </div>
     </div>
-  </header>
+  </ide-toolbar>
 
   <!-- Main Body -->
   <main class="vx-main-content">
@@ -77,23 +93,36 @@
   <footer class="vx-statusbar">
     <div class="vx-flex vx-items-center vx-gap-4 vx-h-full">
       <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
-        <i class="pi pi-sync text-[10px] animate-spin-slow opacity-70"></i>
+        <svg class="animate-spin-slow opacity-70" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
         <span class="antialiased">Ready</span>
       </div>
       <span class="vx-divider"></span>
       <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
-        <i class="pi pi-github text-[12px] opacity-70"></i>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+          <path d="M9 18c-4.51 2-5-2-7-2"/>
+        </svg>
         <span class="antialiased font-semibold tracking-tight">main</span>
         <span class="text-[var(--p-surface-500)] font-normal">*</span>
       </div>
       <span class="vx-divider"></span>
       <div class="vx-flex vx-items-center vx-gap-4 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all vx-h-full">
         <div class="vx-flex vx-items-center vx-gap-2">
-          <i class="pi pi-exclamation-triangle text-[10px] vx-text-warning"></i>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="vx-text-warning">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
           <span>0</span>
         </div>
         <div class="vx-flex vx-items-center vx-gap-2">
-          <i class="pi pi-times-circle text-[10px] vx-text-error"></i>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="vx-text-error">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
           <span>0</span>
         </div>
       </div>
@@ -109,12 +138,18 @@
       </div>
       <span class="vx-divider"></span>
       <div class="vx-flex vx-items-center vx-gap-2 px-2 py-1 rounded hover:vx-bg-800 cursor-pointer transition-all antialiased vx-h-full font-bold">
-        <i class="pi pi-code text-[12px] opacity-70"></i>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
         <span>TypeScript</span>
       </div>
       <span class="vx-divider"></span>
       <div class="vx-flex vx-items-center vx-justify-center w-8 vx-h-full rounded hover:vx-bg-800 cursor-pointer transition-all">
-        <i class="pi pi-bell text-[11px] opacity-70"></i>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
       </div>
     </div>
   </footer>

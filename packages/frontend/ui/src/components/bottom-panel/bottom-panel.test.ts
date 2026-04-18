@@ -8,11 +8,16 @@ describe("BottomPanelComponent", () => {
 
   test("should have default tabs", () => {
     const component = new BottomPanelComponent();
-    expect(component.tabs).toEqual(["Problems", "Output", "Debug Console", "Terminal"]);
+    expect(component.tabs).toEqual([
+      { id: "Problems", label: "Problems" },
+      { id: "Output", label: "Output" },
+      { id: "Debug Console", label: "Debug Console" },
+      { id: "Terminal", label: "Terminal" },
+    ]);
   });
 
-  test("should have activeTabIndex 3 by default", () => {
+  test("should have activeTab 'Terminal' by default", () => {
     const component = new BottomPanelComponent();
-    expect(component.activeTabIndex()).toBe(3);
+    expect(component.activeTab()).toBe("Terminal");
   });
 });

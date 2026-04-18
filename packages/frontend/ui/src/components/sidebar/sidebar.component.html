@@ -2,54 +2,47 @@
   <!-- Sidebar Header -->
   <header class="sidebar__header">
     <div class="sidebar__title-group">
-      <i class="sidebar__icon pi pi-bars"></i>
+      <svg class="sidebar__logo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
       <span class="sidebar__title">Explorer</span>
     </div>
 
     <div class="sidebar__actions">
-      <button
-        class="sidebar__action-btn"
-        type="button"
-        (click)="createNewFile()"
-        title="New File"
-      >
-        <i class="pi pi-file-plus"></i>
-      </button>
-      <button
-        class="sidebar__action-btn"
-        type="button"
-        (click)="createNewFolder()"
-        title="New Folder"
-      >
-        <i class="pi pi-folder-plus"></i>
-      </button>
-      <button
-        class="sidebar__action-btn"
-        type="button"
-        (click)="refreshExplorer()"
-        title="Refresh"
-      >
-        <i class="pi pi-refresh"></i>
-      </button>
+      <ide-button variant="ghost" ariaLabel="New File" (clicked)="newFile.emit()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+      </ide-button>
+      <ide-button variant="ghost" ariaLabel="New Folder" (clicked)="newFolder.emit()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+          <line x1="12" y1="10" x2="12" y2="16"/>
+          <line x1="9" y1="13" x2="15" y2="13"/>
+        </svg>
+      </ide-button>
+      <ide-button variant="ghost" ariaLabel="Refresh" (clicked)="refresh.emit()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </ide-button>
     </div>
   </header>
 
   <!-- Sidebar Content -->
   <div class="sidebar__content">
-    <p-tree
-      [value]="treeNodes()"
-      selectionMode="single"
-      [(selection)]="selectedNode"
-      (onNodeSelect)="selectNodeOrToggleFolder($event)"
-      (onNodeExpand)="expandFolder($event)"
-      (onNodeCollapse)="collapseFolder($event)"
-    >
-      <ng-template let-node pTemplate="default">
-        <div class="sidebar__tree-item">
-          <i [class]="node.data.customIcon + ' sidebar__tree-icon'"></i>
-          <span class="sidebar__tree-label">{{ node.label }}</span>
-        </div>
-      </ng-template>
-    </p-tree>
+    <ide-tree
+      [root]="workspaceFolder()"
+      [activeFileId]="activeFileId()"
+      [expandedFolders]="expandedFolders()"
+      (fileSelect)="fileSelect.emit($event)"
+      (folderToggle)="onFolderToggle($event)"
+    />
   </div>
 </div>

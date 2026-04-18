@@ -1,0 +1,32 @@
+.ide-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: var(--ide-space-3);
+  padding: 0 var(--ide-space-3);
+
+  &__start,
+  &__end {
+    display: flex;
+    align-items: center;
+    gap: var(--ide-space-2);
+    flex-shrink: 0;
+  }
+
+  &__center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--ide-space-2);
+  }
+
+  // Responsive: hide center on very small viewports
+  @media (max-width: 640px) {
+    &__center {
+      display: none;
+    }
+  }
+}

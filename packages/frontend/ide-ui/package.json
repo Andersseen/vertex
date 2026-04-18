@@ -24,6 +24,7 @@
     "@andersseen/headless-components": "^0.1.1",
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
     "@vertex/types": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.2"
