@@ -39,6 +39,7 @@ export class App {
   protected readonly activeFileId = signal<string | null>(null);
   protected readonly rootFolder = signal<VertexFolder | null>(null);
   protected readonly workspacePath = signal<string>('');
+  private readonly EDITOR_KEY = 'vertex:editor';
 
   protected readonly activeFile = computed(() => {
     const id = this.activeFileId();
@@ -47,6 +48,21 @@ export class App {
   });
 
   constructor() {
+    // 1️⃣ Intentar restaurar sesión virtual previa (OPFS/IndexedDB)
+    this.runtime.loadSession().then((folder) => {
+      if (folder) {
+        this.rootFolder.set(folder);
+        this.workspacePath.set(folder.path);
+        this.restoreEditorState();
+      } else {
+        // 2️⃣ Fallback: sidecar nativo o directorio por defecto
+        this.loadNativeWorkspace();
+      }
+    }).catch(() => this.loadNativeWorkspace());
+  }
+
+  /** Fallback cuando no hay sesión virtual guardada */
+  private loadNativeWorkspace(): void {
     this.fileService.getWorkspace().subscribe({
       next: (workspace) => {
         this.workspacePath.set(workspace.path);
@@ -67,7 +83,7 @@ export class App {
           if (firstFile) this.onFileSelect(firstFile);
         }
       },
-      error: () => {},
+      error: (err: unknown) => console.warn('Failed to load directory:', err),
     });
   }
 
@@ -82,6 +98,7 @@ export class App {
     this.openFiles.set([]);
     this.activeFileId.set(null);
     this.workspacePath.set(folder.path);
+    this.clearEditorState();
   }
 
   // ── Folder / File ops ───────────────────────────────────────────────────────
@@ -146,10 +163,61 @@ export class App {
       updated[idx] = file;
       this.openFiles.set(updated);
     }
+    this.saveEditorState();
+  }
+
+  /** Persiste metadatos de tabs abiertos en sessionStorage */
+  private saveEditorState(): void {
+    try {
+      const state = {
+        openFiles: this.openFiles().map((f) => ({
+          id: f.id,
+          path: f.path,
+          name: f.name,
+          language: f.language,
+        })),
+        activeFileId: this.activeFileId(),
+      };
+      sessionStorage.setItem(this.EDITOR_KEY, JSON.stringify(state));
+    } catch { /* storage full or disabled */ }
+  }
+
+  /** Restaura tabs abiertos leyendo contenido desde el FS virtual */
+  private async restoreEditorState(): Promise<void> {
+    try {
+      const raw = sessionStorage.getItem(this.EDITOR_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+
+      const files: VertexFile[] = [];
+      for (const meta of state.openFiles ?? []) {
+        try {
+          const content = await this.runtime.readFile(meta.path);
+          files.push({ ...meta, content, isDirty: false });
+        } catch {
+          // Archivo ya no existe en el FS, omitir
+        }
+      }
+
+      this.openFiles.set(files);
+      const activeId = state.activeFileId;
+      if (activeId && files.some((f) => f.id === activeId)) {
+        this.activeFileId.set(activeId);
+      } else if (files.length > 0) {
+        this.activeFileId.set(files[0].id);
+      }
+    } catch { /* ignore */ }
+  }
+
+  private clearEditorState(): void {
+    try {
+      sessionStorage.removeItem(this.EDITOR_KEY);
+    } catch { /* ignore */ }
   }
 
   onTabSelect(file: VertexFile) {
     this.activeFileId.set(file.id);
+    this.saveEditorState();
   }
 
   onNewFile() {
@@ -175,6 +243,7 @@ export class App {
     if (this.activeFileId() === file.id) {
       this.activeFileId.set(filtered.length > 0 ? filtered[0].id : null);
     }
+    this.saveEditorState();
   }
 
   onContentChange(content: string) {

@@ -10,6 +10,14 @@ export interface CloneProgress {
   percent: number;
 }
 
+interface SessionData {
+  name: string;
+  url: string;
+  dir: string;
+  timestamp: number;
+  version: number;
+}
+
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', '.angular', 'build', '.next']);
 
 const LANGUAGE_MAP: Record<string, string> = {
@@ -30,6 +38,9 @@ export class RuntimeService {
   readonly cloneProgress = signal<CloneProgress | null>(null);
   readonly cloneError = signal<string | null>(null);
   readonly repoName = signal<string>('');
+
+  private readonly SESSION_KEY = 'vertex:session';
+  private readonly SESSION_VERSION = 1;
 
   /** Acceso directo al filesystem virtual para integraciones (ej: terminal) */
   get fs(): IVirtualFS | null {
@@ -67,6 +78,7 @@ export class RuntimeService {
 
       const folder = await this.buildFolderTree('/', name, '/');
       this.isVirtualMode.set(true);
+      this.saveSession(name, options.url, '/');
       return folder;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Clone failed';
@@ -136,6 +148,63 @@ export class RuntimeService {
       language: LANGUAGE_MAP[ext] ?? 'text',
       isDirty: false,
     };
+  }
+
+  /** Guarda metadata de la sesión en localStorage para restaurar tras refresh */
+  private saveSession(name: string, url: string, dir: string): void {
+    try {
+      const data: SessionData = { name, url, dir, timestamp: Date.now(), version: this.SESSION_VERSION };
+      localStorage.setItem(this.SESSION_KEY, JSON.stringify(data));
+    } catch { /* storage full or disabled */ }
+  }
+
+  /**
+   * Intenta restaurar la última sesión virtual desde OPFS/IndexedDB.
+   * Devuelve el folder raíz si existe, null si no hay sesión o está corrupta.
+   */
+  async loadSession(): Promise<VertexFolder | null> {
+    try {
+      const raw = localStorage.getItem(this.SESSION_KEY);
+      if (!raw) return null;
+
+      const data: SessionData = JSON.parse(raw);
+      if (data.version !== this.SESSION_VERSION) {
+        this.clearSession();
+        return null;
+      }
+      const fsName = `vertex-repo-${data.name}`;
+
+      this.opfs = new OPFSFS(fsName);
+      this.virtualFs = new VirtualFS('opfs', fsName);
+      this.gitClient = new GitClient(this.opfs);
+
+      // Verificar que el FS tenga contenido real (no solo raíz vacía)
+      const rootEntries = await this.opfs.readDir('/');
+      if (rootEntries.length === 0) {
+        this.clearSession();
+        return null;
+      }
+
+      const folder = await this.buildFolderTree('/', data.name, '/');
+      this.isVirtualMode.set(true);
+      this.repoName.set(data.name);
+      return folder;
+    } catch {
+      this.clearSession();
+      return null;
+    }
+  }
+
+  /** Limpia la sesión persistida y resetea el runtime */
+  clearSession(): void {
+    try {
+      localStorage.removeItem(this.SESSION_KEY);
+    } catch { /* ignore */ }
+    this.opfs = null;
+    this.virtualFs = null;
+    this.gitClient = null;
+    this.isVirtualMode.set(false);
+    this.repoName.set('');
   }
 
   private extractRepoName(url: string): string {

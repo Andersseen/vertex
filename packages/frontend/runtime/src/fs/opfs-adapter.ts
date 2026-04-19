@@ -3,9 +3,11 @@ import type { IVirtualFS, FileContent, DirEntry, WatchCallback } from '../types/
 
 export class OPFSFS implements IVirtualFS {
   private fs: LightningFS
+  private readonly dbName: string
   private watchers = new Map<string, Set<WatchCallback>>()
 
   constructor(name = 'vertex-runtime') {
+    this.dbName = name
     this.fs = new LightningFS(name)
   }
 
@@ -29,6 +31,7 @@ export class OPFSFS implements IVirtualFS {
     const names = (await this.fs.promises.readdir(path)) as string[]
     const entries: DirEntry[] = []
     for (const name of names) {
+      if (name === '.' || name === '..') continue
       const fullPath = `${path}/${name}`.replace('//', '/')
       const stat = await this.fs.promises.stat(fullPath)
       entries.push({
@@ -60,7 +63,7 @@ export class OPFSFS implements IVirtualFS {
   }
 
   async clear(): Promise<void> {
-    this.fs = new LightningFS(this.fs.constructor.name, { wipe: true })
+    this.fs = new LightningFS(this.dbName, { wipe: true })
     this.watchers.clear()
   }
 
