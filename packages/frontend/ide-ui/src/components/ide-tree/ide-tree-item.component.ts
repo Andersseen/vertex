@@ -23,6 +23,11 @@ function isFolder(item: VertexFile | VertexFolder): item is VertexFolder {
       [class.ide-tree-item--file]="!isFolder(item())"
       [class.ide-tree-item--active]="isActive()"
       [style.padding-left.px]="level() * 14 + 8"
+      [attr.role]="isFolder(item()) ? 'treeitem' : 'treeitem'"
+      [attr.aria-expanded]="isFolder(item()) ? isExpanded() : null"
+      [attr.aria-selected]="isActive()"
+      [attr.aria-level]="level() + 1"
+      [attr.tabindex]="isActive() ? 0 : -1"
       (click)="onClick($event)"
     >
       <!-- Chevron for folders -->

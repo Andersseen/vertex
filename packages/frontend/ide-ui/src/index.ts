@@ -8,3 +8,4 @@ export * from './components/ide-progress-bar/ide-progress-bar.component';
 export * from './components/ide-alert/ide-alert.component';
 export * from './components/ide-tree/ide-tree.component';
 export * from './components/ide-toolbar/ide-toolbar.component';
+export * from './components/ide-splitter/ide-splitter.component';

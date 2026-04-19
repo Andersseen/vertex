@@ -13,7 +13,7 @@ import { IdeTreeItemComponent } from './ide-tree-item.component';
   standalone: true,
   imports: [CommonModule, IdeTreeItemComponent],
   template: `
-    <div class="ide-tree">
+    <div class="ide-tree" role="tree" aria-label="File explorer">
       @if (root()) {
         <ide-tree-item
           [item]="root()!"

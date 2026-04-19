@@ -49,11 +49,11 @@ export class App {
 
   constructor() {
     // 1️⃣ Intentar restaurar sesión virtual previa (OPFS/IndexedDB)
-    this.runtime.loadSession().then((folder) => {
+    this.runtime.loadSession().then(async (folder) => {
       if (folder) {
         this.rootFolder.set(folder);
         this.workspacePath.set(folder.path);
-        this.restoreEditorState();
+        await this.restoreEditorState();
       } else {
         // 2️⃣ Fallback: sidecar nativo o directorio por defecto
         this.loadNativeWorkspace();
@@ -99,6 +99,17 @@ export class App {
     this.activeFileId.set(null);
     this.workspacePath.set(folder.path);
     this.clearEditorState();
+    const firstFile = this.findFirstFile(folder);
+    if (firstFile) this.onFileSelect(firstFile);
+  }
+
+  private findFirstFile(folder: VertexFolder): VertexFile | null {
+    for (const child of folder.children ?? []) {
+      if (!('children' in child)) return child as VertexFile;
+      const found = this.findFirstFile(child as VertexFolder);
+      if (found) return found;
+    }
+    return null;
   }
 
   // ── Folder / File ops ───────────────────────────────────────────────────────
@@ -260,7 +271,16 @@ export class App {
     }
 
     if (this.runtime.isVirtualMode()) {
-      this.runtime.writeFile(file.path, content);
+      this.runtime.writeFile(file.path, content).catch(() => {
+        const failed = { ...updatedFile, isDirty: true };
+        const curr = this.openFiles();
+        const i = curr.findIndex((f) => f.id === file.id);
+        if (i !== -1) {
+          const updated = [...curr];
+          updated[i] = failed;
+          this.openFiles.set(updated);
+        }
+      });
     }
   }
 }

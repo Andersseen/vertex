@@ -32,6 +32,7 @@ import {
       (visibleChange)="visibleChange.emit($event)"
       title="Clone Repository"
       [closable]="!runtime.isCloning()"
+      [showFooter]="true"
     >
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <!-- URL -->

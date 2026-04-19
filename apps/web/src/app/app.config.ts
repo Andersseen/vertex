@@ -5,8 +5,6 @@ import {
 } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 
 import { TERMINAL_BACKEND_ADAPTER } from '@vertex/core';
 import { VirtualTerminalService } from '@vertex/core/web';
@@ -17,15 +15,6 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideHttpClient(),
     provideAnimationsAsync(),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: '.dark-mode',
-        },
-      },
-      ripple: true,
-    }),
     {
       provide: TERMINAL_BACKEND_ADAPTER,
       useClass: VirtualTerminalService,

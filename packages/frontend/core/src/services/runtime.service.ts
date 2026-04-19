@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { VirtualFS, GitClient, OPFSFS } from '@vertex/runtime';
 import type { GitCloneOptions, IVirtualFS } from '@vertex/runtime';
 import type { VertexFile, VertexFolder } from '@vertex/types';
+import { db } from '../db/vertex.db';
 
 export interface CloneProgress {
   phase: string;
@@ -10,13 +11,7 @@ export interface CloneProgress {
   percent: number;
 }
 
-interface SessionData {
-  name: string;
-  url: string;
-  dir: string;
-  timestamp: number;
-  version: number;
-}
+const SESSION_VERSION = 1;
 
 const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', '.angular', 'build', '.next']);
 
@@ -39,15 +34,10 @@ export class RuntimeService {
   readonly cloneError = signal<string | null>(null);
   readonly repoName = signal<string>('');
 
-  private readonly SESSION_KEY = 'vertex:session';
-  private readonly SESSION_VERSION = 1;
-
-  /** Acceso directo al filesystem virtual para integraciones (ej: terminal) */
   get fs(): IVirtualFS | null {
     return this.virtualFs;
   }
 
-  /** Acceso directo al cliente Git */
   get git(): GitClient | null {
     return this.gitClient;
   }
@@ -78,7 +68,7 @@ export class RuntimeService {
 
       const folder = await this.buildFolderTree('/', name, '/');
       this.isVirtualMode.set(true);
-      this.saveSession(name, options.url, '/');
+      await this.saveSession(name, options.url, '/');
       return folder;
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Clone failed';
@@ -150,56 +140,42 @@ export class RuntimeService {
     };
   }
 
-  /** Guarda metadata de la sesión en localStorage para restaurar tras refresh */
-  private saveSession(name: string, url: string, dir: string): void {
-    try {
-      const data: SessionData = { name, url, dir, timestamp: Date.now(), version: this.SESSION_VERSION };
-      localStorage.setItem(this.SESSION_KEY, JSON.stringify(data));
-    } catch { /* storage full or disabled */ }
+  private async saveSession(name: string, url: string, dir: string): Promise<void> {
+    await db.sessions.clear();
+    await db.sessions.add({ name, url, dir, timestamp: Date.now(), version: SESSION_VERSION });
   }
 
-  /**
-   * Intenta restaurar la última sesión virtual desde OPFS/IndexedDB.
-   * Devuelve el folder raíz si existe, null si no hay sesión o está corrupta.
-   */
   async loadSession(): Promise<VertexFolder | null> {
     try {
-      const raw = localStorage.getItem(this.SESSION_KEY);
-      if (!raw) return null;
-
-      const data: SessionData = JSON.parse(raw);
-      if (data.version !== this.SESSION_VERSION) {
-        this.clearSession();
+      const session = await db.sessions.orderBy('timestamp').last();
+      if (!session || session.version !== SESSION_VERSION) {
+        await this.clearSession();
         return null;
       }
-      const fsName = `vertex-repo-${data.name}`;
 
+      const fsName = `vertex-repo-${session.name}`;
       this.opfs = new OPFSFS(fsName);
       this.virtualFs = new VirtualFS('opfs', fsName);
       this.gitClient = new GitClient(this.opfs);
 
-      // Verificar que el FS tenga contenido real (no solo raíz vacía)
       const rootEntries = await this.opfs.readDir('/');
       if (rootEntries.length === 0) {
-        this.clearSession();
+        await this.clearSession();
         return null;
       }
 
-      const folder = await this.buildFolderTree('/', data.name, '/');
+      const folder = await this.buildFolderTree('/', session.name, '/');
       this.isVirtualMode.set(true);
-      this.repoName.set(data.name);
+      this.repoName.set(session.name);
       return folder;
     } catch {
-      this.clearSession();
+      await this.clearSession();
       return null;
     }
   }
 
-  /** Limpia la sesión persistida y resetea el runtime */
-  clearSession(): void {
-    try {
-      localStorage.removeItem(this.SESSION_KEY);
-    } catch { /* ignore */ }
+  async clearSession(): Promise<void> {
+    await db.sessions.clear();
     this.opfs = null;
     this.virtualFs = null;
     this.gitClient = null;

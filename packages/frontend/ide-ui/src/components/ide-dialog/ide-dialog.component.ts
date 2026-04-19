@@ -48,7 +48,7 @@ import { createModal } from '@andersseen/headless-components/modal';
           <ng-content />
         </div>
 
-        @if (hasFooter()) {
+        @if (showFooter()) {
           <footer class="ide-dialog__footer">
             <ng-content select="[ideDialogFooter]" />
           </footer>
@@ -63,6 +63,7 @@ export class IdeDialogComponent {
   readonly visible = input<boolean>(false);
   readonly title = input<string>('');
   readonly closable = input<boolean>(true);
+  readonly showFooter = input<boolean>(false);
   readonly visibleChange = output<boolean>();
 
   protected modal = createModal({
@@ -71,8 +72,6 @@ export class IdeDialogComponent {
     closeOnOverlayClick: true,
     onOpenChange: (isOpen) => this.visibleChange.emit(isOpen as boolean),
   });
-
-  protected hasFooter = () => true; // Simplified; ng-content always renders
 
   constructor() {
     effect(() => {

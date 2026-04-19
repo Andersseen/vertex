@@ -2,7 +2,6 @@ import {
   Component,
   input,
   output,
-  effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { createTabs } from '@andersseen/headless-components/tabs';
@@ -74,12 +73,4 @@ export class IdeTabsComponent {
   });
 
   protected tabIds = () => this.tabDefs().map((t) => t.id);
-
-  constructor() {
-    effect(() => {
-      // Sync orientation if changed dynamically
-      // Note: headless tabs doesn't expose setOrientation, but we can recreate if needed
-      // For now we keep it simple.
-    });
-  }
 }

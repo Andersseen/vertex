@@ -53,41 +53,33 @@
 
   <!-- Main Body -->
   <main class="vx-main-content">
-    <p-splitter
-      [style]="{ height: '100%', border: 'none', background: 'transparent' }"
-      [panelSizes]="[18, 82]"
-      [minSizes]="[10, 30]"
-      gutterSize="4"
+    <ide-splitter
+      storageKey="vertex:layout:main"
+      [defaultPosition]="18"
+      [minSize]="10"
+      [maxSize]="70"
     >
-      <!-- Sidebar Panel -->
-      <ng-template pTemplate="content">
-        <div class="vx-h-full vx-w-full vx-flex vx-flex-col vx-bg-900 vx-border-r">
-          <ng-content select="[sidebar]"></ng-content>
-        </div>
-      </ng-template>
+      <div splitterStart class="vx-sidebar-panel">
+        <ng-content select="[sidebar]"></ng-content>
+      </div>
 
-      <!-- Editor & Bottom Panel -->
-      <ng-template pTemplate="content">
-        <p-splitter
-          layout="vertical"
-          [style]="{ height: '100%', border: 'none', background: 'transparent' }"
-          [panelSizes]="[72, 28]"
-          [minSizes]="[40, 10]"
-          gutterSize="4"
-        >
-          <ng-template pTemplate="content">
-            <div class="vx-h-full vx-flex vx-flex-col vx-bg-950">
-              <ng-content select="[editor]"></ng-content>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="content">
-            <div class="vx-h-full vx-bg-900 vx-overflow-hidden shadow-[inset_0_2px_10px_rgba(0,0,0,0.3)]">
-              <ng-content select="[bottom]"></ng-content>
-            </div>
-          </ng-template>
-        </p-splitter>
-      </ng-template>
-    </p-splitter>
+      <ide-splitter
+        splitterEnd
+        storageKey="vertex:layout:panel"
+        orientation="vertical"
+        [defaultPosition]="72"
+        [minSize]="40"
+        [maxSize]="90"
+      >
+        <div splitterStart class="vx-editor-panel">
+          <ng-content select="[editor]"></ng-content>
+        </div>
+        <div splitterEnd class="vx-bottom-panel">
+          <ng-content select="[bottom]"></ng-content>
+        </div>
+      </ide-splitter>
+
+    </ide-splitter>
   </main>
 
   <footer class="vx-statusbar">

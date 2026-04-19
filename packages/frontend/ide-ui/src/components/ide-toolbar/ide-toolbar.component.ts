@@ -4,7 +4,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   selector: 'ide-toolbar',
   standalone: true,
   template: `
-    <div class="ide-toolbar">
+    <div class="ide-toolbar" role="toolbar" aria-label="Main toolbar">
       <div class="ide-toolbar__start">
         <ng-content select="[ideToolbarStart]" />
       </div>
