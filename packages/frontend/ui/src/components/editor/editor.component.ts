@@ -11,23 +11,8 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { EditorState, Extension } from "@codemirror/state";
+import { EditorState, Extension, Compartment } from "@codemirror/state";
 import { EditorView, basicSetup } from "codemirror";
-import { keymap } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
-import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import {
-  autocompletion,
-  completionKeymap,
-  closeBrackets,
-  closeBracketsKeymap,
-} from "@codemirror/autocomplete";
-import {
-  bracketMatching,
-  foldGutter,
-  foldKeymap,
-  indentOnInput,
-} from "@codemirror/language";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -49,7 +34,14 @@ type Language =
   | "markdown"
   | "ts"
   | "js"
-  | "md";
+  | "md"
+  | "tsx"
+  | "jsx"
+  | "scss"
+  | "sass"
+  | "less"
+  | "rs"
+  | "py";
 
 @Component({
   selector: "v-editor",
@@ -79,6 +71,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   private editorView: EditorView | null = null;
   private _suppressEmit = false;
   protected readonly isDirty = false;
+  private readonly languageCompartment = new Compartment();
 
   ngAfterViewInit(): void {
     this.initializeEditor();
@@ -93,10 +86,19 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
       if (prev?.id !== curr?.id) {
         this._suppressEmit = true;
+        this.switchLanguage(curr?.language);
         this.updateContent(curr?.content ?? "");
         this._suppressEmit = false;
       }
     }
+  }
+
+  private switchLanguage(language?: string): void {
+    if (!this.editorView) return;
+    const ext = this.getLanguageExtension(language);
+    this.editorView.dispatch({
+      effects: this.languageCompartment.reconfigure(ext),
+    });
   }
 
   ngOnDestroy(): void {
@@ -105,6 +107,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private getLanguageExtension(lang?: string): Extension {
     const language = lang?.toLowerCase() as Language | undefined;
+    if (!language) return [];
 
     switch (language) {
       case "javascript":
@@ -112,15 +115,23 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
       case "ts":
       case "js":
         return javascript({ typescript: true });
+      case "tsx":
+      case "jsx":
+        return javascript({ typescript: language === "tsx", jsx: true });
       case "html":
         return html();
       case "css":
+      case "scss":
+      case "sass":
+      case "less":
         return css();
       case "json":
         return json();
       case "rust":
+      case "rs":
         return rust();
       case "python":
+      case "py":
         return python();
       case "markdown":
       case "md":
@@ -138,23 +149,8 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
       doc: currentFile?.content ?? "",
       extensions: [
         basicSetup,
-        history(),
-        foldGutter(),
-        indentOnInput(),
-        bracketMatching(),
-        closeBrackets(),
-        autocompletion(),
-        highlightSelectionMatches(),
-        keymap.of([
-          ...closeBracketsKeymap,
-          ...defaultKeymap,
-          ...searchKeymap,
-          ...historyKeymap,
-          ...foldKeymap,
-          ...completionKeymap,
-        ]),
         oneDark,
-        this.getLanguageExtension(currentFile?.language),
+        this.languageCompartment.of(this.getLanguageExtension(currentFile?.language)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged && !this._suppressEmit) {
             this.contentChange.emit(update.state.doc.toString());

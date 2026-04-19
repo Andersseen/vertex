@@ -1,0 +1,29 @@
+.ide-progress-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ide-space-3);
+  width: 100%;
+
+  &__track {
+    flex: 1 1 auto;
+    height: 6px;
+    background-color: var(--ide-bg-hover);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ide-accent), var(--ide-cyan));
+    border-radius: 999px;
+    transition: width 200ms ease;
+  }
+
+  &__label {
+    font-size: var(--ide-text-xs);
+    font-weight: var(--ide-weight-medium);
+    color: var(--ide-text-secondary);
+    min-width: 32px;
+    text-align: right;
+  }
+}

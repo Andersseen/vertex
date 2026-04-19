@@ -1,4 +1,10 @@
-import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MainLayoutComponent } from '@vertex/ui';
 import { EditorComponent } from '@vertex/ui';
 import { SidebarComponent } from '@vertex/ui';
@@ -6,6 +12,8 @@ import { BottomPanelComponent } from '@vertex/ui';
 import { TabsComponent } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
+import { RuntimeService } from '@vertex/core/web';
+import { CloneDialogComponent } from './components/clone-dialog/clone-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +23,7 @@ import { FileService } from '@vertex/core';
     SidebarComponent,
     BottomPanelComponent,
     TabsComponent,
+    CloneDialogComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -22,14 +31,16 @@ import { FileService } from '@vertex/core';
 })
 export class App {
   private readonly fileService = inject(FileService);
+  protected readonly runtime = inject(RuntimeService);
 
   protected readonly title = signal('Vertex IDE Web');
+  protected readonly showCloneDialog = signal(false);
   protected readonly openFiles = signal<VertexFile[]>([]);
   protected readonly activeFileId = signal<string | null>(null);
   protected readonly rootFolder = signal<VertexFolder | null>(null);
   protected readonly workspacePath = signal<string>('');
+  private readonly EDITOR_KEY = 'vertex:editor';
 
-  // COMPUTED SIGNAL — prevents NG0103 infinite change detection loop
   protected readonly activeFile = computed(() => {
     const id = this.activeFileId();
     if (!id) return null;
@@ -37,13 +48,25 @@ export class App {
   });
 
   constructor() {
-    // Fetch the absolute workspace path to pass to the terminal
+    // 1️⃣ Intentar restaurar sesión virtual previa (OPFS/IndexedDB)
+    this.runtime.loadSession().then(async (folder) => {
+      if (folder) {
+        this.rootFolder.set(folder);
+        this.workspacePath.set(folder.path);
+        await this.restoreEditorState();
+      } else {
+        // 2️⃣ Fallback: sidecar nativo o directorio por defecto
+        this.loadNativeWorkspace();
+      }
+    }).catch(() => this.loadNativeWorkspace());
+  }
+
+  /** Fallback cuando no hay sesión virtual guardada */
+  private loadNativeWorkspace(): void {
     this.fileService.getWorkspace().subscribe({
       next: (workspace) => {
-        const absolutePath = workspace.path;
-        console.log(`[App] Workspace resolved to: ${absolutePath}`);
-        this.workspacePath.set(absolutePath);
-        this.loadDirectory(absolutePath);
+        this.workspacePath.set(workspace.path);
+        this.loadDirectory(workspace.path);
       },
       error: () => {
         this.loadDirectory('.');
@@ -55,34 +78,41 @@ export class App {
     this.fileService.getFiles(path).subscribe({
       next: (folder: VertexFolder) => {
         this.rootFolder.set({ ...folder, path });
-
-        // Auto-open first file for E2E tests and better DX
-        if (folder.children && folder.children.length > 0) {
+        if (folder.children?.length) {
           const firstFile = folder.children.find((f) => !('children' in f)) as VertexFile;
-          if (firstFile) {
-            this.onFileSelect(firstFile);
-          }
+          if (firstFile) this.onFileSelect(firstFile);
         }
       },
-      error: (err) => {
-        console.error(`[App] Failed to load folder:`, err);
-      },
+      error: (err: unknown) => console.warn('Failed to load directory:', err),
     });
   }
 
-  onFolderToggle(folder: VertexFolder) {
-    if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
-      this.fileService
-        .getChildren(folder.path)
-        .subscribe((children: (VertexFile | VertexFolder)[]) => {
-          folder.children = children;
-          // Trigger a refresh of the rootFolder signal to update the UI
-          if (this.rootFolder()) {
-            this.rootFolder.set({ ...this.rootFolder()! });
-          }
-        });
-    }
+  // ── Clone from URL ──────────────────────────────────────────────────────────
+
+  openCloneDialog(): void {
+    this.showCloneDialog.set(true);
   }
+
+  onCloneSuccess(folder: VertexFolder): void {
+    this.rootFolder.set(folder);
+    this.openFiles.set([]);
+    this.activeFileId.set(null);
+    this.workspacePath.set(folder.path);
+    this.clearEditorState();
+    const firstFile = this.findFirstFile(folder);
+    if (firstFile) this.onFileSelect(firstFile);
+  }
+
+  private findFirstFile(folder: VertexFolder): VertexFile | null {
+    for (const child of folder.children ?? []) {
+      if (!('children' in child)) return child as VertexFile;
+      const found = this.findFirstFile(child as VertexFolder);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  // ── Folder / File ops ───────────────────────────────────────────────────────
 
   openFolder() {
     const path = window.prompt(
@@ -92,54 +122,113 @@ export class App {
     if (path) {
       this.fileService.setWorkspace(path).subscribe({
         next: () => {
-          console.log(`[App] Workspace changed to: ${path}`);
           this.workspacePath.set(path);
           this.loadDirectory(path);
         },
-        error: (err) => {
-          console.error(`[App] Failed to set workspace: ${path}`, err);
-          this.loadDirectory(path);
-        },
+        error: () => this.loadDirectory(path),
       });
     }
   }
 
+  onFolderToggle(folder: VertexFolder) {
+    if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
+      if (this.runtime.isVirtualMode()) return;
+      this.fileService
+        .getChildren(folder.path)
+        .subscribe((children: (VertexFile | VertexFolder)[]) => {
+          folder.children = children;
+          if (this.rootFolder()) this.rootFolder.set({ ...this.rootFolder()! });
+        });
+    }
+  }
+
   onFileSelect(file: VertexFile) {
-    // 1. Set as active immediately for UI responsiveness
     this.activeFileId.set(file.id);
+    const existing = this.openFiles().find((f) => f.id === file.id);
 
-    // 2. Check if we already have this file open
-    const openFiles = this.openFiles();
-    const existingFile = openFiles.find((f) => f.id === file.id);
+    if (!file.content && (!existing || !existing.content)) {
+      const read$ = this.runtime.isVirtualMode()
+        ? this.runtime.readFile(file.path).then((content) => ({ content }))
+        : new Promise<{ content: string }>((res, rej) =>
+            this.fileService.readFile(file.path).subscribe({
+              next: (content) => res({ content }),
+              error: rej,
+            }),
+          );
 
-    // 3. Handle content loading and list update
-    if (!file.content && (!existingFile || !existingFile.content)) {
-      this.fileService.readFile(file.path).subscribe((content: string) => {
-        const updatedFile = { ...file, content };
-        this.updateOrAddFile(updatedFile);
-      });
+      read$.then(({ content }) => this.updateOrAddFile({ ...file, content }));
     } else {
       const fileToUse =
-        !file.content && existingFile?.content ? { ...file, content: existingFile.content } : file;
+        !file.content && existing?.content ? { ...file, content: existing.content } : file;
       this.updateOrAddFile(fileToUse);
     }
   }
 
   private updateOrAddFile(file: VertexFile) {
-    const currentOpenFiles = this.openFiles();
-    const existingIndex = currentOpenFiles.findIndex((f) => f.id === file.id);
-
-    if (existingIndex === -1) {
-      this.openFiles.set([...currentOpenFiles, file]);
+    const current = this.openFiles();
+    const idx = current.findIndex((f) => f.id === file.id);
+    if (idx === -1) {
+      this.openFiles.set([...current, file]);
     } else {
-      const updatedFiles = [...currentOpenFiles];
-      updatedFiles[existingIndex] = file;
-      this.openFiles.set(updatedFiles);
+      const updated = [...current];
+      updated[idx] = file;
+      this.openFiles.set(updated);
     }
+    this.saveEditorState();
+  }
+
+  /** Persiste metadatos de tabs abiertos en sessionStorage */
+  private saveEditorState(): void {
+    try {
+      const state = {
+        openFiles: this.openFiles().map((f) => ({
+          id: f.id,
+          path: f.path,
+          name: f.name,
+          language: f.language,
+        })),
+        activeFileId: this.activeFileId(),
+      };
+      sessionStorage.setItem(this.EDITOR_KEY, JSON.stringify(state));
+    } catch { /* storage full or disabled */ }
+  }
+
+  /** Restaura tabs abiertos leyendo contenido desde el FS virtual */
+  private async restoreEditorState(): Promise<void> {
+    try {
+      const raw = sessionStorage.getItem(this.EDITOR_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+
+      const files: VertexFile[] = [];
+      for (const meta of state.openFiles ?? []) {
+        try {
+          const content = await this.runtime.readFile(meta.path);
+          files.push({ ...meta, content, isDirty: false });
+        } catch {
+          // Archivo ya no existe en el FS, omitir
+        }
+      }
+
+      this.openFiles.set(files);
+      const activeId = state.activeFileId;
+      if (activeId && files.some((f) => f.id === activeId)) {
+        this.activeFileId.set(activeId);
+      } else if (files.length > 0) {
+        this.activeFileId.set(files[0].id);
+      }
+    } catch { /* ignore */ }
+  }
+
+  private clearEditorState(): void {
+    try {
+      sessionStorage.removeItem(this.EDITOR_KEY);
+    } catch { /* ignore */ }
   }
 
   onTabSelect(file: VertexFile) {
     this.activeFileId.set(file.id);
+    this.saveEditorState();
   }
 
   onNewFile() {
@@ -160,28 +249,38 @@ export class App {
 
   onTabClose(file: VertexFile, event?: MouseEvent) {
     event?.stopPropagation();
-    const currentFiles = this.openFiles();
-    const filteredFiles = currentFiles.filter((f) => f.id !== file.id);
-    this.openFiles.set(filteredFiles);
-
-    if (this.activeFileId() === file.id && filteredFiles.length > 0) {
-      this.activeFileId.set(filteredFiles[0].id);
-    } else if (filteredFiles.length === 0) {
-      this.activeFileId.set(null);
+    const filtered = this.openFiles().filter((f) => f.id !== file.id);
+    this.openFiles.set(filtered);
+    if (this.activeFileId() === file.id) {
+      this.activeFileId.set(filtered.length > 0 ? filtered[0].id : null);
     }
+    this.saveEditorState();
   }
 
   onContentChange(content: string) {
     const file = this.activeFile();
-    if (file) {
-      const updatedFile = { ...file, content, isDirty: true };
-      const currentFiles = this.openFiles();
-      const index = currentFiles.findIndex((f) => f.id === file.id);
-      if (index !== -1) {
-        const updatedFiles = [...currentFiles];
-        updatedFiles[index] = updatedFile;
-        this.openFiles.set(updatedFiles);
-      }
+    if (!file) return;
+
+    const updatedFile = { ...file, content, isDirty: true };
+    const current = this.openFiles();
+    const idx = current.findIndex((f) => f.id === file.id);
+    if (idx !== -1) {
+      const updated = [...current];
+      updated[idx] = updatedFile;
+      this.openFiles.set(updated);
+    }
+
+    if (this.runtime.isVirtualMode()) {
+      this.runtime.writeFile(file.path, content).catch(() => {
+        const failed = { ...updatedFile, isDirty: true };
+        const curr = this.openFiles();
+        const i = curr.findIndex((f) => f.id === file.id);
+        if (i !== -1) {
+          const updated = [...curr];
+          updated[i] = failed;
+          this.openFiles.set(updated);
+        }
+      });
     }
   }
 }

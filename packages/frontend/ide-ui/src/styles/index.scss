@@ -1,0 +1,9 @@
+// Vertex IDE UI — Global Styles Entry
+// Import once in your app (e.g. in main.ts or angular.json styles array).
+
+@use 'tokens';
+@use 'base';
+
+// The .vx-ide class activates the scoped reset and token defaults.
+// Apply it to your root app container:
+//   <div class="vx-ide"> ... </div>

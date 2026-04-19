@@ -1,21 +1,25 @@
 import { Component, signal, input, ChangeDetectionStrategy } from "@angular/core";
-import { DividerModule } from "primeng/divider";
-import { TabsModule } from "primeng/tabs";
 import { TerminalPanelComponent } from "@vertex/core";
+import { IdeTabsComponent } from "@vertex/ide-ui";
 
 @Component({
   selector: "v-bottom-panel",
   standalone: true,
-  imports: [TabsModule, DividerModule, TerminalPanelComponent],
+  imports: [TerminalPanelComponent, IdeTabsComponent],
   templateUrl: "./bottom-panel.component.html",
   styleUrls: ["./bottom-panel.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BottomPanelComponent {
   readonly workspacePath = input<string>("");
-  readonly activeTabIndex = signal(3);
+  readonly activeTab = signal("Terminal");
 
-  readonly tabs = ["Problems", "Output", "Debug Console", "Terminal"];
+  readonly tabs = [
+    { id: "Problems", label: "Problems" },
+    { id: "Output", label: "Output" },
+    { id: "Debug Console", label: "Debug Console" },
+    { id: "Terminal", label: "Terminal" },
+  ];
 
   // Mock content for the panels
   readonly problems = [

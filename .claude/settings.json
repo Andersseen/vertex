@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng:*)",
+      "Bash(mkdir -p /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/sidebar)",
+      "Bash(cp /Users/andriipap/Andersseen/Web/Projects/volt-ui/src/app/layout/sidebar/sidebar.ts /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/sidebar/sidebar.ts)",
+      "Bash(cp /Users/andriipap/Andersseen/Web/Projects/volt-ui/src/app/layout/sidebar/sidebar.service.ts /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/sidebar/sidebar.service.ts)",
+      "Bash(mkdir -p components layouts/sidebar)",
+      "Bash(mv accordion:*)",
+      "Bash(cp /Users/andriipap/Andersseen/Web/Projects/volt-ui/src/app/layout/sidebar/sidebar.ts /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/layouts/sidebar/sidebar.ts)",
+      "Bash(cp /Users/andriipap/Andersseen/Web/Projects/volt-ui/src/app/layout/sidebar/sidebar.service.ts /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/layouts/sidebar/sidebar.service.ts)",
+      "Bash(rm -rf /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/sidebar)",
+      "Bash(cat /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/components/tooltip/*.ts)",
+      "Bash(cat /Users/andriipap/Andersseen/Web/Projects/volt-ui/projects/volt/src/lib/components/dialog/*.ts)",
+      "Bash(ls *.config.* tsconfig*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.get\\('projects',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); p=d['projects']['volt']; print\\(json.dumps\\(p.get\\('architect',{}\\), indent=2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('mcpServers', {}\\), indent=2\\)\\)\")",
+      "Bash(bun run *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('dependencies',{}\\), indent=2\\)\\)\")",
+      "Bash(bun install *)",
+      "Bash(gtimeout 25 bun run start)",
+      "Bash(curl -s http://localhost:4200/)",
+      "Bash(bun add *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['projects']['vertex-ui']['architect']['serve'], indent=2\\)\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3)",
+      "Bash(bun remove *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(d.get\\('exports',{}\\).keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(node -e \"const l = require\\('/Users/andriipap/Andersseen/Web/Projects/vertex/apps/web/node_modules/@noble/hashes/legacy.js'\\); console.log\\(Object.keys\\(l\\)\\)\")",
+      "Bash(npm run *)",
+      "Read(//Users/andriipap/Andersseen/Web/Projects/**)",
+      "Bash(bun web:dev)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['name','packageManager','workspaces'] if k in d}, indent=2\\)\\)\")",
+      "WebFetch(domain:code-studio.chenxiaoyao.cn)"
+    ]
+  }
+}

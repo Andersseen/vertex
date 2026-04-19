@@ -27,10 +27,10 @@
     gap: $spacing-2;
   }
 
-  // Element: Icon
-  &__icon {
-    font-size: $font-size-xs;
+  // Element: Logo Icon
+  &__logo-icon {
     color: $surface-400;
+    flex-shrink: 0;
   }
 
   // Element: Title
@@ -49,132 +49,9 @@
     gap: $spacing-1;
   }
 
-  // Element: Action Button
-  &__action-btn {
-    @include flex-center;
-    padding: $spacing-1;
-    background: transparent;
-    border: none;
-    @include rounded(4px);
-    color: $surface-400;
-    cursor: pointer;
-    @include transition;
-
-    &:hover {
-      background-color: $surface-800;
-      color: $surface-100;
-    }
-
-    i {
-      font-size: 11px;
-    }
-  }
-
   // Element: Content
   &__content {
     flex: 1;
     @include overflow-auto;
-  }
-
-  // PrimeNG Tree Overrides
-  ::ng-deep {
-    .p-tree {
-      background: transparent !important;
-      color: inherit !important;
-      border: none !important;
-      padding: $spacing-2 0 !important;
-    }
-
-    .p-treenode-content {
-      padding: $spacing-1 $spacing-3 !important;
-      @include rounded(0);
-      @include transition(background);
-      border: none !important;
-      @include flex;
-      @include items-center;
-      @include full-width;
-      @include truncate;
-
-      &:hover {
-        background: $surface-800 !important;
-      }
-
-      &.p-highlight {
-        background: rgba($primary-500, 0.15) !important;
-        border-right: 2px solid $primary-500 !important;
-        color: $surface-0 !important;
-      }
-    }
-
-    .p-tree-toggler {
-      margin-right: $spacing-1 !important;
-      width: 1.25rem !important;
-      height: 1.25rem !important;
-    }
-  }
-
-  // Element: Tree Item
-  &__tree-item {
-    @include flex;
-    @include items-center;
-    gap: $spacing-2;
-    padding: $spacing-0-5 0;
-    @include full-width;
-    @include truncate;
-  }
-
-  // Element: Tree Icon
-  &__tree-icon {
-    font-size: 13px;
-    opacity: 0.7;
-    flex-shrink: 0;
-
-    // Icon color modifiers
-    &--folder {
-      color: #f59e0b;
-    }
-
-    &--typescript {
-      color: #60a5fa;
-    }
-
-    &--javascript {
-      color: #facc15;
-    }
-
-    &--html {
-      color: #f97316;
-    }
-
-    &--css {
-      color: #3b82f6;
-    }
-
-    &--json {
-      color: #4ade80;
-    }
-
-    &--markdown {
-      color: #94a3b8;
-    }
-
-    &--rust {
-      color: #c2410c;
-    }
-
-    &--python {
-      color: #93c5fd;
-    }
-
-    &--default {
-      color: #64748b;
-    }
-  }
-
-  // Element: Tree Label
-  &__tree-label {
-    font-size: $font-size-sm;
-    letter-spacing: -0.01em;
-    @include truncate;
   }
 }

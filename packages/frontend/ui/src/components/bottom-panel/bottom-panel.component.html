@@ -1,103 +1,73 @@
 <div class="bottom-panel">
-  <header class="bottom-panel__header">
-    <nav class="bottom-panel__tabs">
-      @for (tab of tabs; track $index; let i = $index) {
-        <button
-          [id]="'tab-' + tab.toLowerCase().replace(' ', '-')"
-          (click)="activeTabIndex.set(i)"
-          [class.bottom-panel__tab--active]="activeTabIndex() === i"
-          class="bottom-panel__tab"
-          type="button"
-        >
-          <span class="bottom-panel__tab-label">{{ tab }}</span>
-        </button>
-      }
-    </nav>
-
-    <div class="bottom-panel__actions">
-      <button class="bottom-panel__action-btn" type="button">
-        <i class="pi pi-minus"></i>
-      </button>
-      <button class="bottom-panel__action-btn" type="button">
-        <i class="pi pi-times"></i>
-      </button>
-    </div>
-  </header>
-
-  <div class="bottom-panel__content">
-    <!-- Problems Tab -->
-    @if (activeTabIndex() === 0) {
-      <div class="bottom-panel__console">
-        @for (prob of problems; track $index) {
-          <div class="bottom-panel__problem">
-            <i
-              class="bottom-panel__problem-icon"
-              [class.bottom-panel__problem-icon--error]="prob.type === 'error'"
-              [class.bottom-panel__problem-icon--warning]="
-                prob.type === 'warning'
-              "
-              [class]="
-                prob.type === 'error'
-                  ? 'pi pi-times-circle'
-                  : 'pi pi-exclamation-triangle'
-              "
-            ></i>
-            <div class="bottom-panel__problem-content">
-              <span class="bottom-panel__problem-message">{{
-                prob.message
-              }}</span>
-              <span class="bottom-panel__problem-meta"
-                >{{ prob.file }}:{{ prob.line }}</span
+  <ide-tabs
+    [tabsData]="tabs"
+    [defaultValue]="activeTab()"
+    (valueChange)="activeTab.set($event)"
+  >
+    <div class="bottom-panel__content">
+      <!-- Problems Tab -->
+      @if (activeTab() === 'Problems') {
+        <div class="bottom-panel__console">
+          @for (prob of problems; track $index) {
+            <div class="bottom-panel__problem">
+              <span
+                class="bottom-panel__problem-icon"
+                [class.bottom-panel__problem-icon--error]="prob.type === 'error'"
+                [class.bottom-panel__problem-icon--warning]="prob.type === 'warning'"
               >
+                {{ prob.type === 'error' ? '●' : '●' }}
+              </span>
+              <div class="bottom-panel__problem-content">
+                <span class="bottom-panel__problem-message">{{ prob.message }}</span>
+                <span class="bottom-panel__problem-meta">{{ prob.file }}:{{ prob.line }}</span>
+              </div>
             </div>
-          </div>
-        }
+          }
 
-        @if (problems.length === 0) {
-          <div class="bottom-panel__console-item">No problems detected</div>
-        }
-      </div>
-    }
+          @if (problems.length === 0) {
+            <div class="bottom-panel__console-item">No problems detected</div>
+          }
+        </div>
+      }
 
-    <!-- Output Tab -->
-    @if (activeTabIndex() === 1) {
-      <div class="bottom-panel__console">
-        @for (out of output; track $index) {
-          <div
-            class="bottom-panel__output-item"
-            [class.bottom-panel__output-item--success]="out.type === 'success'"
-            [class.bottom-panel__output-item--warning]="out.type === 'warning'"
-            [class.bottom-panel__output-item--info]="out.type === 'info'"
-          >
-            {{ out.text }}
-          </div>
-        }
-      </div>
-    }
+      <!-- Output Tab -->
+      @if (activeTab() === 'Output') {
+        <div class="bottom-panel__console">
+          @for (out of output; track $index) {
+            <div
+              class="bottom-panel__output-item"
+              [class.bottom-panel__output-item--success]="out.type === 'success'"
+              [class.bottom-panel__output-item--warning]="out.type === 'warning'"
+              [class.bottom-panel__output-item--info]="out.type === 'info'"
+            >
+              {{ out.text }}
+            </div>
+          }
+        </div>
+      }
 
-    <!-- Debug Console Tab -->
-    @if (activeTabIndex() === 2) {
-      <div class="bottom-panel__console">
-        @for (dbg of debugConsole; track $index) {
-          <div
-            class="bottom-panel__debug-item"
-            [class.bottom-panel__debug-item--success]="dbg.type === 'success'"
-            [class.bottom-panel__debug-item--warning]="dbg.type === 'warning'"
-            [class.bottom-panel__debug-item--info]="dbg.type === 'info'"
-          >
-            {{ dbg.text }}
-          </div>
-        }
-      </div>
-    }
+      <!-- Debug Console Tab -->
+      @if (activeTab() === 'Debug Console') {
+        <div class="bottom-panel__console">
+          @for (dbg of debugConsole; track $index) {
+            <div
+              class="bottom-panel__debug-item"
+              [class.bottom-panel__debug-item--success]="dbg.type === 'success'"
+              [class.bottom-panel__debug-item--warning]="dbg.type === 'warning'"
+              [class.bottom-panel__debug-item--info]="dbg.type === 'info'"
+            >
+              {{ dbg.text }}
+            </div>
+          }
+        </div>
+      }
 
-    <!-- Terminal Tab -->
-    @if (activeTabIndex() === 3) {
-      <div class="bottom-panel__terminal">
-        <v-terminal-panel
-          [workingDirectory]="workspacePath()"
-        ></v-terminal-panel>
-      </div>
-    }
-  </div>
+      <!-- Terminal Tab -->
+      @if (activeTab() === 'Terminal') {
+        <div class="bottom-panel__terminal">
+          <v-terminal-panel [workingDirectory]="workspacePath()"></v-terminal-panel>
+        </div>
+      }
+    </div>
+  </ide-tabs>
 </div>

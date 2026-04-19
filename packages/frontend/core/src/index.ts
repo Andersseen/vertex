@@ -12,3 +12,8 @@ export * from "./fs/tauri.service";
 // Services
 export * from "./services/config.service";
 export * from "./services/workspace.service";
+export * from "./services/preferences.service";
+
+// Database
+export { db } from "./db/vertex.db";
+export type { SessionRecord, PreferenceRecord } from "./db/vertex.db";

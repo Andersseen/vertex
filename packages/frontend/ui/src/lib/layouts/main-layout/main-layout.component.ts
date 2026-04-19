@@ -1,15 +1,24 @@
-import { Component, Output, EventEmitter } from "@angular/core";
+import { Component, output, ChangeDetectionStrategy } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { SplitterModule } from "primeng/splitter";
-import { ToolbarModule } from "primeng/toolbar";
+import {
+  IdeToolbarComponent,
+  IdeButtonComponent,
+  IdeSplitterComponent,
+} from "@vertex/ide-ui";
 
 @Component({
   selector: "v-main-layout",
-  standalone: true,
-  imports: [CommonModule, SplitterModule, ToolbarModule],
+  imports: [
+    CommonModule,
+    IdeToolbarComponent,
+    IdeButtonComponent,
+    IdeSplitterComponent,
+  ],
   templateUrl: "./main-layout.component.html",
   styleUrls: ["./main-layout.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
-  @Output() openFolder = new EventEmitter<void>();
+  readonly openFolder = output<void>();
+  readonly cloneRepo = output<void>();
 }

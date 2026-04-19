@@ -186,6 +186,21 @@
         border: none !important;
         color: $surface-400 !important;
       }
+
+      // Fallback syntax highlighting tokens (oneDark should cover these,
+      // but these ensure visibility if theme styles fail to load)
+      .cm-keyword { color: #c678dd; }
+      .cm-string, .cm-string2 { color: #98c379; }
+      .cm-comment { color: #5c6370; font-style: italic; }
+      .cm-number { color: #d19a66; }
+      .cm-variable, .cm-variable-2, .cm-variable-3 { color: #e06c75; }
+      .cm-property { color: #e06c75; }
+      .cm-type, .cm-class-name { color: #e5c07b; }
+      .cm-function, .cm-def { color: #61afef; }
+      .cm-operator { color: #56b6c2; }
+      .cm-tag { color: #e06c75; }
+      .cm-attribute { color: #d19a66; }
+      .cm-link { color: #61afef; text-decoration: underline; }
     }
   }
 }

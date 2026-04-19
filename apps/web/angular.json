@@ -31,7 +31,15 @@
                 "input": "public"
               }
             ],
-            "styles": ["primeicons/primeicons.css", "@xterm/xterm/css/xterm.css", "src/styles.scss"]
+            "styles": [
+              "primeicons/primeicons.css",
+              "@xterm/xterm/css/xterm.css",
+              "../../packages/frontend/ide-ui/src/styles/index.scss",
+              "src/styles.scss"
+            ],
+            "polyfills": [
+              "src/polyfills.ts"
+            ]
           },
           "configurations": {
             "production": {

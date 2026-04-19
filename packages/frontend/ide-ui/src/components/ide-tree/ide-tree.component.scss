@@ -1,0 +1,14 @@
+.ide-tree {
+  display: flex;
+  flex-direction: column;
+  padding: var(--ide-space-1) 0;
+  overflow: auto;
+  font-family: var(--ide-font-sans);
+
+  &__empty {
+    padding: var(--ide-space-4);
+    font-size: var(--ide-text-sm);
+    color: var(--ide-text-muted);
+    text-align: center;
+  }
+}

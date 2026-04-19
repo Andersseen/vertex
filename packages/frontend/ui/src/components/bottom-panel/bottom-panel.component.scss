@@ -11,102 +11,7 @@
   position: relative;
   box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.4);
 
-  // Element: Header
-  &__header {
-    background-color: $surface-900;
-    border-bottom: 1px solid $surface-800;
-    flex-shrink: 0;
-    @include flex-between;
-    height: 32px;
-    user-select: none;
-  }
-
-  // Element: Tabs
-  &__tabs {
-    @include flex;
-    @include items-center;
-    height: 100%;
-  }
-
-  // Element: Tab
-  &__tab {
-    padding: 0 $spacing-5;
-    font-size: 10px;
-    font-weight: $font-weight-bold;
-    color: $surface-400;
-    @include transition;
-    cursor: pointer;
-    border-right: 1px solid $surface-800;
-    border-left: none;
-    border-top: none;
-    border-bottom: none;
-    background: none;
-    position: relative;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    @include flex;
-    @include items-center;
-    height: 100%;
-
-    &:hover {
-      color: $surface-100;
-      background-color: $surface-800;
-    }
-
-    // Modifier: Active
-    &--active {
-      color: $surface-0;
-      background-color: $surface-950;
-
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2.5px;
-        background-color: $primary-500;
-        box-shadow: 0 0 8px rgba($primary-500, 0.5);
-      }
-    }
-  }
-
-  // Element: Tab Label
-  &__tab-label {
-    @include truncate;
-    max-width: 120px;
-  }
-
-  // Element: Actions
-  &__actions {
-    @include flex;
-    @include items-center;
-    padding: 0 $spacing-4;
-    gap: $spacing-2;
-  }
-
-  // Element: Action Button
-  &__action-btn {
-    @include flex-center;
-    padding: $spacing-1;
-    color: $surface-500;
-    background: transparent;
-    border: none;
-    @include rounded(4px);
-    cursor: pointer;
-    @include transition;
-
-    &:hover {
-      color: $surface-200;
-      background-color: $surface-800;
-    }
-
-    i {
-      font-size: 9px;
-    }
-  }
-
-  // Element: Content
+  // Content wrapper inside ide-tabs
   &__content {
     flex: 1;
     @include overflow-auto;
@@ -218,16 +123,5 @@
       height: 100%;
       width: 100%;
     }
-  }
-}
-
-// Animation for modified indicator
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
   }
 }
