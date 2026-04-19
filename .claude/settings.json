@@ -30,7 +30,8 @@
       "Bash(node -e \"const l = require\\('/Users/andriipap/Andersseen/Web/Projects/vertex/apps/web/node_modules/@noble/hashes/legacy.js'\\); console.log\\(Object.keys\\(l\\)\\)\")",
       "Bash(npm run *)",
       "Read(//Users/andriipap/Andersseen/Web/Projects/**)",
-      "Bash(bun web:dev)"
+      "Bash(bun web:dev)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['name','packageManager','workspaces'] if k in d}, indent=2\\)\\)\")"
     ]
   }
 }
