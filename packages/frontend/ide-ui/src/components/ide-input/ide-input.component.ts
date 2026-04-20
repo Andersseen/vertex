@@ -8,7 +8,7 @@ import {
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'ide-input',
+  selector: 'v-ide-input',
   standalone: true,
   imports: [FormsModule],
   template: `

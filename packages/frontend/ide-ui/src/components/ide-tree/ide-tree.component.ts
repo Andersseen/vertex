@@ -9,13 +9,13 @@ import type { VertexFile, VertexFolder } from '@vertex/types';
 import { IdeTreeItemComponent } from './ide-tree-item.component';
 
 @Component({
-  selector: 'ide-tree',
+  selector: 'v-ide-tree',
   standalone: true,
   imports: [CommonModule, IdeTreeItemComponent],
   template: `
     <div class="ide-tree" role="tree" aria-label="File explorer">
       @if (root()) {
-        <ide-tree-item
+        <v-ide-tree-item
           [item]="root()!"
           [level]="0"
           [activeFileId]="activeFileId()"

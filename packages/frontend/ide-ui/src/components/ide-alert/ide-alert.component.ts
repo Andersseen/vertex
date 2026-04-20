@@ -3,7 +3,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 export type IdeAlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
 @Component({
-  selector: 'ide-alert',
+  selector: 'v-ide-alert',
   standalone: true,
   template: `
     <div

@@ -1,7 +1,7 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'ide-progress-bar',
+  selector: 'v-ide-progress-bar',
   standalone: true,
   template: `
     <div class="ide-progress-bar" role="progressbar" [attr.aria-valuenow]="value()" aria-valuemin="0" aria-valuemax="100">

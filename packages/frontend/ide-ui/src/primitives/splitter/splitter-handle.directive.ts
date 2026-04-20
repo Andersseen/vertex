@@ -3,7 +3,7 @@ import { SplitterService } from './splitter.service';
 import { SplitterContainerDirective } from './splitter-container.directive';
 
 @Directive({
-  selector: '[qzSplitterHandle]',
+  selector: '[vSplitterHandle]',
   host: {
     '[class.qz-splitter-handle]': 'true',
     '[class.qz-splitter-handle--dragging]': 'splitterService.isDragging()',

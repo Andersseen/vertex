@@ -2,7 +2,7 @@ import { Directive, inject, input, booleanAttribute, computed } from '@angular/c
 import { SplitterService } from './splitter.service';
 
 @Directive({
-  selector: '[qzSplitterPanel]',
+  selector: '[vSplitterPanel]',
   host: {
     '[class.qz-splitter-panel]': 'true',
     '[class.qz-splitter-panel--primary]': 'isPrimary()',
@@ -22,7 +22,7 @@ export class SplitterPanelDirective {
   protected splitterService = inject(SplitterService);
 
   isPrimary = input<boolean, string | boolean>(true, {
-    alias: 'qzSplitterPanel',
+    alias: 'vSplitterPanel',
     transform: booleanAttribute,
   });
 

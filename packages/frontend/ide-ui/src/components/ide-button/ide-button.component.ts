@@ -10,7 +10,7 @@ import { createButton } from '@andersseen/headless-components/button';
 export type IdeButtonVariant = 'default' | 'ghost' | 'accent';
 
 @Component({
-  selector: 'ide-button',
+  selector: 'v-ide-button',
   standalone: true,
   template: `
     <button

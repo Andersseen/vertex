@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'ide-toolbar',
+  selector: 'v-ide-toolbar',
   standalone: true,
   template: `
     <div class="ide-toolbar" role="toolbar" aria-label="Main toolbar">

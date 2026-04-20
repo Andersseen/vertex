@@ -27,7 +27,7 @@ function readStoredPosition(key: string | null, fallback: number): number {
 }
 
 @Component({
-  selector: "ide-splitter",
+  selector: "v-ide-splitter",
   imports: [
     SplitterContainerDirective,
     SplitterHandleDirective,
@@ -36,22 +36,22 @@ function readStoredPosition(key: string | null, fallback: number): number {
   template: `
     <div
       class="ide-splitter"
-      qzSplitterContainer
+      vSplitterContainer
       [orientation]="orientation()"
       [defaultPosition]="initialPosition()"
       [minSize]="minSize()"
       [maxSize]="maxSize()"
       (positionChange)="onPositionChange($event)"
     >
-      <div class="ide-splitter__panel" qzSplitterPanel>
+      <div class="ide-splitter__panel" vSplitterPanel>
         <ng-content select="[splitterStart]" />
       </div>
 
-      <div class="ide-splitter__handle" qzSplitterHandle>
+      <div class="ide-splitter__handle" vSplitterHandle>
         <span class="ide-splitter__handle-bar" aria-hidden="true"></span>
       </div>
 
-      <div class="ide-splitter__panel" [qzSplitterPanel]="false">
+      <div class="ide-splitter__panel" [vSplitterPanel]="false">
         <ng-content select="[splitterEnd]" />
       </div>
     </div>

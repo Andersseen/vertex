@@ -8,7 +8,7 @@ import {
 import { createModal } from '@andersseen/headless-components/modal';
 
 @Component({
-  selector: 'ide-dialog',
+  selector: 'v-ide-dialog',
   standalone: true,
   template: `
     @if (modal.state.isOpen) {

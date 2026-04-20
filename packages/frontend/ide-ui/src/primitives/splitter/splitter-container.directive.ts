@@ -5,7 +5,7 @@ import { SplitterService } from './splitter.service';
 import { SplitterOrientation } from './splitter.types';
 
 @Directive({
-  selector: '[qzSplitterContainer]',
+  selector: '[vSplitterContainer]',
   providers: [SplitterService],
   host: {
     '[class.qz-splitter-container]': 'true',

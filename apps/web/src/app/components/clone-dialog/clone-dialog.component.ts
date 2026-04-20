@@ -27,7 +27,7 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ide-dialog
+    <v-ide-dialog
       [visible]="visible()"
       (visibleChange)="visibleChange.emit($event)"
       title="Clone Repository"
@@ -36,7 +36,7 @@ import {
     >
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <!-- URL -->
-        <ide-input
+        <v-ide-input
           label="Repository URL"
           placeholder="https://github.com/owner/repo"
           [disabled]="runtime.isCloning()"
@@ -45,7 +45,7 @@ import {
         />
 
         <!-- Token -->
-        <ide-input
+        <v-ide-input
           label="GitHub Token (optional, for private repos)"
           type="password"
           placeholder="ghp_xxxxxxxxxxxx"
@@ -60,33 +60,33 @@ import {
               <span>{{ runtime.cloneProgress()?.phase ?? 'Connecting...' }}</span>
               <span>{{ runtime.cloneProgress()?.percent ?? 0 }}%</span>
             </div>
-            <ide-progress-bar [value]="runtime.cloneProgress()?.percent ?? 0" />
+            <v-ide-progress-bar [value]="runtime.cloneProgress()?.percent ?? 0" />
           </div>
         }
 
         <!-- Error -->
         @if (runtime.cloneError()) {
-          <ide-alert severity="error" [text]="runtime.cloneError()!" />
+          <v-ide-alert severity="error" [text]="runtime.cloneError()!" />
         }
       </div>
 
       <div ideDialogFooter>
-        <ide-button
+        <v-ide-button
           variant="ghost"
           [disabled]="runtime.isCloning()"
           (clicked)="visibleChange.emit(false)"
         >
           Cancel
-        </ide-button>
-        <ide-button
+        </v-ide-button>
+        <v-ide-button
           variant="accent"
           [disabled]="!url.trim() || runtime.isCloning()"
           (clicked)="clone()"
         >
           Clone
-        </ide-button>
+        </v-ide-button>
       </div>
-    </ide-dialog>
+    </v-ide-dialog>
   `,
 })
 export class CloneDialogComponent {

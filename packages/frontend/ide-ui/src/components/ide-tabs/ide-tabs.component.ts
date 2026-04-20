@@ -13,7 +13,7 @@ export interface IdeTabDef {
 }
 
 @Component({
-  selector: 'ide-tabs',
+  selector: 'v-ide-tabs',
   standalone: true,
   template: `
     <div class="ide-tabs" [class.ide-tabs--vertical]="orientation() === 'vertical'">

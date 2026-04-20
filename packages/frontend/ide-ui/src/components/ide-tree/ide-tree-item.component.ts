@@ -13,7 +13,7 @@ function isFolder(item: VertexFile | VertexFolder): item is VertexFolder {
 }
 
 @Component({
-  selector: 'ide-tree-item',
+  selector: 'v-ide-tree-item',
   standalone: true,
   imports: [CommonModule, IdeTreeItemComponent],
   template: `
@@ -91,7 +91,7 @@ function isFolder(item: VertexFile | VertexFolder): item is VertexFolder {
     <!-- Recursive children -->
     @if (folderChildren().length > 0 && isExpanded()) {
       @for (child of folderChildren(); track child.id) {
-        <ide-tree-item
+        <v-ide-tree-item
           [item]="child"
           [level]="level() + 1"
           [activeFileId]="activeFileId()"

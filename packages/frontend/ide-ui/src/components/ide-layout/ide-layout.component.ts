@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'ide-layout',
+  selector: 'v-ide-layout',
   standalone: true,
   template: `
     <div class="ide-layout">

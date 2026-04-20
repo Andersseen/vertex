@@ -1,183 +1,201 @@
-# Vertex IDE — Claude Context
+# CLAUDE.md
 
-## Proyecto
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Monorepo Turbo + Bun (`bun@1.3.11`). IDE web/desktop para desarrolladores, con filesystem virtual en el browser (OPFS + IndexedDB) y git browser-native.
+## Project
+
+Turborepo + Bun (`bun@1.3.11`) monorepo. Web/desktop IDE with virtual filesystem in the browser (OPFS + IndexedDB) and browser-native git.
 
 ```
 apps/
-  web/          → Angular 21 app principal (ng serve → localhost:4200)
+  web/          → Angular 21 main app (ng serve → localhost:4200)
   desktop/      → Tauri + Rust
+  web-editor-demo/ → standalone web component demo
 packages/
   frontend/
-    ide-ui/     → @vertex/ide-ui — componentes IDE (headless + CSS custom props)
-    ui/         → @vertex/ui — layouts, editor CodeMirror, sidebar
+    ide-ui/     → @vertex/ide-ui — IDE components (headless + CSS custom props)
+    ui/         → @vertex/ui — layouts, CodeMirror editor, sidebar
     runtime/    → @vertex/runtime — VirtualFS + GitClient (browser)
-    core/       → @vertex/core — servicios Angular (RuntimeService, PreferencesService, Dexie DB)
-    types/      → @vertex/types — tipos compartidos
-    web-editor/ → @vertex/web-editor — Angular Element standalone (web component)
+    core/       → @vertex/core — Angular services (RuntimeService, PreferencesService, Dexie DB)
+    types/      → @vertex/types — shared types
+    web-editor/ → @vertex/web-editor — Angular Element standalone (publishable web component)
   backend/
     terminal/   → @vertex/terminal-sidecar — Node.js + node-pty
-    sidecar/    → Rust sidecar para Tauri
+    sidecar/    → Rust sidecar for Tauri
 ```
-
-**Comandos útiles:**
-- `bun web:dev` — servidor de desarrollo web
-- `bun build` — build completo vía Turbo
-- `bun --cwd packages/frontend/<pkg> check-types` — typecheck de un paquete
 
 ---
 
-## Stack técnico
+## Commands
+
+```bash
+# Development
+bun web:dev                          # Angular dev server → localhost:4200
+bun dev:all                          # web + terminal sidecar + rust sidecar in parallel
+bun desktop:dev                      # Tauri desktop (requires Rust + Cargo)
+
+# Build
+bun build                            # full build via Turbo (respects dependencies)
+bun web:build                        # Angular web app only
+bun web-editor:build                 # web component (esbuild bundle → dist/web-editor-aot.min.js)
+
+# Lint and types
+bun lint                             # turbo lint (all packages)
+bun lint:fix                         # lint with --fix
+bun check-types                      # turbo typecheck (all packages)
+bun --cwd packages/frontend/<pkg> check-types  # typecheck a single package
+
+# Tests
+bun test                             # turbo test (unit)
+bun test:e2e                         # Playwright e2e (apps/web)
+bun test:e2e:ui                      # Playwright with UI
+
+# Deploy
+bun web:deploy                       # ng build + wrangler pages deploy → Cloudflare Pages
+
+# Web editor demo
+bun web-editor-demo:start            # build web-component + serve demo
+```
+
+---
+
+## Angular selectors
+
+ESLint enforces `v-` prefix (components, kebab-case) and `v` prefix (directives, camelCase). Never use `ide-` or `vertex-` as selector prefixes.
+
+```typescript
+@Component({ selector: "v-my-component" })   // correct
+@Directive({ selector: "[vMyDirective]" })    // correct
+@Component({ selector: "ide-foo" })           // lint error
+```
+
+---
+
+## Tech stack
 
 **Frontend:**
 - Angular 21, **zoneless** (`provideZonelessChangeDetection()`), signals
 - CodeMirror 6 (editor), xterm.js (terminal)
-- `@andersseen/headless-components` — headless logic para ide-ui
-- Quartz UI (`/Users/andriipap/Andersseen/Web/Projects/quartz/`) — directivas headless Angular propias, estilo shadcn (no npm, se copia en `src/primitives/`). Módulos: splitter, dialog, drag-drop, overlay, toast, tooltip, listbox
-- CSS custom properties para todo el theming (`--ide-*` tokens en ide-ui)
-- Sin Tailwind, sin PrimeNG (eliminado)
+- `@andersseen/headless-components` — headless logic for ide-ui
+- Quartz UI (`/Users/andriipap/Andersseen/Web/Projects/quartz/`) — custom Angular headless directives, shadcn-style (not on npm, copy into `src/primitives/`). Modules: splitter, dialog, drag-drop, overlay, toast, tooltip, listbox
+- CSS custom properties for all theming (`--ide-*` tokens in ide-ui)
+- No Tailwind, no PrimeNG
 
 **Backend:**
-- Node.js + node-pty para terminal
-- Rust sidecar (Tauri)
-
-**Persistencia:**
-- `localStorage` → posiciones splitter (sync, sin flash)
-- `sessionStorage` → tabs abiertos (`vertex:editor`) — intencionalmente volátil
-- Dexie v4 (`vertex-ide` DB) → sesión activa, preferencias estructuradas
-- OPFS + IndexedDB (Lightning FS) → archivos del repo clonado
+- Node.js + node-pty for terminal (`packages/backend/terminal/`)
+- Rust sidecar (Tauri, `packages/backend/sidecar/`)
 
 ---
 
-## Principios de código — siempre
+## Persistence layers
 
-### SOLID
-- **S** — cada clase/componente hace una sola cosa. Si un componente crece, dividirlo.
-- **O** — extender via inputs/outputs/composition, no modificar componentes existentes.
-- **L** — los servicios son intercambiables via tokens DI de Angular (`InjectionToken`).
-- **I** — interfaces pequeñas y específicas. No una interfaz "god object".
-- **D** — depender de abstracciones (`IVirtualFS`, `IGitClient`), no de implementaciones concretas.
+| Layer | Stores | Reason |
+|-------|--------|--------|
+| `localStorage` | Splitter positions | Sync read, no flash on load |
+| `sessionStorage` (key `vertex:editor`) | Open tabs | Intentionally volatile |
+| Dexie v4 (`vertex-ide` DB) | Active session, preferences | Structured, extensible |
+| OPFS + IndexedDB (Lightning FS) | Cloned repo files | Browser-native filesystem |
 
-### KISS
-- La solución más simple que funciona. Sin abstracciones prematuras.
-- Si se puede resolver con 10 líneas, no crear una clase nueva.
-- No añadir parámetros, opciones ni flags para casos hipotéticos.
-
-### DRY
-- Extraer solo cuando hay 3+ repeticiones reales, no anticipadas.
-- Lógica de dominio en servicios, lógica de UI en componentes.
-- Usar `computed()` de Angular signals para derivar estado, no duplicarlo.
+To add Dexie tables: `db.version(2).stores({...})` in `packages/frontend/core/src/db/vertex.db.ts`.
 
 ---
 
-## Angular moderno — patrones preferidos
+## Package architecture
+
+```
+apps/web (Angular app)
+  └── uses @vertex/core, @vertex/ide-ui, @vertex/runtime, @vertex/ui
+
+@vertex/core
+  ├── db/vertex.db.ts         → VertexDatabase (Dexie), SessionRecord, PreferenceRecord
+  ├── services/               → WorkspaceService, PreferencesService, ConfigService
+  ├── fs/                     → FileService, TauriService
+  └── terminal/               → TERMINAL_BACKEND_ADAPTER token, VirtualTerminalService, MockTerminalService
+
+@vertex/runtime (browser-only, no Angular)
+  ├── fs/    → VirtualFS (abstract), OPFSFS, MemoryFS
+  └── git/   → GitClient (isomorphic-git wrapper)
+
+@vertex/ide-ui
+  ├── components/             → v-ide-button, v-ide-tabs, v-ide-dialog, v-ide-input, v-ide-layout,
+  │                              v-ide-progress-bar, v-ide-splitter, v-ide-toolbar, v-ide-tree, v-ide-alert
+  └── primitives/splitter/    → copied from Quartz (do not change directory structure)
+
+@vertex/web-editor (Angular Element, publishable as web component)
+  ├── web-editor.component.ts      → <vertex-editor> (full web component)
+  └── web-editor-lite.component.ts → display-only, ~500KB vs ~1.6MB
+```
+
+The terminal uses **dependency injection** via `TERMINAL_BACKEND_ADAPTER`. In web: `VirtualTerminalService`; in desktop: can connect to node-pty or WebContainers.
+
+---
+
+## Angular patterns — required
 
 ```typescript
-// ✅ Signals-first
+// Signals-first
 readonly count = signal(0);
 readonly doubled = computed(() => this.count() * 2);
 
-// ✅ input() / output() — no @Input/@Output
+// input() / output() — not @Input/@Output
 readonly value = input<string>('');
 readonly valueChange = output<string>();
 
-// ✅ inject() — no constructor DI
+// inject() — not constructor DI
 private readonly service = inject(MyService);
 
-// ✅ OnPush siempre
+// OnPush always
 @Component({ changeDetection: ChangeDetectionStrategy.OnPush })
 
-// ✅ Standalone — no NgModules
+// Standalone — no NgModules
 @Component({ standalone: true, imports: [...] })
 
-// ✅ Nuevos bloques de control
+// New control flow
 @if (condition) { ... }
 @for (item of items; track item.id) { ... }
 
-// ❌ No usar: ngModel, NgZone, EventEmitter, BehaviorSubject para estado local
+// Never use: ngModel, NgZone, EventEmitter, BehaviorSubject for local state
 ```
 
-**Componentes pequeños > un componente grande.** Si el template supera ~80 líneas o la clase ~100, es señal de dividir.
+Keep components small. Template >80 lines or class >100 lines → split it.
 
 ---
 
-## ide-ui — reglas específicas
+## ide-ui rules
 
-- Todos los estilos via CSS custom properties (`var(--ide-*)`), nunca valores hardcoded.
-- Siempre `ChangeDetectionStrategy.OnPush`.
-- Para lógica interactiva compleja (modal, tabs, splitter): usar primitivo de `@andersseen/headless-components` o Quartz.
-- Para añadir un componente nuevo de Quartz: copiar los archivos del módulo de `/Users/andriipap/Andersseen/Web/Projects/quartz/packages/quartz/src/lib/<module>/` a `packages/frontend/ide-ui/src/primitives/<module>/`.
-- Exportar todo desde `packages/frontend/ide-ui/src/index.ts`.
-
----
-
-## Fase 1 — estado actual (completada)
-
-Lo que está hecho y funciona:
-- ✅ VirtualFS (OPFS) + GitClient (isomorphic-git) en el browser
-- ✅ Clone de repos públicos/privados con progreso
-- ✅ Persistencia de sesión via Dexie (DB `vertex-ide`, tabla `sessions`)
-- ✅ Restauración de tabs abiertos tras refresh (sessionStorage)
-- ✅ Layout IDE: toolbar + splitter horizontal (sidebar/editor) + splitter vertical (editor/bottom)
-- ✅ Splitter con persistencia de posición (localStorage, sin flash)
-- ✅ ide-ui: button, tabs, layout, dialog, input, progress-bar, alert, tree, toolbar, splitter
-- ✅ ide-splitter basado en quartz (ya copiado en `primitives/splitter/`)
-- ✅ Terminal virtual (xterm.js + VirtualTerminalService)
-- ✅ Sin PrimeNG (eliminado completamente)
-- ✅ Dexie v4 en @vertex/core (db, PreferencesService)
-- ✅ writeFile con error handling, restoreEditorState awaited correctamente
-
-Pendiente antes de Fase 2:
-- ⏳ ng-packagr setup para ide-ui (buildable/publishable como `vertex-ui` en npm)
-- ⏳ CDK virtual scroll en ide-tree (repos grandes)
+- All styles via CSS custom properties (`var(--ide-*)`), never hardcoded values.
+- For complex interactive logic (modal, tabs, splitter): use a primitive from `@andersseen/headless-components` or Quartz.
+- To add a new Quartz primitive: copy the module from `/Users/andriipap/Andersseen/Web/Projects/quartz/packages/quartz/src/lib/<module>/` into `packages/frontend/ide-ui/src/primitives/<module>/`.
+- Export everything from `packages/frontend/ide-ui/src/index.ts`.
 
 ---
 
-## Fase 2 — contexto y plan (no empezada)
+## Web Component (`@vertex/web-editor`)
 
-**Objetivo:** Convertir Vertex en un IDE que no solo lee código sino que puede ejecutarlo en el browser.
+Published as Angular Element. Build uses `ng build` (AOT) + `esbuild` to produce an IIFE bundle at `dist/web-editor-aot.min.js`. Installed via `curl` script or `npx vertex-editor`.
 
-### Runtime pipeline
+The public custom element selector is `<vertex-editor>`; `v-editor-internal` is the internal Angular selector and must never appear in external templates.
+
+---
+
+## Phase 2 — planned (not started)
+
+Goal: run code in the browser.
+
 ```
-Fase 2A — Build (esbuild-wasm)
-  Compilar TypeScript/JavaScript en el browser con esbuild-wasm
-  Output: bundle JS en memoria / OPFS
-
-Fase 2B — Preview (Service Worker + iframe)
-  Service Worker intercepta fetch para servir archivos desde OPFS
-  iframe aislado para preview en vivo
-  Hot reload via postMessage
-
-Fase 2C — Node.js Runtime (Nodebox / WebContainers API)
-  Ejecutar código Node.js en el browser (WebContainers de StackBlitz o Nodebox de Sandpack)
-  npm install en browser
-
-Fase 2D — Deploy (Cloudflare Pages API)
-  Deploy directo desde el IDE al usuario autenticado
+Phase 2A — Build (esbuild-wasm)        → compile TS/JS in browser
+Phase 2B — Preview (SW + iframe)       → Service Worker serves OPFS; hot reload via postMessage
+Phase 2C — Node.js Runtime             → WebContainers (needs COOP/COEP headers) or Nodebox
+Phase 2D — Deploy (Cloudflare Pages)   → token stored in Dexie preferences
 ```
 
-### Dependencias de Fase 2
-- `esbuild-wasm` — build en browser
-- Service Worker registration en `apps/web`
-- Decision: WebContainers (StackBlitz, requiere COOP/COEP headers) vs Nodebox (más permisivo)
-- Cloudflare Pages API token en settings de usuario (Dexie `preferences`)
-
-### Lo que ya está preparado para Fase 2
-- `@vertex/runtime` tiene arquitectura de fases documentada (Phase 2-6 en roadmap)
-- `PreferencesService` (Dexie) listo para guardar tokens de deploy, settings
-- `VertexDatabase` extensible: añadir tablas con `db.version(2).stores({...})`
-- `IVirtualFS` / `IGitClient` interfaces — Fase 2 puede añadir `IBuildRunner`, `IPreviewServer`
-- Terminal virtual ya integrada — se puede reconectar a WebContainers shell
-
-### Arquitectura sugerida para Fase 2
+Extend `@vertex/runtime`, do not rewrite it:
 ```
-@vertex/runtime (ampliar, no reescribir)
-  src/
-    fs/       ✅ ya existe
-    git/      ✅ ya existe
-    build/    🆕 BuildRunner (esbuild-wasm)
-    preview/  🆕 PreviewServer (SW + iframe bridge)
-    node/     🆕 NodeRuntime (WebContainers/Nodebox adapter)
-    deploy/   🆕 DeployService (Cloudflare Pages)
+src/
+  fs/      exists
+  git/     exists
+  build/   new — BuildRunner (esbuild-wasm)
+  preview/ new — PreviewServer (SW + iframe bridge)
+  node/    new — NodeRuntime (WebContainers/Nodebox adapter)
+  deploy/  new — DeployService (Cloudflare Pages)
 ```
