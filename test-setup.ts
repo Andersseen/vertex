@@ -77,6 +77,13 @@ mock.module("@angular/core", () => ({
       getFiles: () => mockObservable({ name: '.', path: '.', children: [] }),
       readFile: () => mockObservable('mock content'),
       getChildren: () => mockObservable([]),
+      getWorkspace: () => mockObservable({ path: '.' }),
+      setWorkspace: () => mockObservable(undefined),
+      writeFile: () => mockObservable(undefined),
+      openWorkspace: () => {},
+      selectFolder: () => Promise.resolve('/mock/path'),
+      connect: () => Promise.resolve(),
+      onData$: mockObservable(''),
     };
   },
   Optional: noop("Optional"),
@@ -103,14 +110,22 @@ mock.module("@angular/core", () => ({
   resource: (_opts: any) => ({}),
   rxResource: (_opts: any) => ({}),
   runInInjectionContext: (_ctx: any, fn: any) => fn(),
-  input: (val: any) => {
-    const s: any = () => val;
-    s.required = () => s;
-    return s;
-  },
+  input: Object.assign(
+    (val: any) => {
+      const s: any = () => val;
+      s.required = () => s;
+      return s;
+    },
+    { required: () => { const s: any = () => undefined; s.asReadonly = () => s; return s; } }
+  ),
+  booleanAttribute: (v: any) => v === '' || v === true || v === 'true',
+  numberAttribute: (v: any) => v === undefined ? NaN : Number(v),
   output: () => ({ emit: (_v: any) => { /* noop */ }, subscribe: (_cb: any) => ({ unsubscribe: () => { /* noop */ } }) }),
-  viewChild: () => ({}),
-  viewChildren: () => ({}),
+  viewChild: Object.assign(
+    (_selector: any) => ({ nativeElement: {} }),
+    { required: (_selector: any) => ({ nativeElement: {} }) }
+  ),
+  viewChildren: () => ([]),
   afterNextRender: (fn: any) => fn(),
   afterRender: (fn: any) => fn(),
   ChangeDetectorRef: class { markForCheck() {} detectChanges() {} },
@@ -124,6 +139,10 @@ mock.module("@angular/core", () => ({
   DestroyRef: class { onDestroy(_fn: any) {} },
   PendingTasks: class { add() { return () => {}; } },
   VERSION: { major: "21" },
+  Version: class {},
+  ɵisPromise: (v: any) => v && typeof v.then === 'function',
+  ɵisSubscribable: (v: any) => v && typeof v.subscribe === 'function',
+  ɵRuntimeError: class extends Error {},
   ɵformatRuntimeError: (c: any, m: any) => m,
   ɵsetClassMetadata: () => {},
   ɵɵdefineComponent: () => ({}),
@@ -150,6 +169,7 @@ mock.module("@angular/common", () => ({
   DOCUMENT: "document",
   isPlatformBrowser: () => true,
   isPlatformServer: () => false,
+  ɵgetDOM: () => ({}),
 }));
 
 console.log("Registering rxjs mock...");
@@ -218,10 +238,55 @@ mock.module("@vertex/core", () => ({
     getFiles() { return of({ name: '.', children: [] }); }
     readFile() { return of(''); }
     getChildren() { return of([]); }
+    getWorkspace() { return of({ path: '.' }); }
+    setWorkspace() { return of(undefined); }
+    writeFile() { return of(undefined); }
   },
   TauriTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
   WebTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
+  VirtualTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
+  MockTerminalService: class { connect() { return Promise.resolve(); } onData$ = of(''); },
   TauriService: class { selectFolder() { return Promise.resolve('/mock/path'); } },
+  WorkspaceService: class { openWorkspace() {} },
+  PreferencesService: class {},
+  ConfigService: class {},
+  RuntimeService: class {},
+  TerminalPanelComponent: class {},
+  db: {},
+}));
+
+console.log("Mocking @vertex/ide-ui...");
+const ideUiStub = class {};
+mock.module("@vertex/ide-ui", () => ({
+  IdeAlertComponent: ideUiStub,
+  IdeButtonComponent: ideUiStub,
+  IdeDialogComponent: ideUiStub,
+  IdeInputComponent: ideUiStub,
+  IdeLayoutComponent: ideUiStub,
+  IdeProgressBarComponent: ideUiStub,
+  IdeSplitterComponent: ideUiStub,
+  IdeTabsComponent: ideUiStub,
+  IdeToolbarComponent: ideUiStub,
+  IdeTreeComponent: ideUiStub,
+  IdeTreeItemComponent: ideUiStub,
+  SplitterContainerDirective: ideUiStub,
+  SplitterHandleDirective: ideUiStub,
+  SplitterPanelDirective: ideUiStub,
+  SplitterService: class {},
+  DEFAULT_SPLITTER_CONFIG: {},
+}));
+
+console.log("Mocking @angular/router...");
+mock.module("@angular/router", () => ({
+  RouterOutlet: class {},
+  RouterLink: class {},
+  RouterLinkActive: class {},
+  Router: class {},
+  ActivatedRoute: class {},
+  provideRouter: () => {},
+  withComponentInputBinding: () => {},
+  withPreloading: () => {},
+  PreloadAllModules: class {},
 }));
 
 console.log("--- TEST SETUP COMPLETED ---");
