@@ -1,0 +1,58 @@
+@use 'styles/theme' as *;
+
+.features {
+  padding: $spacing-10 $spacing-6;
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-6;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.feature-card {
+  background-color: $surface-900;
+  border: 1px solid $surface-800;
+  border-radius: 12px;
+  padding: $spacing-6;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: $surface-700;
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background-color: rgba(99, 102, 241, 0.1);
+    color: $primary-400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-4;
+  }
+
+  &__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: $surface-0;
+    margin: 0 0 $spacing-3;
+  }
+
+  &__desc {
+    font-size: 14px;
+    color: $surface-400;
+    line-height: 1.65;
+    margin: 0;
+  }
+}

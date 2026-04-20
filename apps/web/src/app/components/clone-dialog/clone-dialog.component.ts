@@ -3,6 +3,8 @@ import {
   input,
   output,
   inject,
+  effect,
+  signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import type { VertexFolder } from '@vertex/types';
@@ -39,8 +41,9 @@ import {
         <v-ide-input
           label="Repository URL"
           placeholder="https://github.com/owner/repo"
+          [value]="url()"
           [disabled]="runtime.isCloning()"
-          (valueChange)="url = $event"
+          (valueChange)="url.set($event)"
           (enterPressed)="clone()"
         />
 
@@ -50,7 +53,7 @@ import {
           type="password"
           placeholder="ghp_xxxxxxxxxxxx"
           [disabled]="runtime.isCloning()"
-          (valueChange)="token = $event"
+          (valueChange)="token.set($event)"
         />
 
         <!-- Progress -->
@@ -80,7 +83,7 @@ import {
         </v-ide-button>
         <v-ide-button
           variant="accent"
-          [disabled]="!url.trim() || runtime.isCloning()"
+          [disabled]="!url().trim() || runtime.isCloning()"
           (clicked)="clone()"
         >
           Clone
@@ -93,22 +96,30 @@ export class CloneDialogComponent {
   readonly runtime = inject(RuntimeService);
 
   readonly visible = input(false);
+  readonly urlPreset = input('');
   readonly visibleChange = output<boolean>();
   readonly cloneSuccess = output<VertexFolder>();
 
-  url = '';
-  token = '';
+  readonly url = signal('');
+  readonly token = signal('');
+
+  constructor() {
+    effect(() => {
+      const preset = this.urlPreset();
+      if (preset) this.url.set(preset);
+    });
+  }
 
   async clone(): Promise<void> {
-    if (!this.url.trim() || this.runtime.isCloning()) return;
+    if (!this.url().trim() || this.runtime.isCloning()) return;
     try {
       const folder = await this.runtime.clone({
-        url: this.url.trim(),
-        token: this.token.trim() || undefined,
+        url: this.url().trim(),
+        token: this.token().trim() || undefined,
         depth: 1,
       });
-      this.url = '';
-      this.token = '';
+      this.url.set('');
+      this.token.set('');
       this.visibleChange.emit(false);
       this.cloneSuccess.emit(folder);
     } catch {

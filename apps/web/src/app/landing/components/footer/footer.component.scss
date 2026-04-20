@@ -1,0 +1,38 @@
+@use 'styles/theme' as *;
+
+.footer {
+  padding: $spacing-8 $spacing-6;
+  border-top: 1px solid $surface-800;
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-3;
+    font-size: 13px;
+    color: $surface-600;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    color: $surface-500;
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: $surface-0;
+    }
+  }
+
+  &__divider {
+    opacity: 0.4;
+  }
+
+  &__built {
+    color: $surface-600;
+  }
+}

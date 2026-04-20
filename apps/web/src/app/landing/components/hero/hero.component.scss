@@ -1,0 +1,113 @@
+@use 'styles/theme' as *;
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-10 $spacing-6;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  position: relative;
+
+  &__inner {
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+  }
+
+  &__headline {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 $spacing-5;
+    background: linear-gradient(135deg, $surface-0 40%, $primary-400);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  &__subheadline {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: $surface-400;
+    line-height: 1.6;
+    margin: 0 0 $spacing-8;
+  }
+
+  &__input-row {
+    display: flex;
+    gap: $spacing-3;
+    max-width: 600px;
+    margin: 0 auto $spacing-4;
+
+    @media (max-width: 560px) {
+      flex-direction: column;
+    }
+  }
+
+  &__input {
+    flex: 1;
+    padding: $spacing-3 $spacing-4;
+    background-color: $surface-850;
+    border: 1px solid $surface-700;
+    border-radius: 8px;
+    color: $surface-0;
+    font-size: 14px;
+    font-family: $font-mono;
+    outline: none;
+    transition: border-color 0.15s ease;
+
+    &::placeholder {
+      color: $surface-600;
+    }
+
+    &:focus {
+      border-color: $primary-500;
+    }
+  }
+
+  &__btn {
+    padding: $spacing-3 $spacing-5;
+    background-color: $primary-600;
+    color: $surface-0;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-500;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &__hint {
+    font-size: 13px;
+    color: $surface-600;
+    margin: 0;
+  }
+
+  &__hint-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: $primary-400;
+    font-size: 13px;
+    font-family: $font-mono;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.15s ease;
+
+    &:hover {
+      text-decoration-color: $primary-400;
+    }
+  }
+}
