@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common";
 import { CodeExampleComponent } from "./components/code-example/code-example.component";
 
 @Component({
-  selector: "demo-root",
+  selector: "app-root",
   standalone: true,
   imports: [CommonModule, CodeExampleComponent],
   template: `
@@ -32,7 +32,7 @@ import { CodeExampleComponent } from "./components/code-example/code-example.com
       </header>
 
       <main class="main">
-        <demo-code-example
+        <app-code-example
           title="Button Component"
           description="A versatile button component with multiple variants and sizes."
           [code]="buttonCode"

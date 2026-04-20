@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 type Tab = 'preview' | 'code';
 
 @Component({
-  selector: 'demo-code-example',
+  selector: 'app-code-example',
   standalone: true,
   imports: [CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
