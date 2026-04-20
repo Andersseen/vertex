@@ -103,7 +103,8 @@ export class EditorConfigurator {
   }
 }
 
-export { Compartment, EditorState, EditorView, Extension };
+export { Compartment, EditorState, EditorView };
+export type { Extension };
 
 /**
  * FEATURES REMOVED in Lite version:

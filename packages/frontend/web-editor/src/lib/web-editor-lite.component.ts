@@ -93,7 +93,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
   readonly cursorActivity = output<CursorPosition>();
   readonly ready = output<void>();
 
-  editorContainer = viewChild<ElementRef<HTMLDivElement>>("editorContainer");
+  editorContainer = viewChild.required<ElementRef<HTMLDivElement>>("editorContainer");
   private hostElement = inject(ElementRef).nativeElement as HTMLElement;
   private editorView: EditorView | null = null;
 

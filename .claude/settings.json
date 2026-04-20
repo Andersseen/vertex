@@ -36,7 +36,9 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); opts=d.get\\('projects',{}\\).get\\('vertex-ui',{}\\).get\\('architect',{}\\).get\\('build',{}\\).get\\('options',{}\\); print\\(json.dumps\\({k:v for k,v in opts.items\\(\\) if k in ['stylePreprocessorOptions','styles','assets']}, indent=2\\)\\)\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['projects']['vertex-ui']['architect']['build']['options'], indent=2\\)\\)\")",
       "Bash(bun --cwd apps/web check-types)",
-      "Bash(bun web:build)"
+      "Bash(bun web:build)",
+      "Bash(sed -n '103,109p' /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/web-editor/src/lib/editor-config-lite.ts)",
+      "Bash(sed -n '157,163p' /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/web-editor/src/lib/editor-config.ts)"
     ]
   }
 }
