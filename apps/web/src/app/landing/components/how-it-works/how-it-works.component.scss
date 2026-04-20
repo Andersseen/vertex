@@ -1,0 +1,61 @@
+@use 'styles/theme' as *;
+
+.how {
+  padding: $spacing-10 $spacing-6;
+  background-color: $surface-900;
+
+  &__inner {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: $surface-0;
+    margin: 0 0 $spacing-8;
+    letter-spacing: -0.01em;
+  }
+
+  &__steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-5;
+  }
+
+  &__step {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+    text-align: left;
+    background-color: $surface-850;
+    border: 1px solid $surface-800;
+    border-radius: 10px;
+    padding: $spacing-4 $spacing-5;
+  }
+
+  &__step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.15);
+    color: $primary-400;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: $font-mono;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__step-text {
+    font-size: 15px;
+    color: $surface-200;
+    line-height: 1.5;
+  }
+}

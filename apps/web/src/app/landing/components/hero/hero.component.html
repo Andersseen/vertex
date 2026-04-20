@@ -1,0 +1,41 @@
+<section class="hero">
+  <div class="hero__inner">
+    <h1 class="hero__headline">
+      Edit any GitHub repo,<br />right in your browser
+    </h1>
+    <p class="hero__subheadline">
+      Clone, edit, and commit — zero install.<br />
+      Everything runs locally in your browser.
+    </p>
+
+    <div class="hero__input-row">
+      <input
+        class="hero__input"
+        type="url"
+        placeholder="https://github.com/owner/repo"
+        [value]="url()"
+        (input)="url.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button
+        class="hero__btn"
+        [disabled]="!url().trim()"
+        (click)="cloneAndEdit()"
+      >
+        Clone &amp; Edit
+      </button>
+    </div>
+
+    <p class="hero__hint">
+      Try:
+      <button
+        class="hero__hint-link"
+        (click)="url.set('https://github.com/andersseen/palette-forge')"
+      >
+        https://github.com/andersseen/palette-forge
+      </button>
+    </p>
+  </div>
+</section>

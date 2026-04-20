@@ -39,7 +39,10 @@
             ],
             "polyfills": [
               "src/polyfills.ts"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": ["../../packages/frontend/ui/src"]
+            }
           },
           "configurations": {
             "production": {

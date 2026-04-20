@@ -1,0 +1,44 @@
+<v-main-layout (openFolder)="openFolder()" (cloneRepo)="openCloneDialog()">
+  <!-- Left Sidebar: File Explorer -->
+  <v-sidebar
+    sidebar
+    [workspaceFolder]="rootFolder()"
+    [activeFileId]="activeFileId()"
+    (fileSelect)="onFileSelect($event)"
+    (folderToggle)="onFolderToggle($event)"
+    (newFile)="onNewFile()"
+    (newFolder)="onNewFile()"
+  ></v-sidebar>
+
+  <!-- Main Editor Area -->
+  <div editor class="vx-flex vx-flex-col vx-h-full vx-overflow-hidden vx-bg-950">
+    <!-- Tab Bar -->
+    <v-tabs
+      [files]="openFiles()"
+      [activeFileId]="activeFileId()"
+      (tabSelect)="onTabSelect($event)"
+      (tabClose)="onTabClose($event)"
+      (newTab)="onNewFile()"
+    ></v-tabs>
+
+    <!-- Code Editor -->
+    <div class="vx-flex-1 vx-overflow-hidden">
+      <v-editor
+        [file]="activeFile()"
+        [showHeader]="false"
+        (contentChange)="onContentChange($event)"
+      ></v-editor>
+    </div>
+  </div>
+
+  <!-- Bottom Panel Slot -->
+  <v-bottom-panel bottom [workspacePath]="workspacePath()"></v-bottom-panel>
+</v-main-layout>
+
+<!-- Clone Repository Dialog -->
+<app-clone-dialog
+  [visible]="showCloneDialog()"
+  [urlPreset]="cloneUrlPreset()"
+  (visibleChange)="showCloneDialog.set($event)"
+  (cloneSuccess)="onCloneSuccess($event)"
+/>

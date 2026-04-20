@@ -1,0 +1,13 @@
+<section class="how">
+  <div class="how__inner">
+    <h2 class="how__title">How it works</h2>
+    <ol class="how__steps">
+      @for (step of steps; track step; let i = $index) {
+        <li class="how__step">
+          <span class="how__step-num">{{ i + 1 }}</span>
+          <span class="how__step-text">{{ step }}</span>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
