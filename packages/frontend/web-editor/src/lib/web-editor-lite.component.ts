@@ -54,7 +54,7 @@ export interface CursorPosition {
  * SIZE: ~500KB minified (vs ~1.6MB full version)
  */
 @Component({
-  selector: "vertex-editor-internal",
+  selector: "v-editor-internal",
   template: `<div #editorContainer class="vertex-editor-container"></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [

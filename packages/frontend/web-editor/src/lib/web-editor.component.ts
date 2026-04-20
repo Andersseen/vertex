@@ -33,7 +33,7 @@ export interface CursorPosition {
  * For a full editing experience, consider using the full version.
  */
 @Component({
-  selector: "vertex-editor-internal",
+  selector: "v-editor-internal",
   template: `<div #editorContainer class="vertex-editor-container"></div>`,
   styles: `
     :host {
