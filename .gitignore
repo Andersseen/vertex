@@ -35,6 +35,8 @@ coverage
 out/
 dist/
 build/
+!packages/frontend/runtime/src/build/
+!packages/frontend/runtime/src/build/**
 
 # Runtime data
 pids
@@ -78,8 +80,8 @@ Thumbs.db
 .cache/
 .parcel-cache/
 .eslintcache
-build
-dist
+# NOTE: Keep source folders like packages/frontend/runtime/src/build tracked.
+# Build outputs are already covered by dist/ and build/ rules above.
 
 
 # Debug
