@@ -32,7 +32,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "typecheck": "turbo run check-types",
-    "test": "turbo run test",
+    "test": "bun test",
     "test:e2e": "cd apps/web && bun run test:e2e",
     "test:e2e:ui": "cd apps/web && bun run test:e2e:ui",
     "web:dev": "cd apps/web && bun run start",
