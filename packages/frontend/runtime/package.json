@@ -18,6 +18,10 @@
     "./git": {
       "import": "./src/git/index.ts",
       "types": "./src/git/index.ts"
+    },
+    "./build": {
+      "import": "./src/build/index.ts",
+      "types": "./src/build/index.ts"
     }
   },
   "files": ["dist", "README.md"],
@@ -33,6 +37,7 @@
   "license": "MIT",
   "dependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.2",
+    "esbuild-wasm": "^0.28.0",
     "isomorphic-git": "^1.37.5"
   },
   "devDependencies": {
