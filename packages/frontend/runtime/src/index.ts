@@ -21,16 +21,7 @@ export type {
   GitLogEntry,
 } from './types/git.types'
 
-// Build
-export { Bundler } from './build/bundler'
-export { virtualFsPlugin, npmCdnPlugin } from './build/plugins'
-export {
-  readPackageJson,
-  extractDependencyVersions,
-  detectFramework,
-  detectEntryPoint,
-} from './build/resolver'
-export { readTsConfig, tsConfigToEsbuildTarget } from './build/typescript'
+// Build types (no class exports — import Bundler from '@vertex/runtime/build')
 export type {
   BuildConfig,
   BuildResult,
@@ -40,4 +31,12 @@ export type {
   BuildProgressCallback,
   IBundler,
 } from './types/build.types'
-export type { PackageJson } from './build/resolver'
+
+// Preview types (no class exports — import PreviewManager from '@vertex/runtime/preview')
+export type {
+  PreviewConfig,
+  PreviewSession,
+  IPreviewManager,
+  SWMessage,
+  SWResponse,
+} from './types/preview.types'

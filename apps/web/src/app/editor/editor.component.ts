@@ -11,10 +11,12 @@ import { EditorComponent as CodeEditorComponent } from '@vertex/ui';
 import { SidebarComponent } from '@vertex/ui';
 import { BottomPanelComponent } from '@vertex/ui';
 import { TabsComponent } from '@vertex/ui';
+import { IdeSplitterComponent } from '@vertex/ide-ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 import { RuntimeService } from '@vertex/core/web';
 import { CloneDialogComponent } from '../components/clone-dialog/clone-dialog.component';
+import { PreviewPanelComponent } from '../components/preview-panel/preview-panel.component';
 
 @Component({
   selector: 'v-editor-page',
@@ -25,10 +27,35 @@ import { CloneDialogComponent } from '../components/clone-dialog/clone-dialog.co
     SidebarComponent,
     BottomPanelComponent,
     TabsComponent,
+    IdeSplitterComponent,
     CloneDialogComponent,
+    PreviewPanelComponent,
   ],
   templateUrl: './editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    .vx-preview-toggle {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--ide-text-muted, #555);
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.15s, color 0.15s;
+    }
+    .vx-preview-toggle:hover {
+      background: var(--ide-surface-800, #1e1e1e);
+      color: var(--ide-text, #ccc);
+    }
+  `,
 })
 export class EditorComponent {
   private readonly fileService = inject(FileService);
@@ -36,6 +63,7 @@ export class EditorComponent {
   protected readonly runtime = inject(RuntimeService);
 
   protected readonly showCloneDialog = signal(false);
+  protected readonly showPreview = signal(false);
   protected readonly cloneUrlPreset = signal<string>('');
   protected readonly openFiles = signal<VertexFile[]>([]);
   protected readonly activeFileId = signal<string | null>(null);

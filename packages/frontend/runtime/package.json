@@ -22,6 +22,10 @@
     "./build": {
       "import": "./src/build/index.ts",
       "types": "./src/build/index.ts"
+    },
+    "./preview": {
+      "import": "./src/preview/index.ts",
+      "types": "./src/preview/index.ts"
     }
   },
   "files": ["dist", "README.md"],

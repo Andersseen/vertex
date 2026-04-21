@@ -38,7 +38,13 @@
       "Bash(bun --cwd apps/web check-types)",
       "Bash(bun web:build)",
       "Bash(sed -n '103,109p' /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/web-editor/src/lib/editor-config-lite.ts)",
-      "Bash(sed -n '157,163p' /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/web-editor/src/lib/editor-config.ts)"
+      "Bash(sed -n '157,163p' /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/web-editor/src/lib/editor-config.ts)",
+      "Bash(grep -E \"\\\\.ts$|\\\\.html$\")",
+      "Bash(bun --cwd packages/frontend/runtime check-types)",
+      "Bash(node --input-type=module)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/index.ts\")",
+      "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/preview-manager.ts\")"
     ]
   }
 }

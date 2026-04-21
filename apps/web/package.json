@@ -60,6 +60,7 @@
     "@analogjs/platform": "^2.4.9",
     "@angular/compiler-cli": "^21.2.0",
     "@playwright/test": "^1.50.0",
+    "esbuild": "^0.28.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "sass": "^1.99.0",

@@ -10,7 +10,7 @@
     (newFolder)="onNewFile()"
   ></v-sidebar>
 
-  <!-- Main Editor Area -->
+  <!-- Main Editor Area (with optional Preview split) -->
   <div editor class="vx-flex vx-flex-col vx-h-full vx-overflow-hidden vx-bg-950">
     <!-- Tab Bar -->
     <v-tabs
@@ -19,15 +19,57 @@
       (tabSelect)="onTabSelect($event)"
       (tabClose)="onTabClose($event)"
       (newTab)="onNewFile()"
-    ></v-tabs>
+    >
+    </v-tabs>
 
-    <!-- Code Editor -->
-    <div class="vx-flex-1 vx-overflow-hidden">
-      <v-editor
-        [file]="activeFile()"
-        [showHeader]="false"
-        (contentChange)="onContentChange($event)"
-      ></v-editor>
+    <!-- Editor + Preview split -->
+    <div class="vx-flex-1 vx-overflow-hidden vx-flex" style="position: relative;">
+      @if (showPreview()) {
+        <v-ide-splitter
+          storageKey="vertex:layout:preview"
+          [defaultPosition]="55"
+          [minSize]="20"
+          [maxSize]="80"
+          class="vx-flex-1"
+        >
+          <div splitterStart class="vx-h-full vx-overflow-hidden">
+            <v-editor
+              [file]="activeFile()"
+              [showHeader]="false"
+              (contentChange)="onContentChange($event)"
+            ></v-editor>
+          </div>
+          <div splitterEnd class="vx-h-full vx-overflow-hidden">
+            <app-preview-panel [virtualFs]="runtime.fs"></app-preview-panel>
+          </div>
+        </v-ide-splitter>
+      } @else {
+        <v-editor
+          [file]="activeFile()"
+          [showHeader]="false"
+          (contentChange)="onContentChange($event)"
+          class="vx-flex-1"
+        ></v-editor>
+      }
+
+      <!-- Preview toggle button (top-right corner) -->
+      <button
+        class="vx-preview-toggle"
+        (click)="showPreview.set(!showPreview())"
+        [title]="showPreview() ? 'Hide Preview' : 'Show Preview'"
+      >
+        @if (showPreview()) {
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 8l4 4-4 4"/>
+            <path d="M3 12h18"/>
+          </svg>
+        } @else {
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="18" rx="2"/>
+            <path d="M9 3v18"/>
+          </svg>
+        }
+      </button>
     </div>
   </div>
 
