@@ -5,7 +5,7 @@ import {
   computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MainLayoutComponent } from '@vertex/ui';
 import { EditorComponent as CodeEditorComponent } from '@vertex/ui';
 import { SidebarComponent } from '@vertex/ui';
@@ -60,6 +60,7 @@ import { PreviewPanelComponent } from '../components/preview-panel/preview-panel
 export class EditorComponent {
   private readonly fileService = inject(FileService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly runtime = inject(RuntimeService);
 
   protected readonly showCloneDialog = signal(false);
@@ -88,6 +89,7 @@ export class EditorComponent {
       if (folder) {
         this.rootFolder.set(folder);
         this.workspacePath.set(folder.path);
+        this.showCloneDialog.set(false);
         await this.restoreEditorState();
       } else {
         this.loadNativeWorkspace();
@@ -132,9 +134,19 @@ export class EditorComponent {
     this.openFiles.set([]);
     this.activeFileId.set(null);
     this.workspacePath.set(folder.path);
+    this.showCloneDialog.set(false);
     this.clearEditorState();
     const firstFile = this.findFirstFile(folder);
     if (firstFile) this.onFileSelect(firstFile);
+    // Remove ?clone= from URL so it doesn't reopen on refresh
+    if (this.route.snapshot.queryParamMap.has('clone')) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { clone: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
 
   private findFirstFile(folder: VertexFolder): VertexFile | null {

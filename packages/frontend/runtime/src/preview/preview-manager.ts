@@ -3,6 +3,21 @@ import { HotReload } from './hot-reload'
 import { generateIndexHtml } from './template'
 import type { IVirtualFS } from '../types/fs.types'
 import type { PreviewConfig, PreviewSession, IPreviewManager } from '../types/preview.types'
+import { detectFramework, extractDependencyVersions, readPackageJson } from '../build/resolver'
+
+function normalizePreviewHtml(html: string): string {
+  return html
+    .replace(/(src=)(["'])\/(?!\/)/g, '$1$2')
+    .replace(/(href=)(["'])\/(?!\/)/g, '$1$2')
+}
+
+function injectAngularBootstrap(html: string, compilerVersion: string): string {
+  return html.replace(
+    /<script\s+type=["']module["']\s+src=["']([^"']+)["']><\/script>/,
+    (_match, entrySrc: string) =>
+      `<script type="module">import { publishFacade } from 'https://esm.sh/@angular/compiler@${compilerVersion}'; publishFacade(globalThis); import ${JSON.stringify(entrySrc)};</script>`
+  )
+}
 
 export class PreviewManager implements IPreviewManager {
   private readonly swManager = new ServiceWorkerManager()
@@ -20,19 +35,42 @@ export class PreviewManager implements IPreviewManager {
     await this.swManager.register(this.swUrl)
 
     const files = await this.collectFiles(config.serveDir)
+    const pkg = await readPackageJson(this.fs, '/')
+    const framework = detectFramework(pkg)
+    const versions = extractDependencyVersions(pkg)
 
     if (!files['/index.html']) {
       const indexHtml = config.indexHtml
         ? await this.fs.readFile(config.indexHtml).catch(() => null)
         : null
 
-      files['/index.html'] =
+      // Auto-detect entry script from built files
+      const jsFiles = Object.keys(files).filter(p => p.endsWith('.js'))
+      const entryScript = jsFiles.includes('/main.js')
+        ? '/main.js'
+        : (jsFiles.find(p => !p.includes('/')) ?? '/main.js')
+
+      // Auto-detect CSS files
+      const cssFiles = Object.keys(files).filter(p => p.endsWith('.css'))
+
+      files['/index.html'] = normalizePreviewHtml(
         indexHtml ??
-        generateIndexHtml({
-          title: 'Vertex Preview',
-          entryScript: '/main.js',
-          cssFiles: files['/main.css'] !== undefined ? ['/main.css'] : [],
-        })
+          generateIndexHtml({
+            title: 'Vertex Preview',
+            entryScript,
+            cssFiles,
+          })
+      )
+    }
+
+    if (files['/index.html']) {
+      files['/index.html'] = normalizePreviewHtml(files['/index.html'])
+      if (framework === 'angular' && versions['@angular/compiler']) {
+        files['/index.html'] = injectAngularBootstrap(
+          files['/index.html'],
+          versions['@angular/compiler']
+        )
+      }
     }
 
     await this.swManager.mountFiles(files)

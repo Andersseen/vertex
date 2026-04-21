@@ -8,11 +8,14 @@ import {
   ViewChild,
   ElementRef,
   effect,
+  untracked,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { PreviewManager } from '@vertex/runtime/preview';
 import type { PreviewSession } from '@vertex/runtime/preview';
 import type { IVirtualFS } from '@vertex/runtime';
+import { Bundler } from '@vertex/runtime/build';
+import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
 
 @Component({
   selector: 'app-preview-panel',
@@ -24,9 +27,14 @@ import type { IVirtualFS } from '@vertex/runtime';
         <button
           class="preview-btn"
           (click)="togglePreview()"
-          [disabled]="!virtualFs()"
+          [disabled]="!virtualFs() || isBuilding()"
         >
-          @if (isRunning()) {
+          @if (isBuilding()) {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            Building…
+          } @else if (isRunning()) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="6" y="4" width="4" height="16"/>
               <rect x="14" y="4" width="4" height="16"/>
@@ -62,8 +70,10 @@ import type { IVirtualFS } from '@vertex/runtime';
         <div class="preview-placeholder">
           @if (!virtualFs()) {
             <p>Clone a repository first</p>
+          } @else if (isBuilding()) {
+            <p>Building project… please wait</p>
           } @else {
-            <p>Run a build, then click <strong>Run Preview</strong></p>
+            <p>Click <strong>Run Preview</strong> to build &amp; serve</p>
           }
         </div>
       }
@@ -103,7 +113,7 @@ import type { IVirtualFS } from '@vertex/runtime';
       background: var(--ide-surface-700, #2a2a2a);
     }
     .preview-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.5;
       cursor: not-allowed;
     }
     .preview-btn--icon {
@@ -134,6 +144,8 @@ import type { IVirtualFS } from '@vertex/runtime';
     }
     .preview-placeholder p { margin: 0; line-height: 1.6; }
     .preview-placeholder strong { color: var(--ide-text, #ccc); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; }
   `,
 })
 export class PreviewPanelComponent implements OnDestroy {
@@ -146,6 +158,7 @@ export class PreviewPanelComponent implements OnDestroy {
   private session: (PreviewSession & { _setIframe?(el: HTMLIFrameElement): void }) | null = null;
 
   readonly isRunning = signal(false);
+  readonly isBuilding = signal(false);
   readonly safePreviewUrl = signal<SafeResourceUrl>('about:blank');
   rawPreviewUrl = '';
 
@@ -153,7 +166,7 @@ export class PreviewPanelComponent implements OnDestroy {
     // Rebuild manager whenever virtualFs changes
     effect(() => {
       const fs = this.virtualFs();
-      if (this.isRunning()) this.stopPreview();
+      if (untracked(this.isRunning)) void this.stopPreview();
       this.manager = fs ? new PreviewManager(fs) : null;
     });
   }
@@ -169,6 +182,10 @@ export class PreviewPanelComponent implements OnDestroy {
   private async startPreview(): Promise<void> {
     if (!this.manager) return;
     try {
+      // Auto-build before serving
+      const built = await this.runBuild();
+      if (!built) return;
+
       this.session = await this.manager.start({
         baseUrl: '/vertex-preview',
         serveDir: '/dist',
@@ -187,6 +204,69 @@ export class PreviewPanelComponent implements OnDestroy {
       }, 0);
     } catch (err) {
       console.error('[PreviewPanel] Failed to start preview:', err);
+    }
+  }
+
+  private async runBuild(): Promise<boolean> {
+    const fs = this.virtualFs();
+    if (!fs) return false;
+
+    this.isBuilding.set(true);
+    console.log('[PreviewPanel] Starting build...');
+    try {
+      const pkg = await readPackageJson(fs, '/');
+      let entryPoint = detectEntryPoint(pkg);
+      console.log('[PreviewPanel] Detected entry point from package.json:', entryPoint);
+
+      // Verify entry point exists, try common fallbacks
+      if (!(await fs.exists(entryPoint))) {
+        const fallbacks = ['/src/main.tsx', '/src/main.ts', '/src/index.tsx', '/src/index.ts', '/index.ts', '/main.ts'];
+        for (const fb of fallbacks) {
+          if (await fs.exists(fb)) {
+            entryPoint = fb;
+            console.log('[PreviewPanel] Using fallback entry point:', entryPoint);
+            break;
+          }
+        }
+      }
+
+      if (!(await fs.exists(entryPoint))) {
+        console.warn('[PreviewPanel] No entry point found for build');
+      } else {
+        console.log('[PreviewPanel] Building from:', entryPoint);
+      }
+
+      const bundler = new Bundler(fs);
+      const result = await bundler.build({
+        entryPoint,
+        outDir: '/dist',
+        format: 'esm',
+        target: 'browser',
+        minify: true,
+        sourcemap: true,
+        npmResolution: 'cdn',
+        cdnUrl: 'https://esm.sh',
+      });
+
+      console.log('[PreviewPanel] Build result:', result.success ? 'SUCCESS' : 'FAILED', 
+        '- duration:', result.duration + 'ms',
+        '- files:', result.files.map(f => f.path).join(', ') || 'none',
+        '- errors:', result.errors.length,
+        '- warnings:', result.warnings.length
+      );
+
+      if (!result.success) {
+        console.error('[PreviewPanel] Build errors:', result.errors);
+      }
+
+      // Return true even if build has errors so user can see the preview attempt;
+      // the bundler writes whatever succeeded to /dist.
+      return true;
+    } catch (err) {
+      console.error('[PreviewPanel] Build error:', err);
+      return true; // allow preview to try anyway
+    } finally {
+      this.isBuilding.set(false);
     }
   }
 

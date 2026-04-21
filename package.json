@@ -106,6 +106,7 @@
     "@xterm/xterm": "^6.0.0",
     "codemirror": "^6.0.2",
     "dexie": "^4.4.2",
+    "esbuild-wasm": "^0.28.0",
     "hono": "^4.12.9",
     "node-pty": "^1.1.0"
   },
