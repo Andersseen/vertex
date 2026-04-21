@@ -75,13 +75,26 @@ export class TerminalPanelComponent
   private resizeObserver?: ResizeObserver;
   private terminalInitialized = false;
 
+  private previousWorkingDir = '';
+
   constructor() {
-    // React to workspace changes after the terminal is running
+    // React to workspace changes after the terminal is running.
+    // When a workspace is first loaded (empty → dir), reconnect fully
+    // so the banner and prompt reflect the new repo context.
     effect(() => {
       const dir = this.workingDirectory();
-      if (this.terminalInitialized && dir) {
+      if (!this.terminalInitialized) return;
+
+      if (dir && !this.previousWorkingDir) {
+        // Workspace just loaded — full reconnect
+        this.terminalBackend.disconnect().then(() => {
+          this.connect(dir);
+        });
+      } else if (dir && this.previousWorkingDir) {
+        // Simple directory change
         this.terminalBackend.write(`cd "${dir}"\n`);
       }
+      this.previousWorkingDir = dir;
     });
   }
 
@@ -155,9 +168,11 @@ export class TerminalPanelComponent
 
     this.terminal.open(container);
 
-    // Fit after opening
+    // Fit after opening — use a small timeout to ensure the container
+    // has stable dimensions (especially inside tab panels).
     requestAnimationFrame(() => {
       this.fitTerminal();
+      setTimeout(() => this.fitTerminal(), 50);
     });
 
     // Forward user input to backend
@@ -172,16 +187,21 @@ export class TerminalPanelComponent
         this.terminal?.write(data);
       });
 
-    // Observe container resize
+    // Observe container resize (watch the wrapper, not just the terminal div)
     this.resizeObserver = new ResizeObserver(() => {
       requestAnimationFrame(() => {
         this.fitTerminal();
       });
     });
-    this.resizeObserver.observe(container);
+    const wrapper = container.parentElement;
+    if (wrapper) {
+      this.resizeObserver.observe(wrapper);
+    } else {
+      this.resizeObserver.observe(container);
+    }
 
     // Connect to backend
-    this.connect().then(() => {
+    this.connect(this.workingDirectory()).then(() => {
       this.terminalInitialized = true;
     });
   }
@@ -197,16 +217,16 @@ export class TerminalPanelComponent
     }
   }
 
-  private async connect(): Promise<void> {
+  private async connect(cwd?: string): Promise<void> {
     if (this.isConnecting) return;
     this.isConnecting = true;
 
     try {
-      const cwd = this.workingDirectory() || undefined;
+      const effectiveCwd = cwd || this.workingDirectory() || undefined;
       console.log(
-        `[TerminalPanel] Connecting${cwd ? ` to: ${cwd}` : ""}...`,
+        `[TerminalPanel] Connecting${effectiveCwd ? ` to: ${effectiveCwd}` : ""}...`,
       );
-      await this.terminalBackend.connect(cwd);
+      await this.terminalBackend.connect(effectiveCwd);
       this.connectionError.set(null);
       console.log("[TerminalPanel] Connected successfully");
     } catch (err) {

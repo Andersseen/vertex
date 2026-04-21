@@ -21,6 +21,8 @@
       "@vertex/core/web": ["../../packages/frontend/core/src/web/index.ts"],
       "@vertex/types": ["../../packages/frontend/types/src/index.ts"],
       "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"],
+      "@vertex/runtime/build": ["../../packages/frontend/runtime/src/build/index.ts"],
+      "@vertex/runtime/preview": ["../../packages/frontend/runtime/src/preview/index.ts"],
       "@vertex/ide-ui": ["../../packages/frontend/ide-ui/src/index.ts"]
     }
   },

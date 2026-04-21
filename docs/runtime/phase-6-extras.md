@@ -1,415 +1,165 @@
-# Phase 6 — Extras (CSS, TypeScript Checker, ESLint)
-> **Objetivo:** Completar el IDE con herramientas de calidad de código que corren en browser.
-> **Prerrequisito:** Phases 1-5 completadas o según necesidad (cada extra es independiente).
-> **Duración estimada:** Indefinida — añadir según necesidad del proyecto
-> **Nota:** Esta fase NO es un bloqueante para las phases anteriores. Se construye en paralelo con la web app.
+# Phase 6 - Extras (CSS, TypeScript Checker, ESLint)
+
+> **Goal:** Add browser-native code quality and styling tooling to the IDE.
+> **Prerequisite:** Optional. Can be developed in parallel with other phases.
+> **Estimated duration:** Open-ended
+> **Note:** This phase is not a blocker for Phases 1-5.
 
 ---
 
-## Extras disponibles (independientes entre sí)
+## Available extras (independent)
 
-Cada extra se implementa de forma aislada. Puedes añadir solo los que necesites.
+Each extra can be added independently. Implement only what your target projects need.
 
 ---
 
-## Extra A — PostCSS + Tailwind en browser
+## Extra A - PostCSS + Tailwind in browser
 
-### Cuándo añadirlo
-Cuando los proyectos que buildeas usen Tailwind CSS.
+### When to add
 
-### Dependencias
+When projects require Tailwind processing during build/preview.
+
+### Suggested deps
+
 ```bash
 bun add postcss autoprefixer
-# Tailwind v4 tiene su propio WASM, no necesita Node.js
-bun add @tailwindcss/vite  # solo como referencia de la API
 ```
 
-### Implementación
+### Runtime role
 
-```typescript
-// packages/frontend/runtime/src/css/postcss-runner.ts
-import postcss from 'postcss'
-import autoprefixer from 'autoprefixer'
-import type { IVirtualFS } from '../types/fs.types'
-
-export async function processCSS(
-  css: string,
-  options: {
-    tailwind?: boolean
-    autoprefixer?: boolean
-    minify?: boolean
-  } = {}
-): Promise<string> {
-  const plugins: postcss.Plugin[] = []
-
-  if (options.autoprefixer) {
-    plugins.push(autoprefixer())
-  }
-
-  // Tailwind v4 tiene una API directa para browser
-  // Se añade aquí cuando esté estable
-  if (options.tailwind) {
-    // TODO: integrar @tailwindcss/browser cuando esté disponible
-    console.warn('Tailwind en browser: pendiente de @tailwindcss/browser')
-  }
-
-  const result = await postcss(plugins).process(css, { from: undefined })
-  return result.css
-}
-```
-
-**Plugin de esbuild para CSS:**
-```typescript
-// Añadir al bundler (Phase 2) como plugin opcional
-export function cssPlugin(fs: IVirtualFS): esbuild.Plugin {
-  return {
-    name: 'vertex-css',
-    setup(build) {
-      build.onLoad({ filter: /\.css$/, namespace: 'vfs' }, async (args) => {
-        const raw = await fs.readFile(args.path)
-        const processed = await processCSS(raw, { autoprefixer: true })
-        return { contents: processed, loader: 'css' }
-      })
-    }
-  }
-}
-```
+- Process CSS in-browser.
+- Apply autoprefixer.
+- Add Tailwind support path when browser-compatible API is stable.
 
 ---
 
-## Extra B — TypeScript Type Checker
+## Extra B - TypeScript type checker
 
-### Cuándo añadirlo
-Cuando quieras mostrar errores de tipo reales en el editor (squiggly lines).
+### When to add
 
-**Nota:** esbuild (Phase 2) ignora errores de tipo. Este extra añade type checking real vía TypeScript compiler API.
+When you want real type diagnostics in editor (not only transpile/build errors).
 
-### Dependencias
+### Suggested deps
+
 ```bash
 bun add typescript
-# TypeScript funciona en browser (ya es JS puro)
 ```
 
-### Implementación
+### Runtime role
+
+- Use TS Language Service in browser.
+- Track file versions.
+- Expose per-file and full-project diagnostics.
+- Integrate with editor diagnostics rendering.
+
+Recommended diagnostic shape:
 
 ```typescript
-// packages/frontend/runtime/src/types/ts-checker.ts
-import ts from 'typescript'
-import type { IVirtualFS } from '../types/fs.types'
-
 export interface TypeCheckError {
-  file: string
-  line: number
-  column: number
-  message: string
-  severity: 'error' | 'warning'
+  file: string;
+  line: number;
+  column: number;
+  message: string;
+  severity: "error" | "warning";
 }
-
-export class TypeScriptChecker {
-  private languageService: ts.LanguageService | null = null
-  private fileVersions = new Map<string, number>()
-  private fileContents = new Map<string, string>()
-
-  constructor(private fs: IVirtualFS) {}
-
-  async initialize(rootFiles: string[]): Promise<void> {
-    // Cargar todos los archivos al mapa
-    for (const file of rootFiles) {
-      const content = await this.fs.readFile(file)
-      this.fileContents.set(file, content)
-      this.fileVersions.set(file, 1)
-    }
-
-    const servicesHost: ts.LanguageServiceHost = {
-      getScriptFileNames: () => rootFiles,
-      getScriptVersion: (fileName) => String(this.fileVersions.get(fileName) ?? 0),
-      getScriptSnapshot: (fileName) => {
-        const content = this.fileContents.get(fileName)
-        if (!content) return undefined
-        return ts.ScriptSnapshot.fromString(content)
-      },
-      getCurrentDirectory: () => '/',
-      getCompilationSettings: () => ({
-        strict: true,
-        target: ts.ScriptTarget.ES2020,
-        module: ts.ModuleKind.ESNext,
-        moduleResolution: ts.ModuleResolutionKind.Bundler,
-        jsx: ts.JsxEmit.ReactJSX,
-        skipLibCheck: true,  // Evitar check de node_modules
-        noEmit: true,
-      }),
-      getDefaultLibFileName: (opts) => ts.getDefaultLibFilePath(opts),
-      fileExists: (path) => this.fileContents.has(path),
-      readFile: (path) => this.fileContents.get(path),
-      readDirectory: () => [],
-    }
-
-    this.languageService = ts.createLanguageService(servicesHost)
-  }
-
-  async checkFile(filePath: string): Promise<TypeCheckError[]> {
-    if (!this.languageService) {
-      throw new Error('TypeChecker no inicializado. Llama initialize() primero.')
-    }
-
-    const diagnostics = [
-      ...this.languageService.getSyntacticDiagnostics(filePath),
-      ...this.languageService.getSemanticDiagnostics(filePath),
-    ]
-
-    return diagnostics.map(d => {
-      const { line, character } = d.file
-        ? ts.getLineAndCharacterOfPosition(d.file, d.start ?? 0)
-        : { line: 0, character: 0 }
-      return {
-        file: filePath,
-        line: line + 1,
-        column: character + 1,
-        message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
-        severity: d.category === ts.DiagnosticCategory.Error ? 'error' : 'warning',
-      }
-    })
-  }
-
-  updateFile(filePath: string, content: string): void {
-    this.fileContents.set(filePath, content)
-    this.fileVersions.set(filePath, (this.fileVersions.get(filePath) ?? 0) + 1)
-  }
-
-  async checkAll(): Promise<TypeCheckError[]> {
-    if (!this.languageService) return []
-    const allErrors: TypeCheckError[] = []
-    for (const file of this.fileContents.keys()) {
-      if (file.endsWith('.ts') || file.endsWith('.tsx')) {
-        allErrors.push(...await this.checkFile(file))
-      }
-    }
-    return allErrors
-  }
-}
-```
-
-### Integración con CodeMirror (editor)
-
-```typescript
-// apps/web - añadir decoraciones de error en el editor
-import { TypeScriptChecker } from '@vertex/runtime/types'
-
-// Cuando el usuario edita, checkear después de 500ms sin cambios
-const checker = new TypeScriptChecker(virtualFs)
-await checker.initialize(allTsFiles)
-
-editor.on('change', debounce(async () => {
-  checker.updateFile(currentFile, editor.getValue())
-  const errors = await checker.checkFile(currentFile)
-  // Mostrar errors como decoraciones en CodeMirror
-  showDiagnostics(errors)
-}, 500))
 ```
 
 ---
 
-## Extra C — ESLint en browser
+## Extra C - ESLint in browser
 
-### Cuándo añadirlo
-Cuando quieras mostrar linting en tiempo real en el editor.
+### When to add
 
-### Dependencias
+When you want live lint feedback while editing.
+
+### Suggested deps
+
 ```bash
 bun add eslint
-# ESLint tiene un modo "browser-compatible" desde v9
 ```
 
-### Implementación
+### Runtime role
 
-```typescript
-// packages/frontend/runtime/src/lint/eslint-runner.ts
-import { Linter } from 'eslint'
-import type { IVirtualFS } from '../types/fs.types'
-
-export interface LintResult {
-  file: string
-  line: number
-  column: number
-  message: string
-  ruleId: string | null
-  severity: 'error' | 'warning'
-}
-
-export class ESLintRunner {
-  private linter: Linter
-
-  constructor() {
-    // Linter es la API pura de ESLint, funciona en browser
-    this.linter = new Linter({ configType: 'flat' })
-  }
-
-  lint(filePath: string, content: string): LintResult[] {
-    const messages = this.linter.verify(content, [
-      {
-        files: ['**/*.ts', '**/*.tsx'],
-        rules: {
-          'no-console': 'warn',
-          'no-unused-vars': 'warn',
-          'no-undef': 'error',
-          // Añadir más reglas según necesidad
-        },
-        languageOptions: {
-          ecmaVersion: 2022,
-          sourceType: 'module',
-        }
-      }
-    ], { filename: filePath })
-
-    return messages.map(m => ({
-      file: filePath,
-      line: m.line,
-      column: m.column,
-      message: m.message,
-      ruleId: m.ruleId,
-      severity: m.severity === 2 ? 'error' : 'warning',
-    }))
-  }
-}
-```
+- Run `Linter` API in browser.
+- Apply baseline flat config rules.
+- Return lint diagnostics that can be rendered inline.
 
 ---
 
-## Extra D — Sass / SCSS
+## Extra D - Sass / SCSS support
 
-### Cuándo añadirlo
-Cuando los proyectos usen SCSS.
+### When to add
 
-### Dependencias
+When projects include `.scss` / `.sass` styles.
+
+### Suggested deps
+
 ```bash
-bun add sass  # dart-sass, tiene versión JS pura que funciona en browser
+bun add sass
 ```
 
-### Implementación
+### Runtime role
 
-```typescript
-// packages/frontend/runtime/src/css/sass-runner.ts
-import * as sass from 'sass'
-import type { IVirtualFS } from '../types/fs.types'
-
-export async function compileSass(
-  scssPath: string,
-  fs: IVirtualFS
-): Promise<string> {
-  const content = await fs.readFile(scssPath)
-
-  const result = sass.compileString(content, {
-    syntax: scssPath.endsWith('.sass') ? 'indented' : 'scss',
-    // Resolver @import desde VirtualFS
-    importer: {
-      canonicalize(url: string) {
-        return new URL(url, 'file:///virtual/')
-      },
-      async load(canonicalUrl: URL) {
-        const path = canonicalUrl.pathname
-        const content = await fs.readFile(path)
-        return { contents: content, syntax: 'scss' }
-      }
-    }
-  })
-
-  return result.css
-}
-```
-
-**Plugin para esbuild (Phase 2):**
-```typescript
-export function sassPlugin(fs: IVirtualFS): esbuild.Plugin {
-  return {
-    name: 'vertex-sass',
-    setup(build) {
-      build.onLoad({ filter: /\.(scss|sass)$/, namespace: 'vfs' }, async (args) => {
-        const css = await compileSass(args.path, fs)
-        return { contents: css, loader: 'css' }
-      })
-    }
-  }
-}
-```
+- Compile SCSS to CSS in browser.
+- Resolve imports from VirtualFS.
+- Feed output into bundler CSS pipeline.
 
 ---
 
-## Extra E — Prettier (formateo en browser)
+## Extra E - Prettier in browser
 
-```typescript
-// packages/frontend/runtime/src/format/prettier-runner.ts
-import * as prettier from 'prettier/standalone'
-import parserBabel from 'prettier/plugins/babel'
-import parserTypeScript from 'prettier/plugins/typescript'
-import parserCSS from 'prettier/plugins/postcss'
-import parserHTML from 'prettier/plugins/html'
-import estree from 'prettier/plugins/estree'
+### When to add
 
-export async function formatCode(
-  code: string,
-  filepath: string
-): Promise<string> {
-  const ext = filepath.split('.').pop()?.toLowerCase()
-  const parserMap: Record<string, string> = {
-    ts: 'typescript', tsx: 'babel',
-    js: 'babel', jsx: 'babel',
-    css: 'css', scss: 'css',
-    html: 'html', json: 'json',
-  }
+When you want format-on-save behavior in the IDE.
 
-  return prettier.format(code, {
-    parser: parserMap[ext ?? ''] ?? 'babel',
-    plugins: [parserBabel, parserTypeScript, parserCSS, parserHTML, estree],
-    semi: false,
-    singleQuote: true,
-    tabWidth: 2,
-    printWidth: 100,
-  })
-}
+### Suggested deps
+
+```bash
+bun add prettier
 ```
 
----
+### Runtime role
 
-## Tabla de resumen — extras vs necesidad
-
-| Extra | Cuando lo necesitas | Complejidad | npm packages |
-|---|---|---|---|
-| A — PostCSS/Tailwind | Proyectos con Tailwind | Baja | `postcss`, `autoprefixer` |
-| B — TypeScript Checker | Type errors en editor | Media | `typescript` |
-| C — ESLint | Linting en tiempo real | Baja | `eslint` |
-| D — Sass/SCSS | Proyectos con SCSS | Baja | `sass` |
-| E — Prettier | Formateo con Ctrl+S | Baja | `prettier` |
+- Format TS/JS/CSS/HTML/JSON from browser.
+- Use standalone Prettier + parser plugins.
+- Provide command/action hook from editor UI.
 
 ---
 
-## Exports finales del package (`index.ts`)
+## Summary table
+
+| Extra                  | Use case                | Complexity | Packages                  |
+| ---------------------- | ----------------------- | ---------- | ------------------------- |
+| A - PostCSS/Tailwind   | Tailwind projects       | Low        | `postcss`, `autoprefixer` |
+| B - TypeScript Checker | Editor type diagnostics | Medium     | `typescript`              |
+| C - ESLint             | Live linting            | Low        | `eslint`                  |
+| D - Sass/SCSS          | SCSS projects           | Low        | `sass`                    |
+| E - Prettier           | Format-on-save          | Low        | `prettier`                |
+
+---
+
+## Runtime exports (final shape)
 
 ```typescript
 // Phase 1
-export { VirtualFS, MemoryFS, OPFSFS } from './fs/virtual-fs'
-export { GitClient } from './git/git-client'
-export type { IVirtualFS, IVirtualFS, FileContent, DirEntry } from './types/fs.types'
-export type { IGitClient, GitCloneOptions, GitStatus } from './types/git.types'
+export { VirtualFS, MemoryFS, OPFSFS } from "./fs/virtual-fs";
+export { GitClient } from "./git/git-client";
 
 // Phase 2
-export { Bundler } from './build/bundler'
-export type { BuildConfig, BuildResult } from './types/build.types'
+export { Bundler } from "./build/bundler";
 
 // Phase 3
-export { PreviewManager } from './preview/iframe-manager'
-export type { PreviewConfig, PreviewSession } from './types/preview.types'
+export { PreviewManager } from "./preview/iframe-manager";
 
 // Phase 4
-export { NodeboxRuntime } from './node/nodebox-runtime'
-export { NpmManager } from './node/npm-manager'
-export { TerminalBridge } from './node/terminal-bridge'
-export type { INodeRuntime } from './types/node.types'
+export { NodeboxRuntime } from "./node/nodebox-runtime";
+export { NpmManager } from "./node/npm-manager";
+export { TerminalBridge } from "./node/terminal-bridge";
 
 // Phase 5
-export { DeployManager } from './deploy/deploy-manager'
-export type { DeployConfig, DeployResult } from './types/deploy.types'
+export { DeployManager } from "./deploy/deploy-manager";
 
-// Phase 6 (extras — importar por subruta)
+// Phase 6 (subpath imports are fine)
 // import { TypeScriptChecker } from '@vertex/runtime/types'
 // import { ESLintRunner } from '@vertex/runtime/lint'
 // import { formatCode } from '@vertex/runtime/format'
@@ -418,10 +168,12 @@ export type { DeployConfig, DeployResult } from './types/deploy.types'
 
 ---
 
-## Criterio de "Phase 6 completada" (por extra)
+## Acceptance criteria for "Phase 6 complete"
 
-- [ ] **A** — PostCSS procesa CSS de un proyecto Tailwind correctamente
-- [ ] **B** — TypeChecker detecta errores de tipo y los muestra en el editor
-- [ ] **C** — ESLint muestra warnings en tiempo real al editar
-- [ ] **D** — Sass compila archivos `.scss` correctamente
-- [ ] **E** — Prettier formatea TypeScript con Ctrl+S
+Per extra:
+
+- [ ] A: CSS pipeline handles PostCSS/Tailwind as expected.
+- [ ] B: Type errors appear in editor with line/column mapping.
+- [ ] C: ESLint warnings/errors update in near real time.
+- [ ] D: `.scss` files compile correctly through runtime path.
+- [ ] E: Prettier formatting can be triggered from editor action.

@@ -20,3 +20,23 @@ export type {
   GitStatus,
   GitLogEntry,
 } from './types/git.types'
+
+// Build types (no class exports — import Bundler from '@vertex/runtime/build')
+export type {
+  BuildConfig,
+  BuildResult,
+  BuildOutputFile,
+  BuildError,
+  BuildWarning,
+  BuildProgressCallback,
+  IBundler,
+} from './types/build.types'
+
+// Preview types (no class exports — import PreviewManager from '@vertex/runtime/preview')
+export type {
+  PreviewConfig,
+  PreviewSession,
+  IPreviewManager,
+  SWMessage,
+  SWResponse,
+} from './types/preview.types'

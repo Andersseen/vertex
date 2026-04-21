@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { TerminalBackendAdapter } from './terminal-backend-adapter';
 import { RuntimeService } from '../services/runtime.service';
+import { Bundler } from '@vertex/runtime/build';
+import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
 
 @Injectable({ providedIn: 'root' })
 export class VirtualTerminalService implements TerminalBackendAdapter {
@@ -95,7 +97,12 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
       case 'git':
         await this.cmdGit(args);
         break;
+      case 'build':
+        await this.cmdBuild(args);
+        break;
       case 'npm':
+        await this.cmdNpm(args);
+        break;
       case 'node':
       case 'npx':
         this.printlnError(`\`${cmd}\` will be available in Phase 4 (Nodebox Runtime).`);
@@ -361,6 +368,99 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
     }
   }
 
+  private async cmdBuild(args: string[]): Promise<void> {
+    const fs = this.runtime.fs;
+    if (!fs) {
+      this.printlnError('No virtual filesystem. Clone a repository first.');
+      return;
+    }
+
+    const pkg = await readPackageJson(fs, '/');
+    let entryPoint = args[0] ? this.resolvePath(args[0]) : detectEntryPoint(pkg);
+
+    // Verify entry point exists, try common fallbacks
+    if (!(await fs.exists(entryPoint))) {
+      const fallbacks = ['/src/main.tsx', '/src/main.ts', '/src/index.tsx', '/src/index.ts', '/index.ts', '/main.ts'];
+      for (const fb of fallbacks) {
+        if (await fs.exists(fb)) {
+          entryPoint = fb;
+          break;
+        }
+      }
+    }
+
+    if (!(await fs.exists(entryPoint))) {
+      this.printlnError(`build: entry point not found: ${entryPoint}`);
+      this.println('Provide an entry file or create src/main.tsx, src/main.ts, index.ts, etc.');
+      return;
+    }
+
+    this.println(`\x1b[36m▶ Building from ${entryPoint}…\x1b[0m`);
+
+    const bundler = new Bundler(fs);
+    try {
+      const result = await bundler.build(
+        {
+          entryPoint,
+          outDir: '/dist',
+          format: 'esm',
+          target: 'browser',
+          minify: true,
+          sourcemap: true,
+          npmResolution: 'cdn',
+          cdnUrl: 'https://esm.sh',
+        },
+        (phase, percent) => {
+          const bar = this.progressBar(percent, 20);
+          this.dataSubject.next(`\r\x1b[2K  \x1b[90m[${bar}]\x1b[0m ${phase} ${percent}%`);
+        },
+      );
+
+      this.dataSubject.next('\r\n');
+
+      if (result.success) {
+        this.println(`\x1b[32m✓ Build completed in ${result.duration}ms\x1b[0m`);
+        for (const file of result.files) {
+          this.println(`  \x1b[90m→\x1b[0m ${file.path} \x1b[90m(${this.humanSize(file.size)})\x1b[0m`);
+        }
+        this.println(`\x1b[90m  ${result.stats.inputFiles} file(s) → ${this.humanSize(result.stats.outputSize)}\x1b[0m`);
+      } else {
+        this.printlnError(`Build failed with ${result.errors.length} error(s)`);
+        for (const err of result.errors.slice(0, 5)) {
+          this.printlnError(`  ${err.file}:${err.line}:${err.column} ${err.message}`);
+        }
+      }
+
+      if (result.warnings.length > 0) {
+        this.println(`\x1b[33m⚠ ${result.warnings.length} warning(s)\x1b[0m`);
+      }
+    } catch (err) {
+      this.printlnError(`build: ${(err as Error).message}`);
+    }
+  }
+
+  private async cmdNpm(args: string[]): Promise<void> {
+    const subcmd = args[0]?.toLowerCase();
+    if (subcmd === 'run' && args[1] === 'build') {
+      await this.cmdBuild(args.slice(2));
+      return;
+    }
+    this.printlnError(`npm: '${args.join(' ')}' is not supported in web shell.`);
+    this.println('Supported: npm run build');
+  }
+
+  private progressBar(percent: number, width: number): string {
+    const filled = Math.round((percent / 100) * width);
+    const empty = width - filled;
+    return '\x1b[32m' + '█'.repeat(filled) + '\x1b[90m' + '░'.repeat(empty) + '\x1b[0m';
+  }
+
+  private humanSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   // ── UI helpers ──────────────────────────────────────────────────────────────
 
   private printBanner(): void {
@@ -400,8 +500,10 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
       '  \x1b[33mgit status\x1b[0m      Show working tree status',
       '  \x1b[33mgit log\x1b[0m [n]    Show commit history',
       '  \x1b[33mgit branch\x1b[0m      Show current branch',
+      '  \x1b[33mbuild\x1b[0m [entry]  Build project with esbuild (output to /dist)',
+      '  \x1b[33mnpm run build\x1b[0m   Alias for build',
       '',
-      '  \x1b[90mnpm / node / npx → Phase 4 (Nodebox)\x1b[0m',
+      '  \x1b[90mnode / npx → Phase 4 (Nodebox)\x1b[0m',
       '',
     ];
     this.println(lines.join('\r\n'));
