@@ -1,15 +1,17 @@
 function toRelativeAssetPath(path: string): string {
-  return path.replace(/^\//, '')
+  return path.replace(/^\//, "");
 }
 
 export function generateIndexHtml(options: {
-  title: string
-  entryScript: string
-  cssFiles?: string[]
+  title: string;
+  entryScript: string;
+  cssFiles?: string[];
 }): string {
   const cssLinks = (options.cssFiles ?? [])
-    .map((css) => `  <link rel="stylesheet" href="${toRelativeAssetPath(css)}">`)
-    .join('\n')
+    .map(
+      (css) => `  <link rel="stylesheet" href="${toRelativeAssetPath(css)}">`,
+    )
+    .join("\n");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -23,5 +25,5 @@ ${cssLinks}
   <div id="root"></div>
   <script type="module" src="${toRelativeAssetPath(options.entryScript)}"></script>
 </body>
-</html>`
+</html>`;
 }

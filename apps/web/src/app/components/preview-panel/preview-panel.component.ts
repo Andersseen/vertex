@@ -30,19 +30,41 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
           [disabled]="!virtualFs() || isBuilding()"
         >
           @if (isBuilding()) {
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="spin"
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
             Building…
           } @else if (isRunning()) {
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="6" y="4" width="4" height="16"/>
-              <rect x="14" y="4" width="4" height="16"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="6" y="4" width="4" height="16" />
+              <rect x="14" y="4" width="4" height="16" />
             </svg>
             Stop
           } @else {
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5 3 19 12 5 21 5 3"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
             Run Preview
           }
@@ -50,9 +72,16 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
 
         @if (isRunning()) {
           <button class="preview-btn preview-btn--icon" (click)="reload()" title="Reload">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 4 23 10 17 10"/>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
           </button>
           <span class="preview-url">{{ rawPreviewUrl }}</span>
@@ -142,10 +171,21 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
       font-size: 13px;
       text-align: center;
     }
-    .preview-placeholder p { margin: 0; line-height: 1.6; }
-    .preview-placeholder strong { color: var(--ide-text, #ccc); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { animation: spin 1s linear infinite; }
+    .preview-placeholder p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .preview-placeholder strong {
+      color: var(--ide-text, #ccc);
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .spin {
+      animation: spin 1s linear infinite;
+    }
   `,
 })
 export class PreviewPanelComponent implements OnDestroy {
@@ -191,9 +231,7 @@ export class PreviewPanelComponent implements OnDestroy {
         serveDir: '/dist',
       });
       this.rawPreviewUrl = this.session.url;
-      this.safePreviewUrl.set(
-        this.sanitizer.bypassSecurityTrustResourceUrl(this.session.url)
-      );
+      this.safePreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.session.url));
       this.isRunning.set(true);
 
       // Wire iframe reference after view updates
@@ -220,7 +258,14 @@ export class PreviewPanelComponent implements OnDestroy {
 
       // Verify entry point exists, try common fallbacks
       if (!(await fs.exists(entryPoint))) {
-        const fallbacks = ['/src/main.tsx', '/src/main.ts', '/src/index.tsx', '/src/index.ts', '/index.ts', '/main.ts'];
+        const fallbacks = [
+          '/src/main.tsx',
+          '/src/main.ts',
+          '/src/index.tsx',
+          '/src/index.ts',
+          '/index.ts',
+          '/main.ts',
+        ];
         for (const fb of fallbacks) {
           if (await fs.exists(fb)) {
             entryPoint = fb;
@@ -248,11 +293,17 @@ export class PreviewPanelComponent implements OnDestroy {
         cdnUrl: 'https://esm.sh',
       });
 
-      console.log('[PreviewPanel] Build result:', result.success ? 'SUCCESS' : 'FAILED', 
-        '- duration:', result.duration + 'ms',
-        '- files:', result.files.map(f => f.path).join(', ') || 'none',
-        '- errors:', result.errors.length,
-        '- warnings:', result.warnings.length
+      console.log(
+        '[PreviewPanel] Build result:',
+        result.success ? 'SUCCESS' : 'FAILED',
+        '- duration:',
+        result.duration + 'ms',
+        '- files:',
+        result.files.map((f) => f.path).join(', ') || 'none',
+        '- errors:',
+        result.errors.length,
+        '- warnings:',
+        result.warnings.length,
       );
 
       if (!result.success) {
