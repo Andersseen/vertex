@@ -1,5 +1,5 @@
-@use '../../../packages/frontend/ui/src/styles/theme' as *;
-@use '../../../packages/frontend/ui/src/styles/layout' as *;
+@use 'styles/theme' as *;
+@use 'styles/layout' as *;
 
 /* Terminal styles */
 .xterm {
