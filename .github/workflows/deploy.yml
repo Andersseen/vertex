@@ -35,6 +35,7 @@ jobs:
 
       - name: Build and Deploy to Cloudflare Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        timeout-minutes: 15
         run: bun run web:deploy
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
