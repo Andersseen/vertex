@@ -26,6 +26,10 @@
     "./preview": {
       "import": "./src/preview/index.ts",
       "types": "./src/preview/index.ts"
+    },
+    "./node": {
+      "import": "./src/node/index.ts",
+      "types": "./src/node/index.ts"
     }
   },
   "files": ["dist", "README.md"],
@@ -40,6 +44,7 @@
   "author": "Andrii Pap",
   "license": "MIT",
   "dependencies": {
+    "@codesandbox/nodebox": "^0.1.9",
     "@isomorphic-git/lightning-fs": "^4.6.2",
     "esbuild-wasm": "^0.28.0",
     "isomorphic-git": "^1.37.5"
