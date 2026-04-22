@@ -44,7 +44,9 @@
       "Bash(node --input-type=module)",
       "Bash(node -e ' *)",
       "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/index.ts\")",
-      "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/preview-manager.ts\")"
+      "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/preview-manager.ts\")",
+      "Bash(bun --cwd /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime run check-types)",
+      "Bash(npx --prefix /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime tsc --noEmit -p /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/tsconfig.json)"
     ]
   }
 }

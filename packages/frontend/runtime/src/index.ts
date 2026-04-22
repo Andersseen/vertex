@@ -40,3 +40,13 @@ export type {
   SWMessage,
   SWResponse,
 } from './types/preview.types'
+
+// Node runtime types (no class exports — import NodeboxRuntime from '@vertex/runtime/node')
+export type {
+  INodeRuntime,
+  NodeRuntimeOptions,
+  NpmInstallOptions,
+  ScriptRunOptions,
+  DevServerInfo,
+  TerminalAdapter,
+} from './types/node.types'
