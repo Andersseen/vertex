@@ -15,7 +15,18 @@ import { PreviewManager } from '@vertex/runtime/preview';
 import type { PreviewSession } from '@vertex/runtime/preview';
 import type { IVirtualFS } from '@vertex/runtime';
 import { Bundler } from '@vertex/runtime/build';
-import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
+import {
+  readPackageJson,
+  detectEntryPoint,
+  detectEntryFromIndexHtml,
+  needsNodeRuntime,
+  detectDevScript,
+  detectTailwindVersion,
+} from '@vertex/runtime/build';
+import type { TailwindVersion } from '@vertex/runtime/build';
+import { NodeboxRuntime } from '@vertex/runtime/node';
+
+type PreviewMode = 'esbuild' | 'nodebox';
 
 @Component({
   selector: 'app-preview-panel',
@@ -27,9 +38,9 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
         <button
           class="preview-btn"
           (click)="togglePreview()"
-          [disabled]="!virtualFs() || isBuilding()"
+          [disabled]="!virtualFs() || isBusy()"
         >
-          @if (isBuilding()) {
+          @if (isBusy()) {
             <svg
               width="12"
               height="12"
@@ -41,7 +52,7 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
             >
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
-            Building…
+            {{ statusLabel() || 'Working…' }}
           } @else if (isRunning()) {
             <svg
               width="12"
@@ -84,6 +95,7 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
           </button>
+          <span class="preview-mode">{{ activeMode() }}</span>
           <span class="preview-url">{{ rawPreviewUrl }}</span>
         }
       </div>
@@ -93,14 +105,16 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
           #previewFrame
           [src]="safePreviewUrl()"
           class="preview-frame"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
         ></iframe>
       } @else {
         <div class="preview-placeholder">
           @if (!virtualFs()) {
             <p>Clone a repository first</p>
-          } @else if (isBuilding()) {
-            <p>Building project… please wait</p>
+          } @else if (isBusy()) {
+            <p>{{ statusLabel() || 'Working…' }}</p>
+          } @else if (errorMessage()) {
+            <p class="preview-error">{{ errorMessage() }}</p>
           } @else {
             <p>Click <strong>Run Preview</strong> to build &amp; serve</p>
           }
@@ -148,6 +162,15 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
     .preview-btn--icon {
       padding: 3px 7px;
     }
+    .preview-mode {
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: var(--ide-surface-800, #1e1e1e);
+      color: var(--ide-text-muted, #888);
+      letter-spacing: 0.5px;
+    }
     .preview-url {
       font-size: 11px;
       color: var(--ide-text-muted, #555);
@@ -170,6 +193,7 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
       color: var(--ide-text-muted, #555);
       font-size: 13px;
       text-align: center;
+      padding: 16px;
     }
     .preview-placeholder p {
       margin: 0;
@@ -177,6 +201,14 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
     }
     .preview-placeholder strong {
       color: var(--ide-text, #ccc);
+    }
+    .preview-error {
+      color: var(--ide-text-error, #f48771);
+      max-width: 480px;
+      white-space: pre-wrap;
+      text-align: left;
+      font-family: monospace;
+      font-size: 12px;
     }
     @keyframes spin {
       to {
@@ -194,20 +226,24 @@ export class PreviewPanelComponent implements OnDestroy {
   @ViewChild('previewFrame') private frameRef?: ElementRef<HTMLIFrameElement>;
 
   private readonly sanitizer = inject(DomSanitizer);
-  private manager: PreviewManager | null = null;
+  private esbuildManager: PreviewManager | null = null;
+  private nodebox: NodeboxRuntime | null = null;
   private session: (PreviewSession & { _setIframe?(el: HTMLIFrameElement): void }) | null = null;
 
   readonly isRunning = signal(false);
-  readonly isBuilding = signal(false);
+  readonly isBusy = signal(false);
+  readonly statusLabel = signal<string>('');
   readonly safePreviewUrl = signal<SafeResourceUrl>('about:blank');
+  readonly errorMessage = signal<string | null>(null);
+  readonly activeMode = signal<PreviewMode | null>(null);
   rawPreviewUrl = '';
 
   constructor() {
-    // Rebuild manager whenever virtualFs changes
     effect(() => {
       const fs = this.virtualFs();
       if (untracked(this.isRunning)) void this.stopPreview();
-      this.manager = fs ? new PreviewManager(fs) : null;
+      this.errorMessage.set(null);
+      this.esbuildManager = fs ? new PreviewManager(fs) : null;
     });
   }
 
@@ -219,68 +255,149 @@ export class PreviewPanelComponent implements OnDestroy {
     }
   }
 
+  reload(): void {
+    if (this.activeMode() === 'nodebox') {
+      const el = this.frameRef?.nativeElement;
+      if (el) el.contentWindow?.location.reload();
+      return;
+    }
+    this.session?.reload();
+  }
+
+  ngOnDestroy(): void {
+    void this.stopPreview();
+  }
+
   private async startPreview(): Promise<void> {
-    if (!this.manager) return;
+    const fs = this.virtualFs();
+    if (!fs) return;
+
+    this.errorMessage.set(null);
+    this.isBusy.set(true);
+
     try {
-      // Auto-build before serving
-      const built = await this.runBuild();
-      if (!built) return;
+      const pkg = await readPackageJson(fs, '/');
+      const mode: PreviewMode = needsNodeRuntime(pkg) ? 'nodebox' : 'esbuild';
+      this.activeMode.set(mode);
 
-      this.session = await this.manager.start({
-        baseUrl: '/vertex-preview',
-        serveDir: '/dist',
-      });
-      this.rawPreviewUrl = this.session.url;
-      this.safePreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this.session.url));
-      this.isRunning.set(true);
-
-      // Wire iframe reference after view updates
-      setTimeout(() => {
-        if (this.frameRef?.nativeElement && this.session?._setIframe) {
-          this.session._setIframe(this.frameRef.nativeElement);
-        }
-      }, 0);
+      if (mode === 'nodebox') {
+        await this.startNodeboxPreview(fs, pkg);
+      } else {
+        await this.startEsbuildPreview(fs);
+      }
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error('[PreviewPanel] Failed to start preview:', err);
+      this.errorMessage.set(`Preview failed to start: ${msg}`);
+      await this.stopPreview();
+    } finally {
+      this.isBusy.set(false);
+      this.statusLabel.set('');
     }
   }
 
-  private async runBuild(): Promise<boolean> {
-    const fs = this.virtualFs();
-    if (!fs) return false;
+  private async startEsbuildPreview(fs: IVirtualFS): Promise<void> {
+    if (!this.esbuildManager) return;
 
-    this.isBuilding.set(true);
-    console.log('[PreviewPanel] Starting build...');
+    this.statusLabel.set('Building…');
+    const buildOutcome = await this.runEsbuild(fs);
+    if (!buildOutcome.ok) {
+      this.errorMessage.set(buildOutcome.error);
+      return;
+    }
+
+    this.statusLabel.set('Starting preview…');
+    this.session = await this.esbuildManager.start({
+      baseUrl: '/vertex-preview',
+      serveDir: '/dist',
+      indexHtml: '/index.html',
+    });
+    this.applyPreviewUrl(this.session.url);
+    this.isRunning.set(true);
+
+    setTimeout(() => {
+      if (this.frameRef?.nativeElement && this.session?._setIframe) {
+        this.session._setIframe(this.frameRef.nativeElement);
+      }
+    }, 0);
+  }
+
+  private async startNodeboxPreview(
+    fs: IVirtualFS,
+    pkg: Awaited<ReturnType<typeof readPackageJson>>,
+  ): Promise<void> {
+    const devScript = detectDevScript(pkg);
+    if (!devScript) {
+      this.errorMessage.set(
+        'No dev script found. Expected one of `dev`, `start`, or `serve` in package.json scripts.',
+      );
+      return;
+    }
+
+    this.statusLabel.set('Booting Node runtime…');
+    this.nodebox = new NodeboxRuntime(fs);
+    await this.nodebox.init();
+
+    this.statusLabel.set('Installing dependencies (this may take a minute)…');
+    console.log('[PreviewPanel] npm install…');
+    await this.nodebox.install({
+      onOutput: (chunk) => console.log('[npm]', chunk),
+    });
+
+    this.statusLabel.set(`Starting dev server (npm run ${devScript})…`);
+    console.log(`[PreviewPanel] npm run ${devScript}`);
+    const info = await this.nodebox.startDevServer(devScript);
+
+    this.applyPreviewUrl(info.url);
+    this.isRunning.set(true);
+  }
+
+  private async runEsbuild(
+    fs: IVirtualFS,
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
     try {
       const pkg = await readPackageJson(fs, '/');
-      let entryPoint = detectEntryPoint(pkg);
-      console.log('[PreviewPanel] Detected entry point from package.json:', entryPoint);
 
-      // Verify entry point exists, try common fallbacks
-      if (!(await fs.exists(entryPoint))) {
-        const fallbacks = [
+      let entryPoint = await detectEntryFromIndexHtml(fs, '/index.html');
+      if (entryPoint) {
+        console.log('[PreviewPanel] Entry from index.html:', entryPoint);
+      }
+
+      if (!entryPoint || !(await fs.exists(entryPoint))) {
+        const pkgEntry = detectEntryPoint(pkg);
+        const candidates = [
+          pkgEntry,
           '/src/main.tsx',
           '/src/main.ts',
+          '/src/main.jsx',
+          '/src/main.js',
           '/src/index.tsx',
           '/src/index.ts',
+          '/src/index.jsx',
+          '/src/index.js',
           '/index.ts',
           '/main.ts',
         ];
-        for (const fb of fallbacks) {
-          if (await fs.exists(fb)) {
-            entryPoint = fb;
-            console.log('[PreviewPanel] Using fallback entry point:', entryPoint);
+        entryPoint = null;
+        for (const candidate of candidates) {
+          if (candidate && (await fs.exists(candidate))) {
+            entryPoint = candidate;
+            console.log('[PreviewPanel] Fallback entry point:', entryPoint);
             break;
           }
         }
       }
 
-      if (!(await fs.exists(entryPoint))) {
-        console.warn('[PreviewPanel] No entry point found for build');
-      } else {
-        console.log('[PreviewPanel] Building from:', entryPoint);
+      if (!entryPoint) {
+        return {
+          ok: false,
+          error:
+            'Could not find an entry point. Expected a `<script type="module" src="...">` in /index.html ' +
+            'or a /src/main.{ts,tsx,js,jsx} file.',
+        };
       }
 
+      console.log('[PreviewPanel] Building from:', entryPoint);
       const bundler = new Bundler(fs);
       const result = await bundler.build({
         entryPoint,
@@ -306,34 +423,49 @@ export class PreviewPanelComponent implements OnDestroy {
         result.warnings.length,
       );
 
-      if (!result.success) {
-        console.error('[PreviewPanel] Build errors:', result.errors);
+      if (!result.success || result.files.length === 0) {
+        const summary = result.errors
+          .slice(0, 3)
+          .map((e) => `${e.file || '?'}:${e.line}: ${e.message}`)
+          .join('\n');
+        return {
+          ok: false,
+          error: `Build failed (${result.errors.length} error${result.errors.length === 1 ? '' : 's'}):\n${summary || 'no output files'}`,
+        };
       }
 
-      // Return true even if build has errors so user can see the preview attempt;
-      // the bundler writes whatever succeeded to /dist.
-      return true;
+      return { ok: true };
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error('[PreviewPanel] Build error:', err);
-      return true; // allow preview to try anyway
-    } finally {
-      this.isBuilding.set(false);
+      return { ok: false, error: `Build crashed: ${msg}` };
     }
   }
 
+  private applyPreviewUrl(url: string): void {
+    this.rawPreviewUrl = url;
+    this.safePreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+  }
+
   private async stopPreview(): Promise<void> {
-    await this.manager?.stop();
+    try {
+      await this.esbuildManager?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      await this.nodebox?.destroy();
+    } catch {
+      /* ignore */
+    }
+    this.nodebox = null;
     this.session = null;
     this.isRunning.set(false);
+    this.isBusy.set(false);
+    this.statusLabel.set('');
+    this.activeMode.set(null);
     this.safePreviewUrl.set('about:blank');
     this.rawPreviewUrl = '';
-  }
-
-  reload(): void {
-    this.session?.reload();
-  }
-
-  ngOnDestroy(): void {
-    this.manager?.stop();
+    this.errorMessage.set(null);
   }
 }

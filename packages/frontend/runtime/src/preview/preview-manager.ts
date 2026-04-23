@@ -1,6 +1,13 @@
 import { ServiceWorkerManager } from "./service-worker/sw-manager";
 import { HotReload } from "./hot-reload";
 import { generateIndexHtml } from "./template";
+import {
+  injectStylesheets,
+  injectTailwindCdn,
+  makePathsRelative,
+  parseIndexHtml,
+  rewriteEntryScript,
+} from "./html-index";
 import type { IVirtualFS } from "../types/fs.types";
 import type {
   PreviewConfig,
@@ -13,17 +20,27 @@ import {
   readPackageJson,
 } from "../build/resolver";
 
-function normalizePreviewHtml(html: string): string {
-  return html
-    .replace(/(src=)(["'])\/(?!\/)/g, "$1$2")
-    .replace(/(href=)(["'])\/(?!\/)/g, "$1$2");
+function toModuleSpecifier(src: string): string {
+  if (
+    src.startsWith("http://") ||
+    src.startsWith("https://") ||
+    src.startsWith("//") ||
+    src.startsWith("/") ||
+    src.startsWith("./") ||
+    src.startsWith("../")
+  ) {
+    return src;
+  }
+  return "./" + src;
 }
 
 function injectAngularBootstrap(html: string, compilerVersion: string): string {
   return html.replace(
     /<script\s+type=["']module["']\s+src=["']([^"']+)["']><\/script>/,
-    (_match, entrySrc: string) =>
-      `<script type="module">import { publishFacade } from 'https://esm.sh/@angular/compiler@${compilerVersion}'; publishFacade(globalThis); import ${JSON.stringify(entrySrc)};</script>`,
+    (_match, entrySrc: string) => {
+      const specifier = toModuleSpecifier(entrySrc);
+      return `<script type="module">import { publishFacade } from 'https://esm.sh/@angular/compiler@${compilerVersion}'; publishFacade(globalThis); import ${JSON.stringify(specifier)};</script>`;
+    },
   );
 }
 
@@ -47,39 +64,23 @@ export class PreviewManager implements IPreviewManager {
     const framework = detectFramework(pkg);
     const versions = extractDependencyVersions(pkg);
 
-    if (!files["/index.html"]) {
-      const indexHtml = config.indexHtml
-        ? await this.fs.readFile(config.indexHtml).catch(() => null)
-        : null;
+    const jsFiles = Object.keys(files).filter((p) => p.endsWith(".js"));
+    const cssFiles = Object.keys(files).filter((p) => p.endsWith(".css"));
+    const bundlePath =
+      jsFiles.find((p) => p === "/main.js") ??
+      jsFiles.find((p) => /^\/[^/]+\.js$/.test(p)) ??
+      jsFiles[0] ??
+      "/main.js";
 
-      // Auto-detect entry script from built files
-      const jsFiles = Object.keys(files).filter((p) => p.endsWith(".js"));
-      const entryScript = jsFiles.includes("/main.js")
-        ? "/main.js"
-        : (jsFiles.find((p) => !p.includes("/")) ?? "/main.js");
-
-      // Auto-detect CSS files
-      const cssFiles = Object.keys(files).filter((p) => p.endsWith(".css"));
-
-      files["/index.html"] = normalizePreviewHtml(
-        indexHtml ??
-          generateIndexHtml({
-            title: "Vertex Preview",
-            entryScript,
-            cssFiles,
-          }),
-      );
-    }
-
-    if (files["/index.html"]) {
-      files["/index.html"] = normalizePreviewHtml(files["/index.html"]);
-      if (framework === "angular" && versions["@angular/compiler"]) {
-        files["/index.html"] = injectAngularBootstrap(
-          files["/index.html"],
-          versions["@angular/compiler"],
-        );
-      }
-    }
+    files["/index.html"] = await this.buildIndexHtml({
+      builtIndex: files["/index.html"],
+      userIndexPath: config.indexHtml,
+      bundlePath,
+      cssFiles,
+      framework,
+      angularCompilerVersion: versions["@angular/compiler"],
+      tailwind: config.tailwind ?? null,
+    });
 
     await this.swManager.mountFiles(files);
     this.running = true;
@@ -117,7 +118,6 @@ export class PreviewManager implements IPreviewManager {
       },
     };
 
-    // Expose iframeRef setter so the Angular component can wire up the real iframe
     (
       session as PreviewSession & { _setIframe(el: HTMLIFrameElement): void }
     )._setIframe = (el: HTMLIFrameElement) => {
@@ -143,6 +143,55 @@ export class PreviewManager implements IPreviewManager {
     return this.running;
   }
 
+  private async buildIndexHtml(opts: {
+    builtIndex: string | undefined;
+    userIndexPath: string | undefined;
+    bundlePath: string;
+    cssFiles: string[];
+    framework: ReturnType<typeof detectFramework>;
+    angularCompilerVersion?: string;
+    tailwind: 'v3' | 'v4' | null;
+  }): Promise<string> {
+    const bundleRel = opts.bundlePath.replace(/^\//, "");
+    const cssRels = opts.cssFiles.map((p) => p.replace(/^\//, ""));
+
+    let html: string;
+    const userHtml = opts.userIndexPath
+      ? await this.fs.readFile(opts.userIndexPath).catch(() => null)
+      : null;
+
+    if (userHtml) {
+      html = userHtml;
+      const parsed = parseIndexHtml(html);
+      if (parsed.hasModuleScript) {
+        html = rewriteEntryScript(html, bundleRel);
+      } else {
+        html = html.replace(
+          /<\/body>/i,
+          `  <script type="module" src="${bundleRel}"></script>\n</body>`,
+        );
+      }
+      html = injectStylesheets(html, cssRels);
+      html = makePathsRelative(html);
+    } else if (opts.builtIndex) {
+      html = makePathsRelative(opts.builtIndex);
+    } else {
+      html = generateIndexHtml({
+        title: "Vertex Preview",
+        entryScript: bundleRel,
+        cssFiles: cssRels,
+      });
+    }
+
+    if (opts.framework === "angular" && opts.angularCompilerVersion) {
+      html = injectAngularBootstrap(html, opts.angularCompilerVersion);
+    }
+    if (opts.tailwind) {
+      html = injectTailwindCdn(html, opts.tailwind);
+    }
+    return html;
+  }
+
   private async collectFiles(dir: string): Promise<Record<string, string>> {
     const result: Record<string, string> = {};
     await this.collectRecursive(dir, dir, result);
@@ -165,7 +214,6 @@ export class PreviewManager implements IPreviewManager {
       if (entry.type === "file") {
         try {
           const content = await this.fs.readFile(entry.path);
-          // Normalize to path relative to baseDir, rooted at /
           const swPath =
             "/" + entry.path.slice(baseDir.length).replace(/^\//, "");
           result[swPath] = content;

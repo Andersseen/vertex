@@ -7,6 +7,7 @@ export interface NpmInstallOptions {
   packages?: string[]
   dev?: boolean
   exact?: boolean
+  onOutput?: (chunk: string) => void
 }
 
 export interface ScriptRunOptions {

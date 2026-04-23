@@ -16,6 +16,8 @@ const runtimeSrc = path.resolve(__dirname, '../../packages/frontend/runtime/src'
 const RUNTIME_SUBPATHS: Record<string, string> = {
   '@vertex/runtime/preview': path.join(runtimeSrc, 'preview/index.ts'),
   '@vertex/runtime/build': path.join(runtimeSrc, 'build/index.ts'),
+  '@vertex/runtime/node': path.join(runtimeSrc, 'node/index.ts'),
+  '@vertex/runtime/deploy': path.join(runtimeSrc, 'deploy/index.ts'),
 };
 
 export default defineConfig(({ mode }) => ({

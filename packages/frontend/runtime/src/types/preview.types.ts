@@ -5,6 +5,11 @@ export interface PreviewConfig {
   serveDir: string
   /** Optional explicit index.html path inside VirtualFS */
   indexHtml?: string
+  /**
+   * Inject the Tailwind browser/CDN runtime into the preview index.
+   * Used in the lib-bundling path where we can't run PostCSS.
+   */
+  tailwind?: 'v3' | 'v4' | null
 }
 
 export interface PreviewSession {

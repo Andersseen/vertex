@@ -49,7 +49,8 @@
       "Bash(npx --prefix /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime tsc --noEmit -p /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/tsconfig.json)",
       "Bash(bun lint *)",
       "Bash(bun --cwd packages/frontend/runtime test)",
-      "Bash(bun check-types *)"
+      "Bash(bun check-types *)",
+      "Bash(bun --cwd apps/web lint)"
     ]
   }
 }

@@ -6,7 +6,12 @@ import type {
   BuildProgressCallback,
   IBundler,
 } from "../types/build.types";
-import { virtualFsPlugin, npmCdnPlugin, aliasPlugin } from "./plugins";
+import {
+  virtualFsPlugin,
+  npmCdnPlugin,
+  aliasPlugin,
+  stripTailwindDirectives,
+} from "./plugins";
 import {
   readPackageJson,
   extractDependencyVersions,
@@ -74,7 +79,11 @@ export class Bundler implements IBundler {
     if (aliases.length > 0) {
       plugins.push(aliasPlugin(aliases));
     }
-    plugins.push(virtualFsPlugin(this.fs));
+    plugins.push(
+      virtualFsPlugin(this.fs, {
+        cssTransform: config.tailwindStrip ? stripTailwindDirectives : undefined,
+      }),
+    );
     if (config.npmResolution === "cdn") {
       const allowList = Object.keys(versions);
       plugins.push(npmCdnPlugin(config.cdnUrl, versions, allowList));

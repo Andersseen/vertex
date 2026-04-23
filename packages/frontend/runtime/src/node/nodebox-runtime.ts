@@ -9,7 +9,23 @@ import type {
 } from '../types/node.types'
 
 const DEV_SERVER_TIMEOUT_MS = 60_000
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', '.turbo'])
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  '.turbo',
+  '.astro',
+  '.next',
+  '.nuxt',
+  '.svelte-kit',
+  '.cache',
+  '.output',
+  'coverage',
+  '.vercel',
+  '.wrangler',
+])
+// Lockfiles from other package managers confuse Nodebox's npm.
+const SKIP_FILES = new Set(['pnpm-lock.yaml', 'yarn.lock', 'bun.lockb', 'bun.lock'])
 
 export class NodeboxRuntime implements INodeRuntime {
   private nodebox: Nodebox | null = null
@@ -45,11 +61,26 @@ export class NodeboxRuntime implements INodeRuntime {
       if (options.exact) args.push('--save-exact')
     }
 
+    const logs: string[] = []
+    const tailLimit = 8000
+    const onData = (chunk: string) => {
+      logs.push(chunk)
+      options?.onOutput?.(chunk)
+    }
+    shell.stdout.on('data', onData)
+    shell.stderr.on('data', onData)
+
     await shell.runCommand('npm', args)
 
     await new Promise<void>((resolve, reject) => {
       shell.on('exit', (code) => {
-        code === 0 ? resolve() : reject(new Error(`npm install exited with code ${code}`))
+        if (code === 0) {
+          resolve()
+          return
+        }
+        const tail = logs.join('').slice(-tailLimit).trim()
+        const detail = tail ? `\n--- npm output (tail) ---\n${tail}` : ''
+        reject(new Error(`npm install exited with code ${code}${detail}`))
       })
     })
   }
@@ -146,6 +177,7 @@ export class NodeboxRuntime implements INodeRuntime {
         if (SKIP_DIRS.has(name)) continue
         await this.collectFiles(entry.path, out)
       } else {
+        if (SKIP_FILES.has(name)) continue
         try {
           const content = await this.fs.readFile(entry.path)
           if (typeof content === 'string') {

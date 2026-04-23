@@ -8,6 +8,11 @@ export interface BuildConfig {
   npmResolution: 'cdn' | 'nodebox'
   cdnUrl: string
   tsconfig?: string
+  /**
+   * When true, Tailwind directives (@tailwind, @apply, @import "tailwindcss")
+   * are stripped from CSS so the preview can rely on the Tailwind CDN.
+   */
+  tailwindStrip?: boolean
 }
 
 export interface BuildOutputFile {
