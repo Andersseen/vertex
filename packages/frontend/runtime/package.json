@@ -30,6 +30,26 @@
     "./node": {
       "import": "./src/node/index.ts",
       "types": "./src/node/index.ts"
+    },
+    "./deploy": {
+      "import": "./src/deploy/index.ts",
+      "types": "./src/deploy/index.ts"
+    },
+    "./types-checker": {
+      "import": "./src/extras/types/index.ts",
+      "types": "./src/extras/types/index.ts"
+    },
+    "./lint": {
+      "import": "./src/extras/lint/index.ts",
+      "types": "./src/extras/lint/index.ts"
+    },
+    "./format": {
+      "import": "./src/extras/format/index.ts",
+      "types": "./src/extras/format/index.ts"
+    },
+    "./css": {
+      "import": "./src/extras/css/index.ts",
+      "types": "./src/extras/css/index.ts"
     }
   },
   "files": ["dist", "README.md"],
@@ -54,6 +74,16 @@
     "typescript": "~5.9.2"
   },
   "peerDependencies": {
-    "typescript": ">=5.0"
+    "typescript": ">=5.0",
+    "eslint": ">=9.0.0",
+    "prettier": ">=3.0.0",
+    "postcss": ">=8.0.0",
+    "sass": ">=1.70.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint": { "optional": true },
+    "prettier": { "optional": true },
+    "postcss": { "optional": true },
+    "sass": { "optional": true }
   }
 }
