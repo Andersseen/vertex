@@ -11,22 +11,13 @@ import {
   untracked,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PreviewManager } from '@vertex/runtime/preview';
-import type { PreviewSession } from '@vertex/runtime/preview';
+import { PreviewNodeManager } from '@vertex/runtime/preview-node';
+import type {
+  PreviewNodeConfig,
+  PreviewNodePhase,
+  PreviewSession,
+} from '@vertex/runtime/preview-node';
 import type { IVirtualFS } from '@vertex/runtime';
-import { Bundler } from '@vertex/runtime/build';
-import {
-  readPackageJson,
-  detectEntryPoint,
-  detectEntryFromIndexHtml,
-  needsNodeRuntime,
-  detectDevScript,
-  detectTailwindVersion,
-} from '@vertex/runtime/build';
-import type { TailwindVersion } from '@vertex/runtime/build';
-import { NodeboxRuntime } from '@vertex/runtime/node';
-
-type PreviewMode = 'esbuild' | 'nodebox';
 
 @Component({
   selector: 'app-preview-panel',
@@ -95,8 +86,13 @@ type PreviewMode = 'esbuild' | 'nodebox';
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
           </button>
-          <span class="preview-mode">{{ activeMode() }}</span>
           <span class="preview-url">{{ rawPreviewUrl }}</span>
+        }
+
+        @if (logs().length > 0) {
+          <button class="preview-btn preview-btn--log" (click)="toggleLogs()" title="Toggle logs">
+            Logs ({{ logs().length }})
+          </button>
         }
       </div>
 
@@ -116,9 +112,15 @@ type PreviewMode = 'esbuild' | 'nodebox';
           } @else if (errorMessage()) {
             <p class="preview-error">{{ errorMessage() }}</p>
           } @else {
-            <p>Click <strong>Run Preview</strong> to build &amp; serve</p>
+            <p>Click <strong>Run Preview</strong> to install deps &amp; start dev server</p>
           }
         </div>
+      }
+
+      @if (showLogs() && logs().length > 0) {
+        <pre class="preview-logs"
+          >{{ joinedLogs() }}</pre
+        >
       }
     </div>
   `,
@@ -162,14 +164,8 @@ type PreviewMode = 'esbuild' | 'nodebox';
     .preview-btn--icon {
       padding: 3px 7px;
     }
-    .preview-mode {
-      font-size: 10px;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 3px;
-      background: var(--ide-surface-800, #1e1e1e);
-      color: var(--ide-text-muted, #888);
-      letter-spacing: 0.5px;
+    .preview-btn--log {
+      margin-left: auto;
     }
     .preview-url {
       font-size: 11px;
@@ -204,11 +200,26 @@ type PreviewMode = 'esbuild' | 'nodebox';
     }
     .preview-error {
       color: var(--ide-text-error, #f48771);
-      max-width: 480px;
+      max-width: 560px;
       white-space: pre-wrap;
       text-align: left;
       font-family: monospace;
       font-size: 12px;
+    }
+    .preview-logs {
+      flex-shrink: 0;
+      max-height: 240px;
+      overflow: auto;
+      margin: 0;
+      padding: 8px 12px;
+      background: var(--ide-bg-900, #0d0d0d);
+      border-top: 1px solid var(--ide-border, #1e1e1e);
+      color: var(--ide-text-muted, #bbb);
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     @keyframes spin {
       to {
@@ -226,16 +237,17 @@ export class PreviewPanelComponent implements OnDestroy {
   @ViewChild('previewFrame') private frameRef?: ElementRef<HTMLIFrameElement>;
 
   private readonly sanitizer = inject(DomSanitizer);
-  private esbuildManager: PreviewManager | null = null;
-  private nodebox: NodeboxRuntime | null = null;
-  private session: (PreviewSession & { _setIframe?(el: HTMLIFrameElement): void }) | null = null;
+  private manager: PreviewNodeManager | null = null;
+  private session: PreviewSession | null = null;
 
   readonly isRunning = signal(false);
   readonly isBusy = signal(false);
   readonly statusLabel = signal<string>('');
   readonly safePreviewUrl = signal<SafeResourceUrl>('about:blank');
   readonly errorMessage = signal<string | null>(null);
-  readonly activeMode = signal<PreviewMode | null>(null);
+  readonly logs = signal<string[]>([]);
+  readonly showLogs = signal(false);
+  readonly joinedLogs = signal<string>('');
   rawPreviewUrl = '';
 
   constructor() {
@@ -243,7 +255,9 @@ export class PreviewPanelComponent implements OnDestroy {
       const fs = this.virtualFs();
       if (untracked(this.isRunning)) void this.stopPreview();
       this.errorMessage.set(null);
-      this.esbuildManager = fs ? new PreviewManager(fs) : null;
+      this.logs.set([]);
+      this.joinedLogs.set('');
+      this.manager = fs ? new PreviewNodeManager(fs) : null;
     });
   }
 
@@ -255,13 +269,13 @@ export class PreviewPanelComponent implements OnDestroy {
     }
   }
 
+  toggleLogs(): void {
+    this.showLogs.update((v) => !v);
+  }
+
   reload(): void {
-    if (this.activeMode() === 'nodebox') {
-      const el = this.frameRef?.nativeElement;
-      if (el) el.contentWindow?.location.reload();
-      return;
-    }
-    this.session?.reload();
+    const el = this.frameRef?.nativeElement;
+    if (el) el.contentWindow?.location.reload();
   }
 
   ngOnDestroy(): void {
@@ -269,203 +283,74 @@ export class PreviewPanelComponent implements OnDestroy {
   }
 
   private async startPreview(): Promise<void> {
-    const fs = this.virtualFs();
-    if (!fs) return;
+    if (!this.manager) return;
 
     this.errorMessage.set(null);
+    this.logs.set([]);
+    this.joinedLogs.set('');
     this.isBusy.set(true);
 
-    try {
-      const pkg = await readPackageJson(fs, '/');
-      const mode: PreviewMode = needsNodeRuntime(pkg) ? 'nodebox' : 'esbuild';
-      this.activeMode.set(mode);
+    const config: PreviewNodeConfig = {
+      onPhase: (phase, message) => {
+        this.statusLabel.set(phaseLabel(phase, message));
+      },
+      onLog: (chunk) => {
+        this.logs.update((prev) => {
+          const next = [...prev, chunk];
+          return next.length > 500 ? next.slice(-500) : next;
+        });
+        this.joinedLogs.set(this.logs().join(''));
+      },
+    };
 
-      if (mode === 'nodebox') {
-        await this.startNodeboxPreview(fs, pkg);
-      } else {
-        await this.startEsbuildPreview(fs);
-      }
+    try {
+      const session = await this.manager.start(config);
+      this.session = session;
+      this.rawPreviewUrl = session.url;
+      this.safePreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(session.url));
+      this.isRunning.set(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error('[PreviewPanel] Failed to start preview:', err);
-      this.errorMessage.set(`Preview failed to start: ${msg}`);
-      await this.stopPreview();
+      this.errorMessage.set(msg);
+      this.showLogs.set(true);
     } finally {
       this.isBusy.set(false);
       this.statusLabel.set('');
     }
   }
 
-  private async startEsbuildPreview(fs: IVirtualFS): Promise<void> {
-    if (!this.esbuildManager) return;
-
-    this.statusLabel.set('Building…');
-    const buildOutcome = await this.runEsbuild(fs);
-    if (!buildOutcome.ok) {
-      this.errorMessage.set(buildOutcome.error);
-      return;
-    }
-
-    this.statusLabel.set('Starting preview…');
-    this.session = await this.esbuildManager.start({
-      baseUrl: '/vertex-preview',
-      serveDir: '/dist',
-      indexHtml: '/index.html',
-    });
-    this.applyPreviewUrl(this.session.url);
-    this.isRunning.set(true);
-
-    setTimeout(() => {
-      if (this.frameRef?.nativeElement && this.session?._setIframe) {
-        this.session._setIframe(this.frameRef.nativeElement);
-      }
-    }, 0);
-  }
-
-  private async startNodeboxPreview(
-    fs: IVirtualFS,
-    pkg: Awaited<ReturnType<typeof readPackageJson>>,
-  ): Promise<void> {
-    const devScript = detectDevScript(pkg);
-    if (!devScript) {
-      this.errorMessage.set(
-        'No dev script found. Expected one of `dev`, `start`, or `serve` in package.json scripts.',
-      );
-      return;
-    }
-
-    this.statusLabel.set('Booting Node runtime…');
-    this.nodebox = new NodeboxRuntime(fs);
-    await this.nodebox.init();
-
-    this.statusLabel.set('Installing dependencies (this may take a minute)…');
-    console.log('[PreviewPanel] npm install…');
-    await this.nodebox.install({
-      onOutput: (chunk) => console.log('[npm]', chunk),
-    });
-
-    this.statusLabel.set(`Starting dev server (npm run ${devScript})…`);
-    console.log(`[PreviewPanel] npm run ${devScript}`);
-    const info = await this.nodebox.startDevServer(devScript);
-
-    this.applyPreviewUrl(info.url);
-    this.isRunning.set(true);
-  }
-
-  private async runEsbuild(
-    fs: IVirtualFS,
-  ): Promise<{ ok: true } | { ok: false; error: string }> {
-    try {
-      const pkg = await readPackageJson(fs, '/');
-
-      let entryPoint = await detectEntryFromIndexHtml(fs, '/index.html');
-      if (entryPoint) {
-        console.log('[PreviewPanel] Entry from index.html:', entryPoint);
-      }
-
-      if (!entryPoint || !(await fs.exists(entryPoint))) {
-        const pkgEntry = detectEntryPoint(pkg);
-        const candidates = [
-          pkgEntry,
-          '/src/main.tsx',
-          '/src/main.ts',
-          '/src/main.jsx',
-          '/src/main.js',
-          '/src/index.tsx',
-          '/src/index.ts',
-          '/src/index.jsx',
-          '/src/index.js',
-          '/index.ts',
-          '/main.ts',
-        ];
-        entryPoint = null;
-        for (const candidate of candidates) {
-          if (candidate && (await fs.exists(candidate))) {
-            entryPoint = candidate;
-            console.log('[PreviewPanel] Fallback entry point:', entryPoint);
-            break;
-          }
-        }
-      }
-
-      if (!entryPoint) {
-        return {
-          ok: false,
-          error:
-            'Could not find an entry point. Expected a `<script type="module" src="...">` in /index.html ' +
-            'or a /src/main.{ts,tsx,js,jsx} file.',
-        };
-      }
-
-      console.log('[PreviewPanel] Building from:', entryPoint);
-      const bundler = new Bundler(fs);
-      const result = await bundler.build({
-        entryPoint,
-        outDir: '/dist',
-        format: 'esm',
-        target: 'browser',
-        minify: true,
-        sourcemap: true,
-        npmResolution: 'cdn',
-        cdnUrl: 'https://esm.sh',
-      });
-
-      console.log(
-        '[PreviewPanel] Build result:',
-        result.success ? 'SUCCESS' : 'FAILED',
-        '- duration:',
-        result.duration + 'ms',
-        '- files:',
-        result.files.map((f) => f.path).join(', ') || 'none',
-        '- errors:',
-        result.errors.length,
-        '- warnings:',
-        result.warnings.length,
-      );
-
-      if (!result.success || result.files.length === 0) {
-        const summary = result.errors
-          .slice(0, 3)
-          .map((e) => `${e.file || '?'}:${e.line}: ${e.message}`)
-          .join('\n');
-        return {
-          ok: false,
-          error: `Build failed (${result.errors.length} error${result.errors.length === 1 ? '' : 's'}):\n${summary || 'no output files'}`,
-        };
-      }
-
-      return { ok: true };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[PreviewPanel] Build error:', err);
-      return { ok: false, error: `Build crashed: ${msg}` };
-    }
-  }
-
-  private applyPreviewUrl(url: string): void {
-    this.rawPreviewUrl = url;
-    this.safePreviewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
-  }
-
   private async stopPreview(): Promise<void> {
     try {
-      await this.esbuildManager?.stop();
+      await this.manager?.stop();
     } catch {
       /* ignore */
     }
-    try {
-      await this.nodebox?.destroy();
-    } catch {
-      /* ignore */
-    }
-    this.nodebox = null;
     this.session = null;
     this.isRunning.set(false);
     this.isBusy.set(false);
     this.statusLabel.set('');
-    this.activeMode.set(null);
     this.safePreviewUrl.set('about:blank');
     this.rawPreviewUrl = '';
     this.errorMessage.set(null);
+  }
+}
+
+function phaseLabel(phase: PreviewNodePhase, message?: string): string {
+  switch (phase) {
+    case 'init':
+      return 'Booting Node runtime…';
+    case 'install':
+      return 'Installing dependencies (first run may take a minute)…';
+    case 'dev-server':
+      return message ?? 'Starting dev server…';
+    case 'ready':
+      return 'Ready';
+    case 'stopped':
+      return '';
+    case 'failed':
+      return 'Failed';
+    default:
+      return 'Working…';
   }
 }

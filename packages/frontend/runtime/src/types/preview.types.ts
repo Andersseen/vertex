@@ -37,3 +37,26 @@ export type SWResponse =
   | { type: 'READY' }
   | { type: 'PONG' }
   | { type: 'FILE_UPDATED'; path: string }
+
+// ---- Node-backed preview (Nodebox) ----
+
+export type PreviewNodePhase =
+  | 'init'
+  | 'install'
+  | 'dev-server'
+  | 'ready'
+  | 'stopped'
+  | 'failed'
+
+export interface PreviewNodeConfig {
+  /** npm script to run as dev server. Defaults to auto-detect: `dev` → `start` → `serve`. */
+  devScript?: string
+  /** Extra args appended to `npm install` (e.g. `['--force']`). */
+  installFlags?: string[]
+  /** Skip `npm install` (assume node_modules already hydrated). */
+  skipInstall?: boolean
+  /** Called with each stdout/stderr chunk from install + dev-server. */
+  onLog?: (chunk: string, stream: 'stdout' | 'stderr') => void
+  /** Called on phase transitions for UI wiring. */
+  onPhase?: (phase: PreviewNodePhase, message?: string) => void
+}

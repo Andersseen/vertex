@@ -1,4 +1,4 @@
-export { PreviewManager } from './preview-manager'
+export { PreviewLiteManager } from './preview-manager'
 export { ServiceWorkerManager } from './service-worker/sw-manager'
 export { HotReload } from './hot-reload'
 export { generateIndexHtml } from './template'
@@ -8,6 +8,7 @@ export {
   injectStylesheets,
   makePathsRelative,
   injectTailwindCdn,
+  rewriteBaseHref,
 } from './html-index'
 export type { IndexHtmlInfo } from './html-index'
 export type {

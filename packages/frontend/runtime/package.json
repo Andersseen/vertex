@@ -23,9 +23,13 @@
       "import": "./src/build/index.ts",
       "types": "./src/build/index.ts"
     },
-    "./preview": {
-      "import": "./src/preview/index.ts",
-      "types": "./src/preview/index.ts"
+    "./preview-lite": {
+      "import": "./src/preview-lite/index.ts",
+      "types": "./src/preview-lite/index.ts"
+    },
+    "./preview-node": {
+      "import": "./src/preview-node/index.ts",
+      "types": "./src/preview-node/index.ts"
     },
     "./node": {
       "import": "./src/node/index.ts",

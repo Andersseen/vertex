@@ -6,6 +6,7 @@ import {
   injectTailwindCdn,
   makePathsRelative,
   parseIndexHtml,
+  rewriteBaseHref,
   rewriteEntryScript,
 } from "./html-index";
 import type { IVirtualFS } from "../types/fs.types";
@@ -20,31 +21,67 @@ import {
   readPackageJson,
 } from "../build/resolver";
 
-function toModuleSpecifier(src: string): string {
-  if (
-    src.startsWith("http://") ||
-    src.startsWith("https://") ||
-    src.startsWith("//") ||
-    src.startsWith("/") ||
-    src.startsWith("./") ||
-    src.startsWith("../")
-  ) {
-    return src;
+/**
+ * zone.js must patch globals BEFORE Angular core loads. A classic <script>
+ * (non-module) is synchronous and runs to completion before the deferred
+ * module script that carries the app bundle.
+ */
+function injectZoneJs(html: string, zoneVersion: string): string {
+  const tag = `<script src="https://unpkg.com/zone.js@${zoneVersion}/bundles/zone.umd.js"></script>`;
+  if (/<\/head>/i.test(html)) {
+    return html.replace(/<\/head>/i, `  ${tag}\n</head>`);
   }
-  return "./" + src;
+  return tag + "\n" + html;
 }
 
-function injectAngularBootstrap(html: string, compilerVersion: string): string {
-  return html.replace(
-    /<script\s+type=["']module["']\s+src=["']([^"']+)["']><\/script>/,
-    (_match, entrySrc: string) => {
-      const specifier = toModuleSpecifier(entrySrc);
-      return `<script type="module">import { publishFacade } from 'https://esm.sh/@angular/compiler@${compilerVersion}'; publishFacade(globalThis); import ${JSON.stringify(specifier)};</script>`;
-    },
+/**
+ * Build an ES module importmap that pins ALL @angular/* packages (and their
+ * subpaths like @angular/common/http) to the same esm.sh URLs.
+ *
+ * The `*` prefix on the esm.sh URL forces the CDN to emit bare specifiers
+ * for every transitive dep — the browser then resolves every reference via
+ * the same importmap entry, guaranteeing a single Angular instance.
+ *
+ * The trailing-slash entries cover subpaths: a library importing
+ * `@angular/common/http` resolves through the `"@angular/common/"` mapping
+ * to `https://esm.sh/*@angular/common@VER/http`.
+ *
+ * Without this shape we see NG0200 / NullInjectorError as two distinct
+ * copies of @angular/core get loaded and DI can't match providers.
+ */
+function buildAngularImportMap(versions: Record<string, string>): string | null {
+  const angularPkgs = Object.entries(versions).filter(([k]) =>
+    k.startsWith("@angular/"),
   );
+  if (angularPkgs.length === 0) return null;
+
+  const imports: Record<string, string> = {};
+  for (const [pkg, version] of angularPkgs) {
+    imports[pkg] = `https://esm.sh/*${pkg}@${version}`;
+    imports[`${pkg}/`] = `https://esm.sh/*${pkg}@${version}/`;
+  }
+  // rxjs is a peer of @angular/core and must share the same instance.
+  if (versions["rxjs"]) {
+    imports["rxjs"] = `https://esm.sh/*rxjs@${versions["rxjs"]}`;
+    imports["rxjs/"] = `https://esm.sh/*rxjs@${versions["rxjs"]}/`;
+  }
+  if (versions["tslib"]) {
+    imports["tslib"] = `https://esm.sh/tslib@${versions["tslib"]}`;
+  }
+  return JSON.stringify({ imports }, null, 2);
 }
 
-export class PreviewManager implements IPreviewManager {
+function injectImportMap(html: string, mapJson: string): string {
+  const tag = `<script type="importmap">\n${mapJson}\n</script>`;
+  // Importmap MUST come before any <script type="module"> that uses it, and
+  // the standard says only one importmap per document, placed in <head>.
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/<head[^>]*>/i, (match) => `${match}\n  ${tag}`);
+  }
+  return tag + "\n" + html;
+}
+
+export class PreviewLiteManager implements IPreviewManager {
   private readonly swManager = new ServiceWorkerManager();
   private hotReload: HotReload | null = null;
   private running = false;
@@ -78,8 +115,10 @@ export class PreviewManager implements IPreviewManager {
       bundlePath,
       cssFiles,
       framework,
-      angularCompilerVersion: versions["@angular/compiler"],
+      zoneVersion: versions["zone.js"],
+      versions,
       tailwind: config.tailwind ?? null,
+      baseHref: config.baseUrl.endsWith("/") ? config.baseUrl : config.baseUrl + "/",
     });
 
     await this.swManager.mountFiles(files);
@@ -149,8 +188,10 @@ export class PreviewManager implements IPreviewManager {
     bundlePath: string;
     cssFiles: string[];
     framework: ReturnType<typeof detectFramework>;
-    angularCompilerVersion?: string;
+    zoneVersion?: string;
+    versions: Record<string, string>;
     tailwind: 'v3' | 'v4' | null;
+    baseHref: string;
   }): Promise<string> {
     const bundleRel = opts.bundlePath.replace(/^\//, "");
     const cssRels = opts.cssFiles.map((p) => p.replace(/^\//, ""));
@@ -183,8 +224,22 @@ export class PreviewManager implements IPreviewManager {
       });
     }
 
-    if (opts.framework === "angular" && opts.angularCompilerVersion) {
-      html = injectAngularBootstrap(html, opts.angularCompilerVersion);
+    // Always rewrite the <base href> so relative module imports inside the
+    // iframe stay within the preview scope. Without this, `<base href="/">`
+    // in the user's index (standard in Angular CLI) makes every import
+    // resolve against the parent origin — which in dev hits Vertex's own
+    // Vite server and pulls the IDE's Angular chunks into the preview,
+    // causing DI errors like NG0200 / NullInjector.
+    html = rewriteBaseHref(html, opts.baseHref);
+
+    if (opts.framework === "angular") {
+      const importMap = buildAngularImportMap(opts.versions);
+      if (importMap) {
+        html = injectImportMap(html, importMap);
+      }
+      if (opts.zoneVersion) {
+        html = injectZoneJs(html, opts.zoneVersion);
+      }
     }
     if (opts.tailwind) {
       html = injectTailwindCdn(html, opts.tailwind);

@@ -14,7 +14,8 @@ const runtimeSrc = path.resolve(__dirname, '../../packages/frontend/runtime/src'
 // never sees them. Without this, AnalogJS's Angular compiler produces empty
 // output for TypeScript files that have no Angular decorators.
 const RUNTIME_SUBPATHS: Record<string, string> = {
-  '@vertex/runtime/preview': path.join(runtimeSrc, 'preview/index.ts'),
+  '@vertex/runtime/preview-lite': path.join(runtimeSrc, 'preview-lite/index.ts'),
+  '@vertex/runtime/preview-node': path.join(runtimeSrc, 'preview-node/index.ts'),
   '@vertex/runtime/build': path.join(runtimeSrc, 'build/index.ts'),
   '@vertex/runtime/node': path.join(runtimeSrc, 'node/index.ts'),
   '@vertex/runtime/deploy': path.join(runtimeSrc, 'deploy/index.ts'),

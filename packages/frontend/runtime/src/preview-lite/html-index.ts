@@ -47,6 +47,23 @@ export function makePathsRelative(html: string): string {
 }
 
 /**
+ * Rewrite (or inject) the <base href> so the iframe resolves relative URLs
+ * under the preview scope (e.g. /vertex-preview/) instead of the parent
+ * origin's root. Angular, Vue-Router, and many SPA templates ship a
+ * `<base href="/">` — inside an iframe that would redirect every module
+ * resolution to the parent dev server and cross-contaminate the app.
+ */
+export function rewriteBaseHref(html: string, newHref: string): string {
+  if (/<base\s[^>]*href=/i.test(html)) {
+    return html.replace(/<base\s[^>]*href=["'][^"']*["'][^>]*>/i, `<base href="${newHref}">`)
+  }
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/<head[^>]*>/i, (match) => `${match}\n  <base href="${newHref}">`)
+  }
+  return `<base href="${newHref}">\n` + html
+}
+
+/**
  * Inject the Tailwind browser/CDN runtime into <head>.
  * - v3: cdn.tailwindcss.com (Play CDN, JIT in browser)
  * - v4: @tailwindcss/browser via esm.sh
