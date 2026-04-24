@@ -46,7 +46,17 @@
       "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/index.ts\")",
       "Bash(curl -s \"http://localhost:5173/@fs/Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/src/preview/preview-manager.ts\")",
       "Bash(bun --cwd /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime run check-types)",
-      "Bash(npx --prefix /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime tsc --noEmit -p /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/tsconfig.json)"
+      "Bash(npx --prefix /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime tsc --noEmit -p /Users/andriipap/Andersseen/Web/Projects/vertex/packages/frontend/runtime/tsconfig.json)",
+      "Bash(bun lint *)",
+      "Bash(bun --cwd packages/frontend/runtime test)",
+      "Bash(bun check-types *)",
+      "Bash(bun --cwd apps/web lint)",
+      "WebFetch(domain:sebastianwessel.github.io)",
+      "WebFetch(domain:userland.tech)",
+      "Bash(xargs -I{} cat {})",
+      "Bash(bun --cwd packages/frontend/runtime run build)",
+      "Bash(bun build.ts)",
+      "Bash(npm pack *)"
     ]
   }
 }

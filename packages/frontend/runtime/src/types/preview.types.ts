@@ -11,7 +11,6 @@ export interface PreviewSession {
   /** URL to set as iframe src */
   url: string
   reload(): void
-  hotReload(paths: string[]): Promise<void>
   destroy(): void
 }
 
@@ -20,15 +19,3 @@ export interface IPreviewManager {
   stop(): Promise<void>
   isRunning(): boolean
 }
-
-export type SWMessage =
-  | { type: 'MOUNT_FILES'; files: Record<string, string> }
-  | { type: 'UPDATE_FILE'; path: string; content: string }
-  | { type: 'DELETE_FILE'; path: string }
-  | { type: 'CLEAR' }
-  | { type: 'PING' }
-
-export type SWResponse =
-  | { type: 'READY' }
-  | { type: 'PONG' }
-  | { type: 'FILE_UPDATED'; path: string }

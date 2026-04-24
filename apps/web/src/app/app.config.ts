@@ -20,7 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     {
       provide: TERMINAL_BACKEND_ADAPTER,
-      useClass: VirtualTerminalService,
+      useExisting: VirtualTerminalService,
     },
   ],
 };

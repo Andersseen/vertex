@@ -73,6 +73,7 @@ export class TerminalPanelComponent
   private isConnecting = false;
   private dataSubscription?: { unsubscribe: () => void };
   private resizeObserver?: ResizeObserver;
+  private intersectionObserver?: IntersectionObserver;
   private terminalInitialized = false;
 
   private previousWorkingDir = '';
@@ -119,6 +120,7 @@ export class TerminalPanelComponent
   ngOnDestroy(): void {
     this.dataSubscription?.unsubscribe();
     this.resizeObserver?.disconnect();
+    this.intersectionObserver?.disconnect();
     this.terminal?.dispose();
     this.terminalBackend.disconnect();
   }
@@ -199,6 +201,20 @@ export class TerminalPanelComponent
     } else {
       this.resizeObserver.observe(container);
     }
+
+    // Re-fit when the terminal becomes visible after being hidden (e.g. tab switch)
+    // Observe the :host element because it's more reliable than the inner container
+    // when ancestors have display:none.
+    this.intersectionObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          requestAnimationFrame(() => this.fitTerminal());
+          setTimeout(() => this.fitTerminal(), 100);
+          setTimeout(() => this.fitTerminal(), 300);
+        }
+      }
+    });
+    this.intersectionObserver.observe(this.terminalEleRef.nativeElement);
 
     // Connect to backend
     this.connect(this.workingDirectory()).then(() => {

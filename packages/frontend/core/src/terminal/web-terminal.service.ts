@@ -154,6 +154,12 @@ export class WebTerminalService implements TerminalBackendAdapter {
     );
   }
 
+  async writeOutput(_data: string): Promise<void> {
+    // No-op for PTY-backed terminal; output only comes from the shell process.
+    // To stream external logs into the desktop terminal a new WebSocket message
+    // type would be needed. Skipped for now per desktop-out-of-scope policy.
+  }
+
   async disconnect(): Promise<void> {
     if (this.terminalId && this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(

@@ -6,7 +6,12 @@ import type {
   BuildProgressCallback,
   IBundler,
 } from "../types/build.types";
-import { virtualFsPlugin, npmCdnPlugin, aliasPlugin } from "./plugins";
+import {
+  virtualFsPlugin,
+  npmCdnPlugin,
+  aliasPlugin,
+  stripTailwindDirectives,
+} from "./plugins";
 import {
   readPackageJson,
   extractDependencyVersions,
@@ -74,13 +79,26 @@ export class Bundler implements IBundler {
     if (aliases.length > 0) {
       plugins.push(aliasPlugin(aliases));
     }
-    plugins.push(virtualFsPlugin(this.fs));
+    plugins.push(
+      virtualFsPlugin(this.fs, {
+        cssTransform: config.tailwindStrip ? stripTailwindDirectives : undefined,
+      }),
+    );
     if (config.npmResolution === "cdn") {
       const allowList = Object.keys(versions);
       plugins.push(npmCdnPlugin(config.cdnUrl, versions, allowList));
     }
 
     onProgress?.("bundle", 50);
+
+    // For Angular projects we externalize ALL @angular/* — including subpaths
+    // like @angular/common/http — plus rxjs + tslib (peers of @angular/core).
+    // The app and the compiler facade then share a single Angular/rxjs
+    // instance at runtime via an importmap in the preview HTML. Without this
+    // we see NG0200 / NullInjectorError because two copies of @angular/core
+    // (one bundled, one from esm.sh) load side by side and DI can't match.
+    const angularExternals =
+      framework === "angular" ? ["@angular/*", "rxjs", "rxjs/*", "tslib"] : [];
 
     let result: esbuild.BuildResult;
     try {
@@ -108,6 +126,7 @@ export class Bundler implements IBundler {
         sourcemap: config.sourcemap ? "inline" : false,
         write: false,
         outdir: config.outDir,
+        external: angularExternals,
         plugins,
         logLevel: "silent",
       });

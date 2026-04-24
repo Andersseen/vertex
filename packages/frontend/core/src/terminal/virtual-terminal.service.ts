@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { TerminalBackendAdapter } from './terminal-backend-adapter';
 import { RuntimeService } from '../services/runtime.service';
 import { Bundler } from '@vertex/runtime/build';
@@ -7,7 +7,7 @@ import { readPackageJson, detectEntryPoint } from '@vertex/runtime/build';
 
 @Injectable({ providedIn: 'root' })
 export class VirtualTerminalService implements TerminalBackendAdapter {
-  private dataSubject = new Subject<string>();
+  private dataSubject = new ReplaySubject<string>(500);
   readonly onData$ = this.dataSubject.asObservable();
 
   private runtime = inject(RuntimeService);
@@ -48,6 +48,10 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
 
   async resize(_cols: number, _rows: number): Promise<void> {
     // No-op for virtual shell
+  }
+
+  async writeOutput(data: string): Promise<void> {
+    this.dataSubject.next(data);
   }
 
   async disconnect(): Promise<void> {

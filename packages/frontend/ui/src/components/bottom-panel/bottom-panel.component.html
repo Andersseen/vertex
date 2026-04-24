@@ -62,12 +62,10 @@
         </div>
       }
 
-      <!-- Terminal Tab -->
-      @if (activeTab() === 'Terminal') {
-        <div class="bottom-panel__terminal">
-          <v-terminal-panel [workingDirectory]="workspacePath()"></v-terminal-panel>
-        </div>
-      }
+      <!-- Terminal Tab (always mounted so logs are never lost) -->
+      <div class="bottom-panel__terminal" [class.bottom-panel__terminal--hidden]="activeTab() !== 'Terminal'">
+        <v-terminal-panel [workingDirectory]="workspacePath()"></v-terminal-panel>
+      </div>
     </div>
   </v-ide-tabs>
 </div>

@@ -14,14 +14,27 @@ const runtimeSrc = path.resolve(__dirname, '../../packages/frontend/runtime/src'
 // never sees them. Without this, AnalogJS's Angular compiler produces empty
 // output for TypeScript files that have no Angular decorators.
 const RUNTIME_SUBPATHS: Record<string, string> = {
-  '@vertex/runtime/preview': path.join(runtimeSrc, 'preview/index.ts'),
   '@vertex/runtime/build': path.join(runtimeSrc, 'build/index.ts'),
+  '@vertex/runtime/deploy': path.join(runtimeSrc, 'deploy/index.ts'),
+  '@vertex/runtime/preview-wc-headless': path.join(runtimeSrc, 'preview-wc-headless/index.ts'),
+  '@vertex/runtime/preview-wc': path.join(runtimeSrc, 'preview-wc/index.ts'),
+};
+
+const COOP_COEP_HEADERS = {
+  'Cross-Origin-Embedder-Policy': 'credentialless',
+  'Cross-Origin-Opener-Policy': 'same-origin',
 };
 
 export default defineConfig(({ mode }) => ({
   root: __dirname,
   build: {
     target: ['es2022'],
+  },
+  server: {
+    headers: COOP_COEP_HEADERS,
+  },
+  preview: {
+    headers: COOP_COEP_HEADERS,
   },
   resolve: {
     alias: [
@@ -86,7 +99,9 @@ export default defineConfig(({ mode }) => ({
           format: 'esm',
           platform: 'browser',
           target: 'es2022',
-          // Keep large external packages out of the inline bundle
+          // Keep large external packages out of the inline bundle.
+          // @webcontainer/api is bundled inline so the virtual module is self-contained
+          // and Vite's import-analysis never has to resolve a bare specifier from a virtual ID.
           external: ['esbuild-wasm', 'isomorphic-git', '@isomorphic-git/*'],
           logLevel: 'silent',
         });

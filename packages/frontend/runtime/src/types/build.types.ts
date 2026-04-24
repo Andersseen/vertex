@@ -5,9 +5,14 @@ export interface BuildConfig {
   target: 'browser' | 'node' | 'worker'
   minify: boolean
   sourcemap: boolean
-  npmResolution: 'cdn' | 'nodebox'
+  npmResolution: 'cdn'
   cdnUrl: string
   tsconfig?: string
+  /**
+   * When true, Tailwind directives (@tailwind, @apply, @import "tailwindcss")
+   * are stripped from CSS so the preview can rely on the Tailwind CDN.
+   */
+  tailwindStrip?: boolean
 }
 
 export interface BuildOutputFile {
