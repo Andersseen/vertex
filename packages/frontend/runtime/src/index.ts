@@ -32,30 +32,15 @@ export type {
   IBundler,
 } from './types/build.types'
 
-// Preview types. Two implementations behind separate subpaths:
-//   - Lightweight (esbuild-wasm + Service Worker):
-//       import { PreviewLiteManager } from '@vertex/runtime/preview-lite'
-//   - Full Node dev-server (Nodebox):
-//       import { PreviewNodeManager } from '@vertex/runtime/preview-node'
+// Preview types.
+// WebContainers preview is behind separate subpaths:
+//   import { WebContainerRunner }  from '@vertex/runtime/preview-wc-headless'
+//   import { WebContainerPreview } from '@vertex/runtime/preview-wc'
 export type {
   PreviewConfig,
   PreviewSession,
   IPreviewManager,
-  SWMessage,
-  SWResponse,
-  PreviewNodeConfig,
-  PreviewNodePhase,
 } from './types/preview.types'
-
-// Node runtime types (no class exports — import NodeboxRuntime from '@vertex/runtime/node')
-export type {
-  INodeRuntime,
-  NodeRuntimeOptions,
-  NpmInstallOptions,
-  ScriptRunOptions,
-  DevServerInfo,
-  TerminalAdapter,
-} from './types/node.types'
 
 // Deploy types (no class exports — import DeployManager from '@vertex/runtime/deploy')
 export type {

@@ -23,17 +23,9 @@
       "import": "./src/build/index.ts",
       "types": "./src/build/index.ts"
     },
-    "./preview-lite": {
-      "import": "./src/preview-lite/index.ts",
-      "types": "./src/preview-lite/index.ts"
-    },
-    "./preview-node": {
-      "import": "./src/preview-node/index.ts",
-      "types": "./src/preview-node/index.ts"
-    },
-    "./node": {
-      "import": "./src/node/index.ts",
-      "types": "./src/node/index.ts"
+    "./preview-wc-headless": {
+      "import": "./src/preview-wc-headless/index.ts",
+      "types": "./src/preview-wc-headless/index.ts"
     },
     "./deploy": {
       "import": "./src/deploy/index.ts",
@@ -68,8 +60,8 @@
   "author": "Andrii Pap",
   "license": "MIT",
   "dependencies": {
-    "@codesandbox/nodebox": "^0.1.9",
     "@isomorphic-git/lightning-fs": "^4.6.2",
+    "@webcontainer/api": "^1.6.4",
     "esbuild-wasm": "^0.28.0",
     "isomorphic-git": "^1.37.5"
   },
@@ -85,9 +77,17 @@
     "sass": ">=1.70.0"
   },
   "peerDependenciesMeta": {
-    "eslint": { "optional": true },
-    "prettier": { "optional": true },
-    "postcss": { "optional": true },
-    "sass": { "optional": true }
+    "eslint": {
+      "optional": true
+    },
+    "prettier": {
+      "optional": true
+    },
+    "postcss": {
+      "optional": true
+    },
+    "sass": {
+      "optional": true
+    }
   }
 }

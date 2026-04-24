@@ -16,5 +16,5 @@
     "allowImportingTsExtensions": false
   },
   "include": ["src/**/*"],
-  "exclude": ["tests", "dist", "node_modules", "src/preview-lite/service-worker/sw.ts"]
+  "exclude": ["tests", "dist", "node_modules"]
 }

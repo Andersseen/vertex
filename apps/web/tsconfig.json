@@ -22,9 +22,7 @@
       "@vertex/types": ["../../packages/frontend/types/src/index.ts"],
       "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"],
       "@vertex/runtime/build": ["../../packages/frontend/runtime/src/build/index.ts"],
-      "@vertex/runtime/preview-lite": ["../../packages/frontend/runtime/src/preview-lite/index.ts"],
-      "@vertex/runtime/preview-node": ["../../packages/frontend/runtime/src/preview-node/index.ts"],
-      "@vertex/runtime/node": ["../../packages/frontend/runtime/src/node/index.ts"],
+      "@vertex/runtime/preview-wc-headless": ["../../packages/frontend/runtime/src/preview-wc-headless/index.ts"],
       "@vertex/ide-ui": ["../../packages/frontend/ide-ui/src/index.ts"]
     }
   },

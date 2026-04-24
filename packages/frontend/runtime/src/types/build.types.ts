@@ -5,7 +5,7 @@ export interface BuildConfig {
   target: 'browser' | 'node' | 'worker'
   minify: boolean
   sourcemap: boolean
-  npmResolution: 'cdn' | 'nodebox'
+  npmResolution: 'cdn'
   cdnUrl: string
   tsconfig?: string
   /**
