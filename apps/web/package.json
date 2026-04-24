@@ -47,6 +47,7 @@
     "@vertex/runtime": "*",
     "@vertex/types": "*",
     "@vertex/ui": "*",
+    "@webcontainer/api": "^1.6.4",
     "buffer": "^6.0.3",
     "codemirror": "^6.0.2",
     "isomorphic-git": "^1.37.5",

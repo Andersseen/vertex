@@ -99,8 +99,10 @@ export default defineConfig(({ mode }) => ({
           format: 'esm',
           platform: 'browser',
           target: 'es2022',
-          // Keep large external packages out of the inline bundle
-          external: ['esbuild-wasm', 'isomorphic-git', '@isomorphic-git/*', '@webcontainer/api'],
+          // Keep large external packages out of the inline bundle.
+          // @webcontainer/api is bundled inline so the virtual module is self-contained
+          // and Vite's import-analysis never has to resolve a bare specifier from a virtual ID.
+          external: ['esbuild-wasm', 'isomorphic-git', '@isomorphic-git/*'],
           logLevel: 'silent',
         });
 
