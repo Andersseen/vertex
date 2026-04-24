@@ -17,6 +17,7 @@ const RUNTIME_SUBPATHS: Record<string, string> = {
   '@vertex/runtime/build': path.join(runtimeSrc, 'build/index.ts'),
   '@vertex/runtime/deploy': path.join(runtimeSrc, 'deploy/index.ts'),
   '@vertex/runtime/preview-wc-headless': path.join(runtimeSrc, 'preview-wc-headless/index.ts'),
+  '@vertex/runtime/preview-wc': path.join(runtimeSrc, 'preview-wc/index.ts'),
 };
 
 export default defineConfig(({ mode }) => ({

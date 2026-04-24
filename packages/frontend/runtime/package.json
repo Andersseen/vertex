@@ -27,6 +27,10 @@
       "import": "./src/preview-wc-headless/index.ts",
       "types": "./src/preview-wc-headless/index.ts"
     },
+    "./preview-wc": {
+      "import": "./src/preview-wc/index.ts",
+      "types": "./src/preview-wc/index.ts"
+    },
     "./deploy": {
       "import": "./src/deploy/index.ts",
       "types": "./src/deploy/index.ts"

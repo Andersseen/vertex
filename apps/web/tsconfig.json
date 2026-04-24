@@ -23,6 +23,7 @@
       "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"],
       "@vertex/runtime/build": ["../../packages/frontend/runtime/src/build/index.ts"],
       "@vertex/runtime/preview-wc-headless": ["../../packages/frontend/runtime/src/preview-wc-headless/index.ts"],
+      "@vertex/runtime/preview-wc": ["../../packages/frontend/runtime/src/preview-wc/index.ts"],
       "@vertex/ide-ui": ["../../packages/frontend/ide-ui/src/index.ts"]
     }
   },
