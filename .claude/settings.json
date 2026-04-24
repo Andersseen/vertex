@@ -53,7 +53,10 @@
       "Bash(bun --cwd apps/web lint)",
       "WebFetch(domain:sebastianwessel.github.io)",
       "WebFetch(domain:userland.tech)",
-      "Bash(xargs -I{} cat {})"
+      "Bash(xargs -I{} cat {})",
+      "Bash(bun --cwd packages/frontend/runtime run build)",
+      "Bash(bun build.ts)",
+      "Bash(npm pack *)"
     ]
   }
 }

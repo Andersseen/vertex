@@ -1,0 +1,7 @@
+# Dev-only files not needed in the published package
+*.spec.ts
+__tests__/
+*.test.ts
+build.ts
+tsconfig*.json
+*.tgz
