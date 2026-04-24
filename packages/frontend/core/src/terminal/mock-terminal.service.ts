@@ -35,6 +35,11 @@ export class MockTerminalService implements TerminalBackendAdapter {
     return Promise.resolve();
   }
 
+  async writeOutput(_data: string): Promise<void> {
+    // No-op in mock mode
+    return Promise.resolve();
+  }
+
   async disconnect(): Promise<void> {
     // No-op in web mode
     return Promise.resolve();

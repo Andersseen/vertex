@@ -26,6 +26,12 @@ export interface TerminalBackendAdapter {
   disconnect(): Promise<void>;
 
   /**
+   * Write output text directly to the terminal display
+   * (bypasses command input processing; used for streaming logs)
+   */
+  writeOutput(data: string): Promise<void>;
+
+  /**
    * Resize the backend PTY
    */
   resize(cols: number, rows: number): Promise<void>;

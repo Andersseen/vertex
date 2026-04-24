@@ -50,6 +50,10 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
     // No-op for virtual shell
   }
 
+  async writeOutput(data: string): Promise<void> {
+    this.dataSubject.next(data);
+  }
+
   async disconnect(): Promise<void> {
     this.ready = false;
     this.inputBuffer = '';
