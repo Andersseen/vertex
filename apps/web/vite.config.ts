@@ -20,10 +20,21 @@ const RUNTIME_SUBPATHS: Record<string, string> = {
   '@vertex/runtime/preview-wc': path.join(runtimeSrc, 'preview-wc/index.ts'),
 };
 
+const COOP_COEP_HEADERS = {
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+};
+
 export default defineConfig(({ mode }) => ({
   root: __dirname,
   build: {
     target: ['es2022'],
+  },
+  server: {
+    headers: COOP_COEP_HEADERS,
+  },
+  preview: {
+    headers: COOP_COEP_HEADERS,
   },
   resolve: {
     alias: [
@@ -89,7 +100,7 @@ export default defineConfig(({ mode }) => ({
           platform: 'browser',
           target: 'es2022',
           // Keep large external packages out of the inline bundle
-          external: ['esbuild-wasm', 'isomorphic-git', '@isomorphic-git/*'],
+          external: ['esbuild-wasm', 'isomorphic-git', '@isomorphic-git/*', '@webcontainer/api'],
           logLevel: 'silent',
         });
 
