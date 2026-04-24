@@ -50,7 +50,9 @@
       "Bash(bun lint *)",
       "Bash(bun --cwd packages/frontend/runtime test)",
       "Bash(bun check-types *)",
-      "Bash(bun --cwd apps/web lint)"
+      "Bash(bun --cwd apps/web lint)",
+      "WebFetch(domain:sebastianwessel.github.io)",
+      "WebFetch(domain:userland.tech)"
     ]
   }
 }
