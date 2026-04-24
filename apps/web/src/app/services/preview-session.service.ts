@@ -141,10 +141,9 @@ export class PreviewSessionService {
 
   private async writeToTerminal(data: string): Promise<void> {
     try {
-      console.log('[PreviewSession] writing to terminal, length:', data.length);
       await this.terminalBackend.writeOutput(data);
-    } catch (err) {
-      console.error('[PreviewSession] writeToTerminal failed:', err);
+    } catch {
+      // Terminal may not be ready yet; ignore.
     }
   }
 
