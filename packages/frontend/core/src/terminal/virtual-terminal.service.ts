@@ -51,6 +51,7 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
   }
 
   async writeOutput(data: string): Promise<void> {
+    console.log('[VirtualTerminal] writeOutput called, subscribers:', this.dataSubject.observed, 'data length:', data.length);
     this.dataSubject.next(data);
   }
 

@@ -80,13 +80,11 @@ export class PreviewSessionService {
   }
 
   /**
-   * Re-attach a fresh iframe (e.g. after the panel was hidden then shown).
+   * Register a fresh iframe reference (e.g. after the panel was hidden then shown).
+   * The caller is responsible for binding the URL via Angular [src].
    */
-  attach(iframe: HTMLIFrameElement): void {
+  registerIframe(iframe: HTMLIFrameElement): void {
     this.currentIframe = iframe;
-    if (this.session && this.isRunning()) {
-      iframe.src = this.session.url;
-    }
   }
 
   /**
@@ -107,6 +105,13 @@ export class PreviewSessionService {
    */
   reload(): void {
     this.currentIframe?.contentWindow?.location.reload();
+  }
+
+  /**
+   * Get the current preview URL (useful for binding [src] on remount).
+   */
+  getUrl(): string | null {
+    return this.session?.url ?? null;
   }
 
   /**
@@ -136,9 +141,10 @@ export class PreviewSessionService {
 
   private async writeToTerminal(data: string): Promise<void> {
     try {
+      console.log('[PreviewSession] writing to terminal, length:', data.length);
       await this.terminalBackend.writeOutput(data);
-    } catch {
-      // Terminal may not be ready yet; ignore.
+    } catch (err) {
+      console.error('[PreviewSession] writeToTerminal failed:', err);
     }
   }
 

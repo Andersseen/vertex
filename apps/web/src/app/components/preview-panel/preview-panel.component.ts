@@ -339,7 +339,11 @@ export class PreviewPanelComponent implements AfterViewInit, OnDestroy {
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly session = inject(PreviewSessionService);
 
-  readonly safePreviewUrl = signal<SafeResourceUrl>('about:blank');
+  readonly safePreviewUrl = signal<SafeResourceUrl>(
+    this.session.previewUrl()
+      ? this.sanitizer.bypassSecurityTrustResourceUrl(this.session.previewUrl())
+      : 'about:blank',
+  );
 
   /** Steps enriched with status for the template. */
   readonly steps = signal(
@@ -374,9 +378,9 @@ export class PreviewPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // If a session is already running, re-attach the fresh iframe
-    if (this.session.isRunning() && this.frameRef) {
-      this.session.attach(this.frameRef.nativeElement);
+    // Register the fresh iframe so the service can reload / fullscreen it
+    if (this.frameRef) {
+      this.session.registerIframe(this.frameRef.nativeElement);
     }
   }
 
