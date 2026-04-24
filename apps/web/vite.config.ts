@@ -21,7 +21,7 @@ const RUNTIME_SUBPATHS: Record<string, string> = {
 };
 
 const COOP_COEP_HEADERS = {
-  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Embedder-Policy': 'credentialless',
   'Cross-Origin-Opener-Policy': 'same-origin',
 };
 
