@@ -26,9 +26,30 @@ const DEMO_TREE: VertexFolder = {
       path: '/src',
       isExpanded: true,
       children: [
-        { id: 'app-ts', name: 'app.ts', path: '/src/app.ts', content: '', language: 'typescript', isDirty: false },
-        { id: 'app-scss', name: 'app.scss', path: '/src/app.scss', content: '', language: 'scss', isDirty: false },
-        { id: 'config', name: 'config.json', path: '/src/config.json', content: '', language: 'json', isDirty: false },
+        {
+          id: 'app-ts',
+          name: 'app.ts',
+          path: '/src/app.ts',
+          content: '',
+          language: 'typescript',
+          isDirty: false,
+        },
+        {
+          id: 'app-scss',
+          name: 'app.scss',
+          path: '/src/app.scss',
+          content: '',
+          language: 'scss',
+          isDirty: false,
+        },
+        {
+          id: 'config',
+          name: 'config.json',
+          path: '/src/config.json',
+          content: '',
+          language: 'json',
+          isDirty: false,
+        },
       ],
     },
     {
@@ -38,8 +59,22 @@ const DEMO_TREE: VertexFolder = {
       isExpanded: false,
       children: [],
     },
-    { id: 'readme', name: 'README.md', path: '/README.md', content: '', language: 'md', isDirty: false },
-    { id: 'pkg', name: 'package.json', path: '/package.json', content: '', language: 'json', isDirty: false },
+    {
+      id: 'readme',
+      name: 'README.md',
+      path: '/README.md',
+      content: '',
+      language: 'md',
+      isDirty: false,
+    },
+    {
+      id: 'pkg',
+      name: 'package.json',
+      path: '/package.json',
+      content: '',
+      language: 'json',
+      isDirty: false,
+    },
   ],
 };
 

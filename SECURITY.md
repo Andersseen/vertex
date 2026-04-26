@@ -162,9 +162,10 @@ Before deploying to production:
 If you discover a security vulnerability:
 
 1. **DO NOT** open a public issue
-2. Email security concerns to: [your-security-email@example.com]
-3. Provide detailed description and reproduction steps
-4. Allow time for patch before public disclosure
+2. Open a private GitHub Security Advisory draft in this repository
+3. If advisories are unavailable, contact the maintainers through GitHub with a private report
+4. Provide detailed impact, reproduction steps, and proposed mitigations (if available)
+5. Allow time for a patch before public disclosure
 
 ## Security Updates
 

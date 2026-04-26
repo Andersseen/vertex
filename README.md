@@ -1,81 +1,97 @@
 # Vertex
 
-A modern IDE built with Tauri, Angular, and CodeMirror 6.
+Vertex is an open source IDE platform built with Angular, Tauri, Bun, and CodeMirror 6.
 
-## Quick Install - Vertex Editor Web Component
+It contains:
 
-Install the standalone web component to any project:
+- A desktop IDE app (Tauri + Angular)
+- A web app
+- A reusable web editor package
+- Frontend and backend packages in a Bun/Turbo monorepo
+
+## Status
+
+Active development.
+
+## Monorepo Layout
+
+```text
+apps/
+  desktop/           # Tauri desktop app
+  web/               # Analog/Angular web app
+  web-editor-demo/   # Demo app for web editor
+packages/
+  frontend/
+    core/
+    ide-ui/
+    runtime/
+    types/
+    ui/
+    web-editor/
+  backend/
+    sidecar/
+    terminal/
+scripts/
+```
+
+## Requirements
+
+- Bun 1.3.11+
+- Node.js 18+
+- Rust toolchain (for Tauri desktop development)
+
+## Quick Start
 
 ```bash
-# One-liner installation
+bun install
+bun run dev
+```
+
+Useful commands:
+
+```bash
+bun run lint
+bun run check-types
+bun test
+bun run build
+```
+
+## Web Editor One-Liner Install
+
+Install the standalone web component into any project:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
 ```
 
-Then use it in your HTML:
+Basic usage:
+
 ```html
 <script src="web-editor.min.js"></script>
-<vertex-editor 
-  value="const x = 1;" 
+<vertex-editor
+  value="const x = 1;"
   language="typescript"
   theme="dark"
 ></vertex-editor>
 ```
 
-## Installation Methods
+More details: [packages/frontend/web-editor/README.md](packages/frontend/web-editor/README.md)
 
-### 1. curl + node (Recommended)
-```bash
-curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
-```
+## Documentation
 
-### 2. Download and run
-```bash
-curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs
-node install.mjs ./public
-```
+- Main web app docs: [apps/web/README.md](apps/web/README.md)
+- Desktop app docs: [apps/desktop/README.md](apps/desktop/README.md)
+- Runtime docs: [packages/frontend/runtime/README.md](packages/frontend/runtime/README.md)
+- Preview WC docs: [docs/preview-wc/README.md](docs/preview-wc/README.md)
 
-### 3. Clone and build locally
-```bash
-git clone https://github.com/andersseen/vertex.git
-cd vertex/packages/frontend/web-editor
-npm install
-npm run build
-node ../../scripts/install.mjs ~/my-project/public --local
-```
+## Open Source Project Policies
 
-## Project Structure
-
-```
-vertex/
-├── apps/
-│   └── desktop/          # Tauri desktop app
-├── packages/
-│   ├── frontend/
-│   │   └── web-editor/   # Standalone web component
-│   └── backend/
-└── scripts/
-    └── install.mjs       # CLI installer
-```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Build web-editor
-cd packages/frontend/web-editor
-npm run build
-
-# Run desktop app
-cd apps/desktop
-npm run tauri dev
-```
-
-## Web Component Documentation
-
-See [packages/frontend/web-editor/README.md](./packages/frontend/web-editor/README.md) for full API documentation and examples.
+- Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Support guide: [SUPPORT.md](SUPPORT.md)
+- License: [LICENSE](LICENSE)
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).
