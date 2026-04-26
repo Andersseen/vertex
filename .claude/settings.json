@@ -56,7 +56,15 @@
       "Bash(xargs -I{} cat {})",
       "Bash(bun --cwd packages/frontend/runtime run build)",
       "Bash(bun build.ts)",
-      "Bash(npm pack *)"
+      "Bash(npm pack *)",
+      "Bash(npm show *)",
+      "Read(//private/tmp/**)",
+      "Bash(tar -tzf quartz-headless-0.0.1.tgz)",
+      "Bash(tar -xzf quartz-headless-0.0.1.tgz package/types/quartz-headless.d.ts)",
+      "Read(//tmp/package/fesm2022/**)",
+      "Bash(tar -xzf quartz-headless-0.0.1.tgz)",
+      "Bash(bun --cwd packages/frontend/ide-ui check-types)",
+      "Bash(bun --cwd packages/frontend/ui check-types)"
     ]
   }
 }

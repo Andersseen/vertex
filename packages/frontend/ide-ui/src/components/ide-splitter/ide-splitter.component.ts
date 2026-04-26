@@ -9,8 +9,8 @@ import {
   SplitterContainerDirective,
   SplitterHandleDirective,
   SplitterPanelDirective,
-} from "../../primitives/splitter";
-import type { SplitterOrientation } from "../../primitives/splitter";
+} from "quartz-headless";
+import type { SplitterOrientation } from "quartz-headless";
 
 function readStoredPosition(key: string | null, fallback: number): number {
   if (!key) return fallback;
@@ -36,22 +36,22 @@ function readStoredPosition(key: string | null, fallback: number): number {
   template: `
     <div
       class="ide-splitter"
-      vSplitterContainer
+      qzSplitterContainer
       [orientation]="orientation()"
       [defaultPosition]="initialPosition()"
       [minSize]="minSize()"
       [maxSize]="maxSize()"
       (positionChange)="onPositionChange($event)"
     >
-      <div class="ide-splitter__panel" vSplitterPanel>
+      <div class="ide-splitter__panel" qzSplitterPanel>
         <ng-content select="[splitterStart]" />
       </div>
 
-      <div class="ide-splitter__handle" vSplitterHandle>
+      <div class="ide-splitter__handle" qzSplitterHandle>
         <span class="ide-splitter__handle-bar" aria-hidden="true"></span>
       </div>
 
-      <div class="ide-splitter__panel" [vSplitterPanel]="false">
+      <div class="ide-splitter__panel" [qzSplitterPanel]="false">
         <ng-content select="[splitterEnd]" />
       </div>
     </div>
