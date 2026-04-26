@@ -74,10 +74,11 @@ ESLint enforces `v-` prefix (components, kebab-case) and `v` prefix (directives,
 ## Tech stack
 
 **Frontend:**
-- Angular 21, **zoneless** (`provideZonelessChangeDetection()`), signals
+- Angular 21, **zoneless** (`provideZonelessChangeDetection()`), signals — see [`ANGULAR_USAGE.md`](./ANGULAR_USAGE.md) for patterns and best practices
+- Analog.js (`@analogjs/platform` + `@analogjs/router`) — file-based routing in `apps/web/src/app/routes/` — see [`ANALOGJS_USAGE.md`](./ANALOGJS_USAGE.md) for conventions
 - CodeMirror 6 (editor), xterm.js (terminal)
-- `@andersseen/headless-components` — headless logic for ide-ui
-- Quartz UI (`/Users/andriipap/Andersseen/Web/Projects/quartz/`) — custom Angular headless directives, shadcn-style (not on npm, copy into `src/primitives/`). Modules: splitter, dialog, drag-drop, overlay, toast, tooltip, listbox
+- `@andersseen/headless-components` — headless factory-pattern logic (createButton, createModal, createTabs) for ide-ui
+- `quartz-headless` (npm) — Angular headless directives: splitter, tree, overlay, toast, tooltip, drag-drop, virtual-scroll, viewport
 - CSS custom properties for all theming (`--ide-*` tokens in ide-ui)
 - No Tailwind, no PrimeNG
 
@@ -117,9 +118,10 @@ apps/web (Angular app)
   └── git/   → GitClient (isomorphic-git wrapper)
 
 @vertex/ide-ui
-  ├── components/             → v-ide-button, v-ide-tabs, v-ide-dialog, v-ide-input, v-ide-layout,
-  │                              v-ide-progress-bar, v-ide-splitter, v-ide-toolbar, v-ide-tree, v-ide-alert
-  └── primitives/splitter/    → copied from Quartz (do not change directory structure)
+  └── components/             → v-ide-navbar, v-ide-button, v-ide-tabs, v-ide-dialog, v-ide-input,
+                                 v-ide-layout, v-ide-progress-bar, v-ide-splitter, v-ide-toolbar,
+                                 v-ide-tree, v-ide-alert
+                                 (splitter + tree backed by quartz-headless npm package)
 
 @vertex/web-editor (Angular Element, publishable as web component)
   ├── web-editor.component.ts      → <vertex-editor> (full web component)
@@ -164,9 +166,11 @@ Keep components small. Template >80 lines or class >100 lines → split it.
 ## ide-ui rules
 
 - All styles via CSS custom properties (`var(--ide-*)`), never hardcoded values.
-- For complex interactive logic (modal, tabs, splitter): use a primitive from `@andersseen/headless-components` or Quartz.
-- To add a new Quartz primitive: copy the module from `/Users/andriipap/Andersseen/Web/Projects/quartz/packages/quartz/src/lib/<module>/` into `packages/frontend/ide-ui/src/primitives/<module>/`.
+- For complex interactive logic (splitter, tree, overlay, toast, tooltip, drag-drop): import from `quartz-headless` npm package.
+- For button/tabs/modal headless logic: use `@andersseen/headless-components` (factory-pattern API).
 - Export everything from `packages/frontend/ide-ui/src/index.ts`.
+
+Current components: `v-ide-navbar`, `v-ide-button`, `v-ide-tabs`, `v-ide-dialog`, `v-ide-input`, `v-ide-layout`, `v-ide-progress-bar`, `v-ide-splitter`, `v-ide-toolbar`, `v-ide-tree`, `v-ide-alert`.
 
 ---
 
