@@ -88,7 +88,11 @@ export class DemosComponent {
     folder.isExpanded = !folder.isExpanded;
     this.expandedFolders.update((set) => {
       const next = new Set(set);
-      folder.isExpanded ? next.add(folder.id) : next.delete(folder.id);
+      if (folder.isExpanded) {
+        next.add(folder.id);
+      } else {
+        next.delete(folder.id);
+      }
       return next;
     });
   }

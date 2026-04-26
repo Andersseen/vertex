@@ -5,8 +5,6 @@ import analog from '@analogjs/platform';
 import path from 'node:path';
 import { build as esbuildBundle, stop as esbuildStop } from 'esbuild';
 
-let esbuildRefCount = 0;
-
 const runtimeSrc = path.resolve(__dirname, '../../packages/frontend/runtime/src');
 
 // Subpath → entry point map.
@@ -25,7 +23,7 @@ const COOP_COEP_HEADERS = {
   'Cross-Origin-Opener-Policy': 'same-origin',
 };
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   root: __dirname,
   build: {
     target: ['es2022'],
@@ -90,7 +88,6 @@ export default defineConfig(({ mode }) => ({
         const entry = RUNTIME_SUBPATHS[subpath];
         if (!entry) return;
 
-        esbuildRefCount++;
         // Bundle the subpath with plain esbuild — bypasses Angular's compiler
         const result = await esbuildBundle({
           entryPoints: [entry],
@@ -111,7 +108,6 @@ export default defineConfig(({ mode }) => ({
 
       closeBundle() {
         esbuildStop();
-        esbuildRefCount = 0;
       },
     },
     analog({
