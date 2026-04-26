@@ -51,6 +51,18 @@
     gap: $spacing-4;
   }
 
+  &__link {
+    color: $surface-400;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: $surface-0;
+    }
+  }
+
   &__github {
     color: $surface-400;
     display: flex;

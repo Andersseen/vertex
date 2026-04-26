@@ -1,0 +1,175 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--ide-bg-base, #0d0d0d);
+  overflow: hidden;
+}
+
+// ─── Navbar slots ────────────────────────────────────────────────────────────
+
+.demos-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ide-text-primary, #f5f5f5);
+
+  svg {
+    color: var(--ide-accent, #7c3aed);
+  }
+}
+
+.demos-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ide-text-secondary, #a0a0a0);
+    text-decoration: none;
+    transition: background-color 80ms ease, color 80ms ease;
+
+    &:hover {
+      background-color: var(--ide-bg-hover, #1a1a1a);
+      color: var(--ide-text-primary, #f5f5f5);
+    }
+
+    &--active {
+      background-color: var(--ide-bg-selected, #1e1e1e);
+      color: var(--ide-text-primary, #f5f5f5);
+    }
+  }
+}
+
+// ─── Main layout ─────────────────────────────────────────────────────────────
+
+.demos-main {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 40px 48px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+.demos-header {
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ide-text-primary, #f5f5f5);
+    margin: 0 0 8px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: var(--ide-text-muted, #666);
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+// ─── Section ─────────────────────────────────────────────────────────────────
+
+.demos-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ide-text-primary, #f5f5f5);
+    margin: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ide-border, #222);
+  }
+
+  &__desc {
+    font-size: 13px;
+    color: var(--ide-text-muted, #666);
+    margin: 0;
+    line-height: 1.5;
+
+    code {
+      font-family: var(--ide-font-mono, monospace);
+      font-size: 12px;
+      background: var(--ide-bg-surface, #111);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--ide-accent, #7c3aed);
+    }
+  }
+}
+
+// ─── Preview cards ───────────────────────────────────────────────────────────
+
+.demos-preview {
+  background-color: var(--ide-bg-surface, #111);
+  border: 1px solid var(--ide-border, #222);
+  border-radius: 8px;
+  padding: 20px;
+
+  &--row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &--col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &--fill {
+    height: 200px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  &--tree {
+    max-height: 280px;
+    overflow: auto;
+  }
+}
+
+// ─── Tab content placeholder ──────────────────────────────────────────────────
+
+.demos-tab-content {
+  display: block;
+  padding: 12px 0 4px;
+  font-size: 13px;
+  color: var(--ide-text-muted, #666);
+}
+
+// ─── Splitter panes ───────────────────────────────────────────────────────────
+
+.demos-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 13px;
+  color: var(--ide-text-muted, #666);
+
+  &--left {
+    background-color: var(--ide-bg-hover, #161616);
+  }
+
+  &--right {
+    background-color: var(--ide-bg-surface, #111);
+  }
+}

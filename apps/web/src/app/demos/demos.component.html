@@ -1,0 +1,147 @@
+<v-ide-navbar>
+  <div navStart class="demos-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="16 18 22 12 16 6"/>
+      <polyline points="8 6 2 12 8 18"/>
+    </svg>
+    <span>Vertex IDE</span>
+  </div>
+  <div navCenter class="demos-nav">
+    <a class="demos-nav__link" routerLink="/editor" routerLinkActive="demos-nav__link--active">
+      Editor
+    </a>
+    <a class="demos-nav__link" routerLink="/demos" routerLinkActive="demos-nav__link--active">
+      Components
+    </a>
+  </div>
+</v-ide-navbar>
+
+<main class="demos-main">
+  <header class="demos-header">
+    <h1 class="demos-header__title">IDE UI Components</h1>
+    <p class="demos-header__subtitle">
+      Headless component library for the IDE — CSS custom properties, no Tailwind, no PrimeNG.
+    </p>
+  </header>
+
+  <!-- Buttons -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Button</h2>
+    <p class="demos-section__desc">Three variants: <code>default</code>, <code>ghost</code>, and <code>accent</code>. Supports loading and disabled states.</p>
+    <div class="demos-preview demos-preview--row">
+      <v-ide-button>Default</v-ide-button>
+      <v-ide-button variant="ghost">Ghost</v-ide-button>
+      <v-ide-button variant="accent">Accent</v-ide-button>
+      <v-ide-button [loading]="true">Loading</v-ide-button>
+      <v-ide-button [disabled]="true">Disabled</v-ide-button>
+    </div>
+  </section>
+
+  <!-- Input -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Input</h2>
+    <p class="demos-section__desc">Text field with label, placeholder, and disabled state.</p>
+    <div class="demos-preview demos-preview--col">
+      <v-ide-input label="File name" placeholder="app.ts" [value]="inputValue()" (valueChange)="inputValue.set($event)" />
+      <v-ide-input placeholder="No label" />
+      <v-ide-input label="Disabled" placeholder="Not editable" [disabled]="true" />
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Tabs</h2>
+    <p class="demos-section__desc">Horizontal tabs with disabled support. The "Disabled" tab cannot be selected.</p>
+    <div class="demos-preview">
+      <v-ide-tabs
+        [tabsData]="tabs"
+        [defaultValue]="activeTab()"
+        (valueChange)="onTabChange($event)"
+      >
+        @switch (activeTab()) {
+          @case ('tab-overview') { <span class="demos-tab-content">Overview content</span> }
+          @case ('tab-config') { <span class="demos-tab-content">Configuration content</span> }
+          @case ('tab-output') { <span class="demos-tab-content">Process output...</span> }
+        }
+      </v-ide-tabs>
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Alert</h2>
+    <p class="demos-section__desc">Four severity levels. The last one is dismissible.</p>
+    <div class="demos-preview demos-preview--col">
+      <v-ide-alert severity="info" text="The repository is being cloned..." />
+      <v-ide-alert severity="success" text="Project ready to use." />
+      <v-ide-alert severity="warning" text="This file has unsaved changes." />
+      <v-ide-alert severity="error" text="Could not connect to the server." [dismissible]="true" />
+    </div>
+  </section>
+
+  <!-- Progress Bar -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Progress Bar</h2>
+    <p class="demos-section__desc">Progress bar with a value between 0 and 100.</p>
+    <div class="demos-preview demos-preview--col">
+      <v-ide-progress-bar [value]="progress()" />
+      <div class="demos-preview--row" style="gap: 8px; margin-top: 8px;">
+        <v-ide-button variant="ghost" (clicked)="decreaseProgress()">− 10%</v-ide-button>
+        <span style="color: var(--ide-text-muted); font-size: 13px; line-height: 28px;">{{ progress() }}%</span>
+        <v-ide-button variant="ghost" (clicked)="increaseProgress()">+ 10%</v-ide-button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dialog -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Dialog</h2>
+    <p class="demos-section__desc">Modal with backdrop, Escape key close, and X button.</p>
+    <div class="demos-preview">
+      <v-ide-button variant="accent" (clicked)="dialogOpen.set(true)">Open Dialog</v-ide-button>
+      <v-ide-dialog
+        title="Clone repository"
+        [visible]="dialogOpen()"
+        [showFooter]="true"
+        (visibleChange)="dialogOpen.set($event)"
+      >
+        <v-ide-input label="Repository URL" placeholder="https://github.com/user/repo" />
+        <ng-container ideDialogFooter>
+          <v-ide-button variant="ghost" (clicked)="dialogOpen.set(false)">Cancel</v-ide-button>
+          <v-ide-button variant="accent" (clicked)="dialogOpen.set(false)">Clone</v-ide-button>
+        </ng-container>
+      </v-ide-dialog>
+    </div>
+  </section>
+
+  <!-- Splitter -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Splitter</h2>
+    <p class="demos-section__desc">Resizable horizontal panel. Drag the center divider.</p>
+    <div class="demos-preview demos-preview--fill">
+      <v-ide-splitter orientation="horizontal" [defaultPosition]="40" [minSize]="20" [maxSize]="80">
+        <div splitterStart class="demos-pane demos-pane--left">
+          <span>Left panel</span>
+        </div>
+        <div splitterEnd class="demos-pane demos-pane--right">
+          <span>Right panel</span>
+        </div>
+      </v-ide-splitter>
+    </div>
+  </section>
+
+  <!-- Tree -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Tree</h2>
+    <p class="demos-section__desc">File tree with icons by type, active state, and controlled expansion.</p>
+    <div class="demos-preview demos-preview--tree">
+      <v-ide-tree
+        [root]="tree"
+        [activeFileId]="activeFileId()"
+        [expandedFolders]="expandedFolders()"
+        (fileSelect)="onFileSelect($event)"
+        (folderToggle)="onFolderToggle($event)"
+      />
+    </div>
+  </section>
+</main>

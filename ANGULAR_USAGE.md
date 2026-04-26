@@ -1,199 +1,54 @@
-# Using Vertex Editor in Angular
+You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
-## Installation
+## TypeScript Best Practices
 
-```bash
-# Install the web component
-curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
-```
+- Use strict type checking
+- Prefer type inference when the type is obvious
+- Avoid the `any` type; use `unknown` when type is uncertain
 
-Then add the script to your `angular.json`:
+## Angular Best Practices
 
-```json
-{
-  "projects": {
-    "your-app": {
-      "architect": {
-        "build": {
-          "options": {
-            "scripts": [
-              "src/web-editor.min.js"
-            ]
-          }
-        }
-      }
-    }
-  }
-}
-```
+- Always use standalone components over NgModules
+- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Use signals for state management
+- Implement lazy loading for feature routes
+- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
+- Use `NgOptimizedImage` for all static images.
+  - `NgOptimizedImage` does not work for inline base64 images.
 
-Or import it in your `main.ts`:
+## Accessibility Requirements
 
-```typescript
-import './web-editor.min.js';
-```
+- It MUST pass all AXE checks.
+- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
 
-## Component Usage
+### Components
 
-```typescript
-import {
-  ChangeDetectionStrategy,
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  input,
-  signal,
-  viewChild,
-  ElementRef,
-  AfterViewInit,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+- Keep components small and focused on a single responsibility
+- Use `input()` and `output()` functions instead of decorators
+- Use `computed()` for derived state
+- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
+- Prefer inline templates for small components
+- Prefer Reactive forms instead of Template-driven ones
+- Do NOT use `ngClass`, use `class` bindings instead
+- Do NOT use `ngStyle`, use `style` bindings instead
+- When using external templates/styles, use paths relative to the component TS file.
 
-@Component({
-  selector: 'app-code-panel',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // <-- Important!
-  template: `
-    <div class="code-container">
-      <vertex-editor
-        #editor
-        [attr.value]="code()"
-        [attr.language]="language()"
-        theme="dark"
-        lineNumbers="true"
-        readonly="true"
-        height="400px"
-      ></vertex-editor>
-    </div>
-  `,
-  styles: `
-    .code-container {
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #333;
-    }
-    
-    vertex-editor {
-      display: block;
-    }
-  `
-})
-export class CodePanel implements AfterViewInit {
-  readonly code = input.required<string>();
-  readonly language = input<string>('typescript');
-  
-  private editorRef = viewChild<ElementRef>('editor');
+## State Management
 
-  ngAfterViewInit() {
-    // Access editor methods after it's ready
-    const editor = this.editorRef()?.nativeElement;
-    if (editor) {
-      editor.addEventListener('ready', () => {
-        console.log('Editor ready, value:', editor.getValue());
-      });
-    }
-  }
-  
-  // Example: Copy code
-  async copyCode() {
-    const editor = this.editorRef()?.nativeElement;
-    if (editor) {
-      const code = editor.getValue();
-      await navigator.clipboard.writeText(code);
-    }
-  }
-}
-```
+- Use signals for local component state
+- Use `computed()` for derived state
+- Keep state transformations pure and predictable
+- Do NOT use `mutate` on signals, use `update` or `set` instead
 
-## Key Points
+## Templates
 
-1. **`schemas: [CUSTOM_ELEMENTS_SCHEMA]`** - Required to use custom elements
-2. **`[attr.value]="code()"`** - Bind value as attribute (not property)
-3. **Access methods via `nativeElement`** - After `ready` event
-4. **Import the script** - Either in `angular.json` or `main.ts`
+- Keep templates simple and avoid complex logic
+- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
+- Use the async pipe to handle observables
+- Do not assume globals like (`new Date()`) are available.
 
-## Your Fixed Component
+## Services
 
-```typescript
-import {
-  ChangeDetectionStrategy,
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  input,
-  signal,
-  viewChild,
-  ElementRef,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CopyButton } from './copy-button';
-
-@Component({
-  selector: 'app-code-panel',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, CopyButton],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // <-- Fixed: moved to schemas
-  template: `
-    <div class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold text-lg">{{ title() }}</h3>
-        <app-copy-button [code]="code()" />
-      </div>
-
-      @if (cliCommand()) {
-        <div class="cli-command">
-          <span>Install via CLI:</span>
-          <code>{{ cliCommand() }}</code>
-          <button (click)="copyCliCommand()">
-            {{ cliCopied() ? 'Copied!' : 'Copy' }}
-          </button>
-        </div>
-      }
-
-      <div class="editor-wrapper">
-        <vertex-editor
-          [attr.value]="code()"
-          [attr.language]="'typescript'"
-          theme="dark"
-          lineNumbers="true"
-          readonly="true"
-          height="400px"
-        ></vertex-editor>
-      </div>
-
-      @if (description()) {
-        <p class="description">{{ description() }}</p>
-      }
-    </div>
-  `,
-  styles: `
-    .editor-wrapper {
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #333;
-    }
-    
-    vertex-editor {
-      display: block;
-    }
-  `
-})
-export class CodePanel {
-  readonly title = input<string>('Component Source');
-  readonly code = input.required<string>();
-  readonly cliCommand = input<string>('');
-  readonly description = input<string>('');
-
-  cliCopied = signal(false);
-
-  async copyCliCommand() {
-    if (!this.cliCommand()) return;
-    try {
-      await navigator.clipboard.writeText(this.cliCommand());
-      this.cliCopied.set(true);
-      setTimeout(() => this.cliCopied.set(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-}
-```
+- Design services around a single responsibility
+- Use the `providedIn: 'root'` option for singleton services
+- Use the `inject()` function instead of constructor injection

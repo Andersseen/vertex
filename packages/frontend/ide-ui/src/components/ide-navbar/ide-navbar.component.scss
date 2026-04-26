@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.ide-navbar {
+  display: flex;
+  align-items: center;
+  height: var(--ide-navbar-height, 48px);
+  padding: 0 var(--ide-space-4);
+  background-color: var(--ide-bg-surface);
+  border-bottom: 1px solid var(--ide-border);
+  gap: var(--ide-space-4);
+
+  &__start {
+    display: flex;
+    align-items: center;
+    gap: var(--ide-space-3);
+    flex-shrink: 0;
+  }
+
+  &__center {
+    display: flex;
+    align-items: center;
+    gap: var(--ide-space-1);
+    flex: 1 1 auto;
+  }
+
+  &__end {
+    display: flex;
+    align-items: center;
+    gap: var(--ide-space-2);
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}

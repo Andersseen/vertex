@@ -26,6 +26,7 @@
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
     "@vertex/types": "workspace:*",
+    "quartz-headless": "^0.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.2"
   },
