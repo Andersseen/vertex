@@ -13,6 +13,7 @@ import {
 import { CommonModule } from "@angular/common";
 import { EditorState, Extension, Compartment } from "@codemirror/state";
 import { EditorView, basicSetup } from "codemirror";
+import { keymap } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -156,6 +157,15 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
             this.contentChange.emit(update.state.doc.toString());
           }
         }),
+        keymap.of([
+          {
+            key: "Mod-s",
+            run: () => {
+              this.save.emit();
+              return true;
+            },
+          },
+        ]),
         ...this.extensions(),
       ],
     });

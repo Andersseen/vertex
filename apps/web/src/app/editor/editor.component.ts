@@ -21,6 +21,9 @@ import { PreviewPanelComponent } from '../components/preview-panel/preview-panel
 @Component({
   selector: 'v-editor-page',
   standalone: true,
+  host: {
+    '(document:keydown)': 'onDocumentKeydown($event)',
+  },
   imports: [
     MainLayoutComponent,
     CodeEditorComponent,
@@ -299,6 +302,24 @@ export class EditorComponent {
       this.activeFileId.set(filtered.length > 0 ? filtered[0].id : null);
     }
     this.saveEditorState();
+  }
+
+  onSave(): void {
+    const file = this.activeFile();
+    if (!file) return;
+    const current = this.openFiles();
+    const idx = current.findIndex((f) => f.id === file.id);
+    if (idx !== -1) {
+      const updated = [...current];
+      updated[idx] = { ...updated[idx], isDirty: false };
+      this.openFiles.set(updated);
+    }
+  }
+
+  onDocumentKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+    }
   }
 
   onContentChange(content: string) {

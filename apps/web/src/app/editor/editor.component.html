@@ -37,6 +37,7 @@
               [file]="activeFile()"
               [showHeader]="false"
               (contentChange)="onContentChange($event)"
+              (save)="onSave()"
             ></v-editor>
           </div>
           <div splitterEnd class="vx-h-full vx-overflow-hidden">
@@ -48,6 +49,7 @@
           [file]="activeFile()"
           [showHeader]="false"
           (contentChange)="onContentChange($event)"
+          (save)="onSave()"
           class="vx-flex-1"
         ></v-editor>
       }

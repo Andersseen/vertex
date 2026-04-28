@@ -67,7 +67,9 @@
       "Bash(bun --cwd packages/frontend/ui check-types)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d.get\\('exports',{}\\).keys\\(\\)\\)[:20]\\)\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('exports:', list\\(d.get\\('exports',{}\\).keys\\(\\)\\)[:15]\\); print\\('version:', d.get\\('version'\\)\\)\")",
-      "Bash(git -C /Users/andriipap/Andersseen/Web/Projects/vertex status --short)"
+      "Bash(git -C /Users/andriipap/Andersseen/Web/Projects/vertex status --short)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('version','?'\\), d.get\\('description','?'\\)\\)\")",
+      "Read(//Users/andriipap/**)"
     ]
   }
 }
