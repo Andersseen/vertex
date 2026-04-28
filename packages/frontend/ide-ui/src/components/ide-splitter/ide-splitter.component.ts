@@ -3,6 +3,8 @@ import {
   input,
   output,
   computed,
+  viewChild,
+  afterNextRender,
   ChangeDetectionStrategy,
 } from "@angular/core";
 import {
@@ -71,6 +73,16 @@ export class IdeSplitterComponent {
   protected readonly initialPosition = computed(() =>
     readStoredPosition(this.storageKey(), this.defaultPosition()),
   );
+
+  // quartz-headless bug workaround: SplitterContainerDirective calls setPosition(defaultPosition())
+  // in its constructor, before Angular has bound the [defaultPosition] input signal.
+  // After the first render Angular inputs are set, so we re-apply the stored position.
+  private readonly splitterDir = viewChild(SplitterContainerDirective);
+  constructor() {
+    afterNextRender(() => {
+      this.splitterDir()?.splitterService.setPosition(this.initialPosition());
+    });
+  }
 
   protected onPositionChange(pos: number): void {
     const key = this.storageKey();
