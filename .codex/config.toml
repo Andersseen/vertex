@@ -1,0 +1,21 @@
+[mcp_servers.angular-cli]
+args = [
+    "-y",
+    "@angular/cli",
+    "mcp",
+]
+command = "npx"
+
+[mcp_servers.bun]
+args = [
+    "-y",
+    "mcp-bun@latest",
+]
+command = "npx"
+
+[mcp_servers.tauri]
+args = [
+    "-y",
+    "@hypothesi/tauri-mcp-server",
+]
+command = "npx"

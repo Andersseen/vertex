@@ -3,62 +3,79 @@
   display: inline-block;
 
   &__trigger {
-    cursor: pointer;
+    display: contents;
   }
 
   &__menu {
-    position: absolute;
-    top: calc(100% + var(--ide-space-1));
-    left: 0;
-    z-index: 100;
-    min-width: 160px;
-    background-color: var(--ide-bg-elevated);
+    min-width: 180px;
+    padding: var(--ide-space-1) 0;
     border: 1px solid var(--ide-border-default);
     border-radius: var(--ide-radius-md);
+    background-color: var(--ide-bg-elevated);
     box-shadow: var(--ide-shadow-md);
-    padding: var(--ide-space-1) 0;
+    color: var(--ide-text-primary);
     outline: none;
-
-    &--top {
-      top: auto;
-      bottom: calc(100% + var(--ide-space-1));
-    }
-
-    &--right {
-      left: auto;
-      right: 0;
-    }
-
-    &--left {
-      left: 0;
-    }
   }
 
   &__item {
     display: flex;
     align-items: center;
     width: 100%;
+    min-height: 26px;
+    gap: var(--ide-space-2);
     padding: var(--ide-space-1) var(--ide-space-3);
-    font-size: var(--ide-text-sm);
-    color: var(--ide-text-primary);
-    background: transparent;
     border: none;
-    cursor: pointer;
+    background: transparent;
+    color: var(--ide-text-primary);
+    font: inherit;
+    font-size: var(--ide-text-sm);
+    line-height: var(--ide-leading-tight);
     text-align: left;
-    transition: background-color 100ms ease;
     white-space: nowrap;
+    cursor: pointer;
 
     &:hover,
-    &:focus {
+    &:focus-visible,
+    &[data-state='active'] {
       background-color: var(--ide-bg-hover);
       outline: none;
     }
 
     &--disabled {
-      opacity: 0.4;
+      color: var(--ide-text-muted);
       cursor: not-allowed;
-      pointer-events: none;
     }
+
+    &--destructive {
+      color: var(--ide-error-text);
+
+      &:hover,
+      &:focus-visible,
+      &[data-state='active'] {
+        background-color: var(--ide-error-subtle);
+      }
+    }
+  }
+
+  &__item-icon {
+    width: 16px;
+    flex: 0 0 16px;
+    color: var(--ide-text-muted);
+    text-align: center;
+  }
+
+  &__item-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__shortcut {
+    margin-left: var(--ide-space-4);
+    color: var(--ide-text-muted);
+    font-family: var(--ide-font-mono);
+    font-size: var(--ide-text-xs);
   }
 
   &__separator {
