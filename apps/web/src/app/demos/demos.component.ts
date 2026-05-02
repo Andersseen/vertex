@@ -19,6 +19,9 @@ import {
   IdeBreadcrumbComponent,
   IdeTooltipComponent,
   IdeDrawerComponent,
+  IdePopoverComponent,
+  IdeVirtualListComponent,
+  IdeTooltipDirective,
 } from '@vertex/ide-ui';
 import type {
   IdeTabDef,
@@ -115,6 +118,11 @@ const DEMO_CONTEXT_ITEMS: IdeContextMenuItemDef[] = [
   { id: 'delete', label: 'Delete' },
 ];
 
+const DEMO_VIRTUAL_ITEMS = Array.from({ length: 5000 }, (_, i) => ({
+  label: `item-${String(i + 1).padStart(4, '0')}.ts`,
+  index: i,
+}));
+
 const DEMO_BREADCRUMB: IdeBreadcrumbItem[] = [
   { id: 'root', label: 'my-project', href: '#' },
   { id: 'src', label: 'src', href: '#' },
@@ -144,6 +152,9 @@ const DEMO_BREADCRUMB: IdeBreadcrumbItem[] = [
     IdeBreadcrumbComponent,
     IdeTooltipComponent,
     IdeDrawerComponent,
+    IdePopoverComponent,
+    IdeVirtualListComponent,
+    IdeTooltipDirective,
   ],
   templateUrl: './demos.component.html',
   styleUrl: './demos.component.scss',
@@ -164,6 +175,7 @@ export class DemosComponent {
   protected readonly selectedDropdown = signal('');
   protected readonly contextItem = signal('');
   protected readonly drawerOpen = signal(false);
+  protected readonly virtualItems = DEMO_VIRTUAL_ITEMS;
 
   private readonly toast = inject(IdeToastService);
 

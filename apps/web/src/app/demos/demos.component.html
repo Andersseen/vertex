@@ -249,6 +249,63 @@
       </v-ide-drawer>
     </div>
   </section>
+
+  <!-- Popover -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Popover</h2>
+    <p class="demos-section__desc">Smart-positioned overlay panel backed by <code>OverlayService</code>. Automatically flips when near the viewport edge. Define the panel content in <code>#popoverPanel</code>.</p>
+    <div class="demos-preview demos-preview--row">
+      <v-ide-popover placement="bottom-start">
+        <v-ide-button popoverTrigger variant="ghost">Actions ▾</v-ide-button>
+        <ng-template #popoverPanel>
+          <div class="ide-popover__panel">
+            <button class="demos-popover-item">New File</button>
+            <button class="demos-popover-item">New Folder</button>
+            <div class="demos-popover-sep"></div>
+            <button class="demos-popover-item">Rename</button>
+            <button class="demos-popover-item demos-popover-item--danger">Delete</button>
+          </div>
+        </ng-template>
+      </v-ide-popover>
+
+      <v-ide-popover placement="bottom-end">
+        <v-ide-button popoverTrigger>Help ▾</v-ide-button>
+        <ng-template #popoverPanel>
+          <div class="ide-popover__panel demos-popover-info">
+            <p>Use the popover for any rich content — forms, settings, action lists.</p>
+            <p>Placement flips automatically when there isn't enough room.</p>
+          </div>
+        </ng-template>
+      </v-ide-popover>
+    </div>
+  </section>
+
+  <!-- Virtual List -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Virtual List</h2>
+    <p class="demos-section__desc">Renders only the visible rows of a large dataset. This demo has 5 000 items — only ~10 are in the DOM at once.</p>
+    <div class="demos-preview">
+      <v-ide-virtual-list [items]="virtualItems" [itemHeight]="28" height="280px">
+        <ng-template #itemTemplate let-item>
+          <span class="demos-vlist-icon">ts</span>
+          <span class="demos-vlist-label">{{ item.label }}</span>
+          <span class="demos-vlist-index">{{ item.index }}</span>
+        </ng-template>
+      </v-ide-virtual-list>
+    </div>
+  </section>
+
+  <!-- Tooltip Directive -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Tooltip Directive</h2>
+    <p class="demos-section__desc">Attribute-based tooltip via <code>[vIdeTooltip]</code> — no wrapper component needed. Backed by quartz's <code>TooltipDirective</code> with smart flip positioning.</p>
+    <div class="demos-preview demos-preview--row demos-preview--tooltip">
+      <v-ide-button [vIdeTooltip]="'Save the current file'" tooltipPlacement="top">Save</v-ide-button>
+      <v-ide-button variant="ghost" [vIdeTooltip]="'Undo last change'" tooltipPlacement="bottom">Undo</v-ide-button>
+      <v-ide-button variant="accent" [vIdeTooltip]="'Deploy to production'" tooltipPlacement="right">Deploy</v-ide-button>
+      <v-ide-button [vIdeTooltip]="'This button is disabled'" [disabled]="true" tooltipPlacement="top">Disabled</v-ide-button>
+    </div>
+  </section>
 </main>
 
 <v-ide-toaster />

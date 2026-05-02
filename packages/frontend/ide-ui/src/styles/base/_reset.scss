@@ -36,3 +36,32 @@
     text-decoration: none;
   }
 }
+
+// Quartz overlay tooltip — rendered in document.body outside component scope
+.qz-tooltip {
+  position: fixed;
+  z-index: 9000;
+  padding: 3px 8px;
+  background-color: var(--ide-bg-elevated);
+  color: var(--ide-text-primary);
+  font-size: var(--ide-text-xs);
+  font-family: var(--ide-font-sans);
+  border-radius: var(--ide-radius-sm);
+  border: 1px solid var(--ide-border-default);
+  box-shadow: var(--ide-shadow-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+// Popover panel — rendered via OverlayService outside component scope
+.ide-popover__panel {
+  background-color: var(--ide-bg-elevated);
+  border: 1px solid var(--ide-border-default);
+  border-radius: var(--ide-radius-md);
+  box-shadow: var(--ide-shadow-md);
+  padding: var(--ide-space-1) 0;
+  min-width: 180px;
+  font-size: var(--ide-text-sm);
+  color: var(--ide-text-primary);
+}

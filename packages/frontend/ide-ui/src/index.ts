@@ -19,4 +19,7 @@ export * from './components/ide-toast/ide-toast.service';
 export * from './components/ide-toast/ide-toast.component';
 export * from './components/ide-breadcrumb/ide-breadcrumb.component';
 export * from './components/ide-tooltip/ide-tooltip.component';
+export * from './components/ide-tooltip/ide-tooltip.directive';
 export * from './components/ide-drawer/ide-drawer.component';
+export * from './components/ide-popover/ide-popover.component';
+export * from './components/ide-virtual-list/ide-virtual-list.component';
