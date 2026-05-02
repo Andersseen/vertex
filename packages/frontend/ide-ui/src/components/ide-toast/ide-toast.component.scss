@@ -1,0 +1,110 @@
+.ide-toaster {
+  position: fixed;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ide-space-2);
+  pointer-events: none;
+
+  &[data-position='bottom-right'] {
+    bottom: var(--ide-space-4);
+    right: var(--ide-space-4);
+    align-items: flex-end;
+  }
+
+  &[data-position='bottom-left'] {
+    bottom: var(--ide-space-4);
+    left: var(--ide-space-4);
+    align-items: flex-start;
+  }
+
+  &[data-position='top-right'] {
+    top: var(--ide-space-4);
+    right: var(--ide-space-4);
+    align-items: flex-end;
+  }
+
+  &[data-position='top-left'] {
+    top: var(--ide-space-4);
+    left: var(--ide-space-4);
+    align-items: flex-start;
+  }
+
+  &[data-position='top-center'] {
+    top: var(--ide-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+  }
+
+  &[data-position='bottom-center'] {
+    bottom: var(--ide-space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+  }
+}
+
+.ide-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--ide-space-2);
+  padding: var(--ide-space-2) var(--ide-space-3);
+  min-width: 240px;
+  max-width: 380px;
+  background-color: var(--ide-bg-elevated);
+  border: 1px solid var(--ide-border-default);
+  border-radius: var(--ide-radius-md);
+  box-shadow: var(--ide-shadow-md);
+  font-size: var(--ide-text-sm);
+  color: var(--ide-text-primary);
+  pointer-events: all;
+
+  &--success {
+    border-color: var(--ide-success-border);
+    color: var(--ide-success-text);
+    background-color: var(--ide-bg-elevated);
+  }
+
+  &--error {
+    border-color: var(--ide-error-border);
+    color: var(--ide-error-text);
+    background-color: var(--ide-bg-elevated);
+  }
+
+  &--warning {
+    border-color: var(--ide-warning-border);
+    color: var(--ide-warning-text);
+    background-color: var(--ide-bg-elevated);
+  }
+
+  &--info {
+    border-color: var(--ide-info-border);
+    color: var(--ide-info-text);
+    background-color: var(--ide-bg-elevated);
+  }
+
+  &__message {
+    flex: 1 1 auto;
+  }
+
+  &__dismiss {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: var(--ide-radius-sm);
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+    background: transparent;
+    transition: opacity 100ms ease, background-color 100ms ease;
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
