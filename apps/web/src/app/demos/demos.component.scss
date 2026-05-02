@@ -21,45 +21,29 @@
   }
 }
 
-.demos-nav {
+// ─── Main layout ─────────────────────────────────────────────────────────────
+
+.demos-shell {
+  flex: 1 1 auto;
   display: flex;
-  align-items: center;
-  gap: 2px;
-
-  &__link {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    color: var(--ide-text-secondary, #a0a0a0);
-    text-decoration: none;
-    transition: background-color 80ms ease, color 80ms ease;
-
-    &:hover {
-      background-color: var(--ide-bg-hover, #1a1a1a);
-      color: var(--ide-text-primary, #f5f5f5);
-    }
-
-    &--active {
-      background-color: var(--ide-bg-selected, #1e1e1e);
-      color: var(--ide-text-primary, #f5f5f5);
-    }
-  }
+  min-height: 0;
+  overflow: hidden;
 }
 
-// ─── Main layout ─────────────────────────────────────────────────────────────
+.demos-sidebar {
+  flex: 0 0 auto;
+  height: 100%;
+  overflow: hidden;
+}
 
 .demos-main {
   flex: 1 1 auto;
+  min-width: 0;
   overflow-y: auto;
   padding: 40px 48px;
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 32px;
 }
 
 // ─── Header ──────────────────────────────────────────────────────────────────
@@ -146,6 +130,17 @@
   }
 }
 
+.demos-inline-controls {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.demos-value {
+  color: var(--ide-text-muted);
+  font-size: 13px;
+  line-height: 28px;
+}
+
 // ─── Tab content placeholder ──────────────────────────────────────────────────
 
 .demos-tab-content {
@@ -153,6 +148,94 @@
   padding: 12px 0 4px;
   font-size: 13px;
   color: var(--ide-text-muted, #666);
+}
+
+// ─── Accordion ───────────────────────────────────────────────────────────────
+
+.demos-accordion-text {
+  font-size: 13px;
+  color: var(--ide-text-secondary, #888);
+  margin: 0;
+  line-height: 1.5;
+
+  code {
+    font-family: var(--ide-font-mono, monospace);
+    font-size: 12px;
+    background: var(--ide-bg-hover, #1a1a1a);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--ide-accent, #7c3aed);
+  }
+}
+
+// ─── Context menu trigger area ────────────────────────────────────────────────
+
+.demos-context-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 80px;
+  border: 1px dashed var(--ide-border-default, #333);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ide-text-muted, #666);
+  cursor: context-menu;
+  user-select: none;
+}
+
+// ─── Badge ───────────────────────────────────────────────────────────────────
+
+.demos-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: var(--ide-bg-active, #1a1a1a);
+  color: var(--ide-text-secondary, #888);
+  border: 1px solid var(--ide-border-subtle, #222);
+}
+
+// ─── Tooltip (extra vertical padding so tooltips aren't clipped) ──────────────
+
+.demos-preview--tooltip {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
+// ─── Virtual list demo ────────────────────────────────────────────────────────
+
+.demos-vlist-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 16px;
+  font-size: 9px;
+  font-family: var(--ide-font-mono, monospace);
+  font-weight: 600;
+  border-radius: 3px;
+  background-color: var(--ide-accent, #7c3aed);
+  color: #fff;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.demos-vlist-label {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--ide-text-primary, #f5f5f5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demos-vlist-index {
+  font-size: 11px;
+  color: var(--ide-text-muted, #555);
+  font-family: var(--ide-font-mono, monospace);
+  flex-shrink: 0;
 }
 
 // ─── Splitter panes ───────────────────────────────────────────────────────────

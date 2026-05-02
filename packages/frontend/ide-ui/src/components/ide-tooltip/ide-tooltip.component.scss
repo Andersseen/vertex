@@ -1,0 +1,46 @@
+.ide-tooltip {
+  &__host {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__content {
+    position: absolute;
+    z-index: var(--ide-z-tooltip);
+    padding: var(--ide-space-1) var(--ide-space-2);
+    background-color: var(--ide-bg-active);
+    border: 1px solid var(--ide-border-default);
+    border-radius: var(--ide-radius-sm);
+    font-size: var(--ide-text-xs);
+    color: var(--ide-text-primary);
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: var(--ide-shadow-md);
+
+    &--top {
+      bottom: calc(100% + var(--ide-space-1));
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &--bottom {
+      top: calc(100% + var(--ide-space-1));
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &--left {
+      right: calc(100% + var(--ide-space-1));
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &--right {
+      left: calc(100% + var(--ide-space-1));
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}

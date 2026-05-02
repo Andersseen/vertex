@@ -1,5 +1,6 @@
 // Components
 export * from './components/ide-navbar/ide-navbar.component';
+export * from './components/ide-sidebar/ide-sidebar.component';
 export * from './components/ide-button/ide-button.component';
 export * from './components/ide-tabs/ide-tabs.component';
 export * from './components/ide-layout/ide-layout.component';
@@ -10,3 +11,14 @@ export * from './components/ide-alert/ide-alert.component';
 export * from './components/ide-tree/ide-tree.component';
 export * from './components/ide-toolbar/ide-toolbar.component';
 export * from './components/ide-splitter/ide-splitter.component';
+export * from './components/ide-accordion/ide-accordion.component';
+export * from './components/ide-accordion/ide-accordion-item.component';
+export * from './components/ide-accordion/ide-accordion.context';
+export * from './components/ide-dropdown/ide-dropdown.component';
+export * from './components/ide-context-menu/ide-context-menu.component';
+export * from './components/ide-toast/ide-toast.service';
+export * from './components/ide-toast/ide-toast.component';
+export * from './components/ide-breadcrumb/ide-breadcrumb.component';
+export * from './components/ide-tooltip/ide-tooltip.directive';
+export * from './components/ide-drawer/ide-drawer.component';
+export * from './components/ide-virtual-list/ide-virtual-list.component';

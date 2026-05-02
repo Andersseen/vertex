@@ -1,4 +1,7 @@
-<v-ide-navbar>
+<v-ide-navbar
+  [items]="navbarItems"
+  defaultActiveItem="components"
+>
   <div navStart class="demos-brand">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <polyline points="16 18 22 12 16 6"/>
@@ -6,142 +9,281 @@
     </svg>
     <span>Vertex IDE</span>
   </div>
-  <div navCenter class="demos-nav">
-    <a class="demos-nav__link" routerLink="/editor" routerLinkActive="demos-nav__link--active">
-      Editor
-    </a>
-    <a class="demos-nav__link" routerLink="/demos" routerLinkActive="demos-nav__link--active">
-      Components
-    </a>
-  </div>
 </v-ide-navbar>
 
-<main class="demos-main">
-  <header class="demos-header">
-    <h1 class="demos-header__title">IDE UI Components</h1>
-    <p class="demos-header__subtitle">
-      Headless component library for the IDE — CSS custom properties, no Tailwind, no PrimeNG.
-    </p>
-  </header>
+<div class="demos-shell">
+  <aside class="demos-sidebar">
+    <v-ide-sidebar
+      [items]="componentItems"
+      [defaultActiveItem]="activeComponent()"
+      [collapsible]="false"
+      ariaLabel="Component demos"
+      (activeItemChange)="activeComponent.set($event)"
+    />
+  </aside>
 
-  <!-- Buttons -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Button</h2>
-    <p class="demos-section__desc">Three variants: <code>default</code>, <code>ghost</code>, and <code>accent</code>. Supports loading and disabled states.</p>
-    <div class="demos-preview demos-preview--row">
-      <v-ide-button>Default</v-ide-button>
-      <v-ide-button variant="ghost">Ghost</v-ide-button>
-      <v-ide-button variant="accent">Accent</v-ide-button>
-      <v-ide-button [loading]="true">Loading</v-ide-button>
-      <v-ide-button [disabled]="true">Disabled</v-ide-button>
-    </div>
-  </section>
+  <main class="demos-main">
+    <header class="demos-header">
+      <h1 class="demos-header__title">IDE UI Components</h1>
+      <p class="demos-header__subtitle">
+        Headless component library for the IDE — CSS custom properties, no Tailwind, no PrimeNG.
+      </p>
+    </header>
 
-  <!-- Input -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Input</h2>
-    <p class="demos-section__desc">Text field with label, placeholder, and disabled state.</p>
-    <div class="demos-preview demos-preview--col">
-      <v-ide-input label="File name" placeholder="app.ts" [value]="inputValue()" (valueChange)="inputValue.set($event)" />
-      <v-ide-input placeholder="No label" />
-      <v-ide-input label="Disabled" placeholder="Not editable" [disabled]="true" />
-    </div>
-  </section>
+    @switch (activeComponent()) {
+      @case ('button') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Button</h2>
+          <p class="demos-section__desc">Three variants: <code>default</code>, <code>ghost</code>, and <code>accent</code>. Supports loading and disabled states.</p>
+          <div class="demos-preview demos-preview--row">
+            <v-ide-button>Default</v-ide-button>
+            <v-ide-button variant="ghost">Ghost</v-ide-button>
+            <v-ide-button variant="accent">Accent</v-ide-button>
+            <v-ide-button [loading]="true">Loading</v-ide-button>
+            <v-ide-button [disabled]="true">Disabled</v-ide-button>
+          </div>
+        </section>
+      }
 
-  <!-- Tabs -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Tabs</h2>
-    <p class="demos-section__desc">Horizontal tabs with disabled support. The "Disabled" tab cannot be selected.</p>
-    <div class="demos-preview">
-      <v-ide-tabs
-        [tabsData]="tabs"
-        [defaultValue]="activeTab()"
-        (valueChange)="onTabChange($event)"
-      >
-        @switch (activeTab()) {
-          @case ('tab-overview') { <span class="demos-tab-content">Overview content</span> }
-          @case ('tab-config') { <span class="demos-tab-content">Configuration content</span> }
-          @case ('tab-output') { <span class="demos-tab-content">Process output...</span> }
-        }
-      </v-ide-tabs>
-    </div>
-  </section>
+      @case ('input') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Input</h2>
+          <p class="demos-section__desc">Text field with label, placeholder, and disabled state.</p>
+          <div class="demos-preview demos-preview--col">
+            <v-ide-input label="File name" placeholder="app.ts" [value]="inputValue()" (valueChange)="inputValue.set($event)" />
+            <v-ide-input placeholder="No label" />
+            <v-ide-input label="Disabled" placeholder="Not editable" [disabled]="true" />
+          </div>
+        </section>
+      }
 
-  <!-- Alerts -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Alert</h2>
-    <p class="demos-section__desc">Four severity levels. The last one is dismissible.</p>
-    <div class="demos-preview demos-preview--col">
-      <v-ide-alert severity="info" text="The repository is being cloned..." />
-      <v-ide-alert severity="success" text="Project ready to use." />
-      <v-ide-alert severity="warning" text="This file has unsaved changes." />
-      <v-ide-alert severity="error" text="Could not connect to the server." [dismissible]="true" />
-    </div>
-  </section>
+      @case ('tabs') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Tabs</h2>
+          <p class="demos-section__desc">Horizontal tabs with disabled support. The "Disabled" tab cannot be selected.</p>
+          <div class="demos-preview">
+            <v-ide-tabs
+              [tabsData]="tabs"
+              [defaultValue]="activeTab()"
+              (valueChange)="onTabChange($event)"
+            >
+              @switch (activeTab()) {
+                @case ('tab-overview') { <span class="demos-tab-content">Overview content</span> }
+                @case ('tab-config') { <span class="demos-tab-content">Configuration content</span> }
+                @case ('tab-output') { <span class="demos-tab-content">Process output...</span> }
+              }
+            </v-ide-tabs>
+          </div>
+        </section>
+      }
 
-  <!-- Progress Bar -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Progress Bar</h2>
-    <p class="demos-section__desc">Progress bar with a value between 0 and 100.</p>
-    <div class="demos-preview demos-preview--col">
-      <v-ide-progress-bar [value]="progress()" />
-      <div class="demos-preview--row" style="gap: 8px; margin-top: 8px;">
-        <v-ide-button variant="ghost" (clicked)="decreaseProgress()">− 10%</v-ide-button>
-        <span style="color: var(--ide-text-muted); font-size: 13px; line-height: 28px;">{{ progress() }}%</span>
-        <v-ide-button variant="ghost" (clicked)="increaseProgress()">+ 10%</v-ide-button>
-      </div>
-    </div>
-  </section>
+      @case ('alert') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Alert</h2>
+          <p class="demos-section__desc">Four severity levels. The last one is dismissible.</p>
+          <div class="demos-preview demos-preview--col">
+            <v-ide-alert severity="info" text="The repository is being cloned..." />
+            <v-ide-alert severity="success" text="Project ready to use." />
+            <v-ide-alert severity="warning" text="This file has unsaved changes." />
+            <v-ide-alert severity="error" text="Could not connect to the server." [dismissible]="true" />
+          </div>
+        </section>
+      }
 
-  <!-- Dialog -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Dialog</h2>
-    <p class="demos-section__desc">Modal with backdrop, Escape key close, and X button.</p>
-    <div class="demos-preview">
-      <v-ide-button variant="accent" (clicked)="dialogOpen.set(true)">Open Dialog</v-ide-button>
-      <v-ide-dialog
-        title="Clone repository"
-        [visible]="dialogOpen()"
-        [showFooter]="true"
-        (visibleChange)="dialogOpen.set($event)"
-      >
-        <v-ide-input label="Repository URL" placeholder="https://github.com/user/repo" />
-        <ng-container ideDialogFooter>
-          <v-ide-button variant="ghost" (clicked)="dialogOpen.set(false)">Cancel</v-ide-button>
-          <v-ide-button variant="accent" (clicked)="dialogOpen.set(false)">Clone</v-ide-button>
-        </ng-container>
-      </v-ide-dialog>
-    </div>
-  </section>
+      @case ('progress') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Progress Bar</h2>
+          <p class="demos-section__desc">Progress bar with a value between 0 and 100.</p>
+          <div class="demos-preview demos-preview--col">
+            <v-ide-progress-bar [value]="progress()" />
+            <div class="demos-preview--row demos-inline-controls">
+              <v-ide-button variant="ghost" (clicked)="decreaseProgress()">- 10%</v-ide-button>
+              <span class="demos-value">{{ progress() }}%</span>
+              <v-ide-button variant="ghost" (clicked)="increaseProgress()">+ 10%</v-ide-button>
+            </div>
+          </div>
+        </section>
+      }
 
-  <!-- Splitter -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Splitter</h2>
-    <p class="demos-section__desc">Resizable horizontal panel. Drag the center divider.</p>
-    <div class="demos-preview demos-preview--fill">
-      <v-ide-splitter orientation="horizontal" [defaultPosition]="40" [minSize]="20" [maxSize]="80">
-        <div splitterStart class="demos-pane demos-pane--left">
-          <span>Left panel</span>
-        </div>
-        <div splitterEnd class="demos-pane demos-pane--right">
-          <span>Right panel</span>
-        </div>
-      </v-ide-splitter>
-    </div>
-  </section>
+      @case ('dialog') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Dialog</h2>
+          <p class="demos-section__desc">Modal with backdrop, Escape key close, and X button.</p>
+          <div class="demos-preview">
+            <v-ide-button variant="accent" (clicked)="dialogOpen.set(true)">Open Dialog</v-ide-button>
+            <v-ide-dialog
+              title="Clone repository"
+              [visible]="dialogOpen()"
+              [showFooter]="true"
+              (visibleChange)="dialogOpen.set($event)"
+            >
+              <v-ide-input label="Repository URL" placeholder="https://github.com/user/repo" />
+              <ng-container ideDialogFooter>
+                <v-ide-button variant="ghost" (clicked)="dialogOpen.set(false)">Cancel</v-ide-button>
+                <v-ide-button variant="accent" (clicked)="dialogOpen.set(false)">Clone</v-ide-button>
+              </ng-container>
+            </v-ide-dialog>
+          </div>
+        </section>
+      }
 
-  <!-- Tree -->
-  <section class="demos-section">
-    <h2 class="demos-section__title">Tree</h2>
-    <p class="demos-section__desc">File tree with icons by type, active state, and controlled expansion.</p>
-    <div class="demos-preview demos-preview--tree">
-      <v-ide-tree
-        [root]="tree"
-        [activeFileId]="activeFileId()"
-        [expandedFolders]="expandedFolders()"
-        (fileSelect)="onFileSelect($event)"
-        (folderToggle)="onFolderToggle($event)"
-      />
-    </div>
-  </section>
-</main>
+      @case ('splitter') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Splitter</h2>
+          <p class="demos-section__desc">Resizable horizontal panel. Drag the center divider.</p>
+          <div class="demos-preview demos-preview--fill">
+            <v-ide-splitter orientation="horizontal" [defaultPosition]="40" [minSize]="20" [maxSize]="80">
+              <div splitterStart class="demos-pane demos-pane--left">
+                <span>Left panel</span>
+              </div>
+              <div splitterEnd class="demos-pane demos-pane--right">
+                <span>Right panel</span>
+              </div>
+            </v-ide-splitter>
+          </div>
+        </section>
+      }
+
+      @case ('tree') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Tree</h2>
+          <p class="demos-section__desc">File tree with icons by type, active state, and controlled expansion.</p>
+          <div class="demos-preview demos-preview--tree">
+            <v-ide-tree
+              [root]="tree"
+              [activeFileId]="activeFileId()"
+              [expandedFolders]="expandedFolders()"
+              (fileSelect)="onFileSelect($event)"
+              (folderToggle)="onFolderToggle($event)"
+            />
+          </div>
+        </section>
+      }
+
+      @case ('accordion') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Accordion</h2>
+          <p class="demos-section__desc">Collapsible sections backed by <code>createAccordion</code>. Set <code>allowMultiple</code> to expand several at once.</p>
+          <div class="demos-preview">
+            <v-ide-accordion [allowMultiple]="false">
+              <v-ide-accordion-item itemId="setup" label="Setup">
+                <p class="demos-accordion-text">Run <code>bun install</code> to install all dependencies from the workspace root.</p>
+              </v-ide-accordion-item>
+              <v-ide-accordion-item itemId="build" label="Build">
+                <p class="demos-accordion-text">Run <code>bun build</code> to compile all packages respecting Turbo's dependency graph.</p>
+              </v-ide-accordion-item>
+              <v-ide-accordion-item itemId="deploy" label="Deploy" [disabled]="true">
+                <p class="demos-accordion-text">Deployment is disabled in this environment.</p>
+              </v-ide-accordion-item>
+            </v-ide-accordion>
+          </div>
+        </section>
+      }
+
+      @case ('dropdown') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Dropdown</h2>
+          <p class="demos-section__desc">Click the trigger to open a positioned menu. Supports disabled items, shortcuts, destructive intent and separators.</p>
+          <div class="demos-preview demos-preview--row">
+            <v-ide-dropdown [items]="dropdownItems" (itemSelected)="onDropdownSelect($event)">
+              <v-ide-button dropdownTrigger variant="ghost">Actions</v-ide-button>
+            </v-ide-dropdown>
+            @if (selectedDropdown()) {
+              <span class="demos-badge">Selected: {{ selectedDropdown() }}</span>
+            }
+          </div>
+        </section>
+      }
+
+      @case ('context-menu') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Context Menu</h2>
+          <p class="demos-section__desc">Right-click inside the dashed area to trigger the context menu.</p>
+          <div class="demos-preview">
+            <v-ide-context-menu [items]="contextItems" (itemSelected)="onContextSelect($event)">
+              <div class="demos-context-area">
+                <span>Right-click here</span>
+                @if (contextItem()) {
+                  <span class="demos-badge">Last: {{ contextItem() }}</span>
+                }
+              </div>
+            </v-ide-context-menu>
+          </div>
+        </section>
+      }
+
+      @case ('toast') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Toast</h2>
+          <p class="demos-section__desc">Transient notifications via <code>IdeToastService</code>. The <code>v-ide-toaster</code> outlet renders all active toasts.</p>
+          <div class="demos-preview demos-preview--row">
+            <v-ide-button variant="ghost" (clicked)="showToast('default')">Default</v-ide-button>
+            <v-ide-button variant="ghost" (clicked)="showToast('success')">Success</v-ide-button>
+            <v-ide-button variant="ghost" (clicked)="showToast('error')">Error</v-ide-button>
+            <v-ide-button variant="ghost" (clicked)="showToast('warning')">Warning</v-ide-button>
+            <v-ide-button variant="ghost" (clicked)="showToast('info')">Info</v-ide-button>
+          </div>
+        </section>
+      }
+
+      @case ('breadcrumb') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Breadcrumb</h2>
+          <p class="demos-section__desc">Navigation path indicator. The last item is marked as current and is non-interactive.</p>
+          <div class="demos-preview">
+            <v-ide-breadcrumb [items]="breadcrumbItems" (navigate)="onBreadcrumbNavigate($event)" />
+          </div>
+        </section>
+      }
+
+      @case ('tooltip') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Tooltip</h2>
+          <p class="demos-section__desc">Attribute-based tooltip via <code>[vIdeTooltip]</code>. Backed by Quartz overlay positioning with smart flip behavior.</p>
+          <div class="demos-preview demos-preview--row demos-preview--tooltip">
+            <v-ide-button [vIdeTooltip]="'Save the current file'" tooltipPlacement="top">Save</v-ide-button>
+            <v-ide-button variant="ghost" [vIdeTooltip]="'Undo last change'" tooltipPlacement="bottom">Undo</v-ide-button>
+            <v-ide-button variant="accent" [vIdeTooltip]="'Deploy to production'" tooltipPlacement="right">Deploy</v-ide-button>
+            <v-ide-button [vIdeTooltip]="'This button is disabled'" [disabled]="true" tooltipPlacement="top">Disabled</v-ide-button>
+          </div>
+        </section>
+      }
+
+      @case ('drawer') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Drawer</h2>
+          <p class="demos-section__desc">Slides in from an edge. Supports <code>left</code>, <code>right</code>, <code>top</code>, and <code>bottom</code> placement. Closes on overlay click or Escape.</p>
+          <div class="demos-preview demos-preview--row">
+            <v-ide-button variant="accent" (clicked)="drawerOpen.set(true)">Open Drawer</v-ide-button>
+            <v-ide-drawer
+              title="File Explorer"
+              placement="left"
+              [visible]="drawerOpen()"
+              (visibleChange)="drawerOpen.set($event)"
+            >
+              <p>Drawer content goes here. You can place a file tree, settings panel, or any secondary UI.</p>
+            </v-ide-drawer>
+          </div>
+        </section>
+      }
+
+      @case ('virtual-list') {
+        <section class="demos-section">
+          <h2 class="demos-section__title">Virtual List</h2>
+          <p class="demos-section__desc">Renders only the visible rows of a large dataset. This demo has 5 000 items — only the visible rows are in the DOM.</p>
+          <div class="demos-preview">
+            <v-ide-virtual-list [items]="virtualItems" [itemHeight]="28" height="280px">
+              <ng-template #itemTemplate let-item>
+                <span class="demos-vlist-icon">ts</span>
+                <span class="demos-vlist-label">{{ item.label }}</span>
+                <span class="demos-vlist-index">{{ item.index }}</span>
+              </ng-template>
+            </v-ide-virtual-list>
+          </div>
+        </section>
+      }
+    }
+  </main>
+</div>
+
+<v-ide-toaster />

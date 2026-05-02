@@ -9,32 +9,31 @@
 
   &--error {
     background-color: var(--ide-error-subtle);
-    border-color: rgba(239, 68, 68, 0.25);
-    color: #fca5a5;
+    border-color: var(--ide-error-border);
+    color: var(--ide-error-text);
   }
 
   &--warning {
     background-color: var(--ide-warning-subtle);
-    border-color: rgba(245, 158, 11, 0.25);
-    color: #fcd34d;
+    border-color: var(--ide-warning-border);
+    color: var(--ide-warning-text);
   }
 
   &--success {
     background-color: var(--ide-success-subtle);
-    border-color: rgba(34, 197, 94, 0.25);
-    color: #86efac;
+    border-color: var(--ide-success-border);
+    color: var(--ide-success-text);
   }
 
   &--info {
     background-color: var(--ide-accent-subtle);
-    border-color: rgba(59, 130, 246, 0.25);
-    color: #93c5fd;
+    border-color: var(--ide-info-border);
+    color: var(--ide-info-text);
   }
 
   &__icon {
+    display: flex;
     flex-shrink: 0;
-    font-size: 8px;
-    line-height: 1;
   }
 
   &__text {

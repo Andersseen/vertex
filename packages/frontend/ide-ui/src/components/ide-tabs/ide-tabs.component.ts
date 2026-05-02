@@ -2,6 +2,7 @@ import {
   Component,
   input,
   output,
+  effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { createTabs } from '@andersseen/headless-components/tabs';
@@ -73,4 +74,13 @@ export class IdeTabsComponent {
   });
 
   protected tabIds = () => this.tabDefs().map((t) => t.id);
+
+  constructor() {
+    // createTabs reads defaultValue() at field-init time (before inputs are set).
+    // This effect re-runs once Angular resolves the input and syncs the selection.
+    effect(() => {
+      const val = this.defaultValue();
+      if (val) this.tabs.actions.selectTab(val);
+    });
+  }
 }

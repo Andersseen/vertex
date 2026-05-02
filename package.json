@@ -109,8 +109,5 @@
     "esbuild-wasm": "^0.28.0",
     "hono": "^4.12.9",
     "node-pty": "^1.1.0"
-  },
-  "patchedDependencies": {
-    "isomorphic-git@1.37.5": "patches/isomorphic-git@1.37.5.patch"
   }
 }

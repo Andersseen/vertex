@@ -224,7 +224,7 @@
         "@angular/core": "^21.2.0",
         "@angular/forms": "^21.2.0",
         "@vertex/types": "workspace:*",
-        "quartz-headless": "^0.0.1",
+        "quartz-headless": "0.0.2",
         "rxjs": "~7.8.0",
         "tslib": "^2.6.2",
       },
@@ -345,9 +345,6 @@
         "typescript": "~5.9.2",
       },
     },
-  },
-  "patchedDependencies": {
-    "isomorphic-git@1.37.5": "patches/isomorphic-git@1.37.5.patch",
   },
   "packages": {
     "@acemir/cssom": ["@acemir/cssom@0.9.31", "", {}, "sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA=="],
@@ -2494,7 +2491,7 @@
 
     "quansync": ["quansync@0.2.11", "", {}, "sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA=="],
 
-    "quartz-headless": ["quartz-headless@0.0.1", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "^21.0.0", "@angular/core": "^21.0.0" } }, "sha512-UnhpX7a/4dfLxY/f8JChQwyGj7JwWE3HzSc4MPpI8AvJVqTBHDCXzB72Omg2q/n87GsYosfC5oBFOHniWAVTEA=="],
+    "quartz-headless": ["quartz-headless@0.0.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "^21.0.0", "@angular/core": "^21.0.0" } }, "sha512-cKbRODqUDn/Ye/xfEeXGRDvqwwBupMG1s/RSyufkfZOQdeK7nlepo3zp1+Q1VQfz23VOpFsU3W8S+MB1AMjekg=="],
 
     "queue-microtask": ["queue-microtask@1.2.3", "", {}, "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="],
 
