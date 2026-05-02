@@ -70,7 +70,12 @@
       "Bash(git -C /Users/andriipap/Andersseen/Web/Projects/vertex status --short)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('version','?'\\), d.get\\('description','?'\\)\\)\")",
       "Read(//Users/andriipap/**)",
-      "WebFetch(domain:claude.ai)"
+      "WebFetch(domain:claude.ai)",
+      "Bash(bun pm *)",
+      "Bash(bun --cwd /Users/andriipap/Andersseen/Web/Projects/vertex pm ls)",
+      "Bash(bun x *)",
+      "Bash(curl -s https://registry.npmjs.org/quartz-headless/latest)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('version',''\\)\\)\")"
     ]
   }
 }

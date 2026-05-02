@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   IdeNavbarComponent,
@@ -10,8 +10,22 @@ import {
   IdeDialogComponent,
   IdeSplitterComponent,
   IdeTreeComponent,
+  IdeAccordionComponent,
+  IdeAccordionItemComponent,
+  IdeDropdownComponent,
+  IdeContextMenuComponent,
+  IdeToasterComponent,
+  IdeToastService,
+  IdeBreadcrumbComponent,
+  IdeTooltipComponent,
+  IdeDrawerComponent,
 } from '@vertex/ide-ui';
-import type { IdeTabDef } from '@vertex/ide-ui';
+import type {
+  IdeTabDef,
+  IdeDropdownItemDef,
+  IdeContextMenuItemDef,
+  IdeBreadcrumbItem,
+} from '@vertex/ide-ui';
 import type { VertexFolder } from '@vertex/types';
 
 const DEMO_TREE: VertexFolder = {
@@ -85,6 +99,28 @@ const DEMO_TABS: IdeTabDef[] = [
   { id: 'tab-disabled', label: 'Disabled', disabled: true },
 ];
 
+const DEMO_DROPDOWN_ITEMS: IdeDropdownItemDef[] = [
+  { id: 'new-file', label: 'New File' },
+  { id: 'new-folder', label: 'New Folder' },
+  { id: 'sep1', label: '', separator: true },
+  { id: 'rename', label: 'Rename' },
+  { id: 'delete', label: 'Delete', disabled: true },
+];
+
+const DEMO_CONTEXT_ITEMS: IdeContextMenuItemDef[] = [
+  { id: 'open', label: 'Open in Editor' },
+  { id: 'copy-path', label: 'Copy Path' },
+  { id: 'sep1', label: '', separator: true },
+  { id: 'reveal', label: 'Reveal in Explorer' },
+  { id: 'delete', label: 'Delete' },
+];
+
+const DEMO_BREADCRUMB: IdeBreadcrumbItem[] = [
+  { id: 'root', label: 'my-project', href: '#' },
+  { id: 'src', label: 'src', href: '#' },
+  { id: 'app', label: 'app.ts', current: true },
+];
+
 @Component({
   selector: 'v-demos',
   standalone: true,
@@ -100,6 +136,14 @@ const DEMO_TABS: IdeTabDef[] = [
     IdeDialogComponent,
     IdeSplitterComponent,
     IdeTreeComponent,
+    IdeAccordionComponent,
+    IdeAccordionItemComponent,
+    IdeDropdownComponent,
+    IdeContextMenuComponent,
+    IdeToasterComponent,
+    IdeBreadcrumbComponent,
+    IdeTooltipComponent,
+    IdeDrawerComponent,
   ],
   templateUrl: './demos.component.html',
   styleUrl: './demos.component.scss',
@@ -114,6 +158,14 @@ export class DemosComponent {
   protected readonly expandedFolders = signal<Set<string>>(new Set(['root', 'src']));
   protected readonly activeFileId = signal<string | null>(null);
   protected readonly tree = DEMO_TREE;
+  protected readonly dropdownItems = DEMO_DROPDOWN_ITEMS;
+  protected readonly contextItems = DEMO_CONTEXT_ITEMS;
+  protected readonly breadcrumbItems = DEMO_BREADCRUMB;
+  protected readonly selectedDropdown = signal('');
+  protected readonly contextItem = signal('');
+  protected readonly drawerOpen = signal(false);
+
+  private readonly toast = inject(IdeToastService);
 
   protected onTabChange(id: string) {
     this.activeTab.set(id);
@@ -142,5 +194,29 @@ export class DemosComponent {
 
   protected increaseProgress() {
     this.progress.update((v) => Math.min(100, v + 10));
+  }
+
+  protected onDropdownSelect(id: string) {
+    this.selectedDropdown.set(id);
+  }
+
+  protected onContextSelect(id: string) {
+    this.contextItem.set(id);
+  }
+
+  protected showToast(type: 'default' | 'success' | 'error' | 'warning' | 'info') {
+    const messages: Record<string, string> = {
+      default: 'Operation completed.',
+      success: 'Repository cloned successfully.',
+      error: 'Failed to connect to the server.',
+      warning: 'File has unsaved changes.',
+      info: 'Building project...',
+    };
+    this.toast.present(messages[type], type);
+  }
+
+  protected onBreadcrumbNavigate(item: IdeBreadcrumbItem) {
+    // navigation is handled by the parent in real usage
+    void item;
   }
 }

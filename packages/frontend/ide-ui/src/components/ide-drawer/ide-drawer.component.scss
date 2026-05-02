@@ -1,0 +1,98 @@
+.ide-drawer {
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background-color: var(--ide-bg-overlay);
+  }
+
+  &__panel {
+    position: fixed;
+    z-index: 401;
+    background-color: var(--ide-bg-surface);
+    border: 1px solid var(--ide-border-default);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &--left {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      border-left: none;
+      border-radius: 0 var(--ide-radius-md) var(--ide-radius-md) 0;
+    }
+
+    &--right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 280px;
+      border-right: none;
+      border-radius: var(--ide-radius-md) 0 0 var(--ide-radius-md);
+    }
+
+    &--top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 280px;
+      border-top: none;
+      border-radius: 0 0 var(--ide-radius-md) var(--ide-radius-md);
+    }
+
+    &--bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 280px;
+      border-bottom: none;
+      border-radius: var(--ide-radius-md) var(--ide-radius-md) 0 0;
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--ide-space-3) var(--ide-space-4);
+    border-bottom: 1px solid var(--ide-border-subtle);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: var(--ide-text-sm);
+    font-weight: var(--ide-font-semibold);
+    color: var(--ide-text-primary);
+    margin: 0;
+  }
+
+  &__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: var(--ide-radius-sm);
+    color: var(--ide-text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: color 100ms ease, background-color 100ms ease;
+
+    &:hover {
+      color: var(--ide-text-primary);
+      background-color: var(--ide-bg-hover);
+    }
+  }
+
+  &__content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: var(--ide-space-4);
+    font-size: var(--ide-text-sm);
+    color: var(--ide-text-secondary);
+    line-height: 1.5;
+  }
+}

@@ -155,6 +155,60 @@
   color: var(--ide-text-muted, #666);
 }
 
+// ─── Accordion ───────────────────────────────────────────────────────────────
+
+.demos-accordion-text {
+  font-size: 13px;
+  color: var(--ide-text-secondary, #888);
+  margin: 0;
+  line-height: 1.5;
+
+  code {
+    font-family: var(--ide-font-mono, monospace);
+    font-size: 12px;
+    background: var(--ide-bg-hover, #1a1a1a);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--ide-accent, #7c3aed);
+  }
+}
+
+// ─── Context menu trigger area ────────────────────────────────────────────────
+
+.demos-context-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 80px;
+  border: 1px dashed var(--ide-border-default, #333);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ide-text-muted, #666);
+  cursor: context-menu;
+  user-select: none;
+}
+
+// ─── Badge ───────────────────────────────────────────────────────────────────
+
+.demos-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: var(--ide-bg-active, #1a1a1a);
+  color: var(--ide-text-secondary, #888);
+  border: 1px solid var(--ide-border-subtle, #222);
+}
+
+// ─── Tooltip (extra vertical padding so tooltips aren't clipped) ──────────────
+
+.demos-preview--tooltip {
+  padding-top: 36px;
+  padding-bottom: 36px;
+}
+
 // ─── Splitter panes ───────────────────────────────────────────────────────────
 
 .demos-pane {

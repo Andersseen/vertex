@@ -4,7 +4,6 @@ import {
   output,
   signal,
   inject,
-  ElementRef,
   DestroyRef,
   ChangeDetectionStrategy,
   PLATFORM_ID,
@@ -73,8 +72,6 @@ export class IdeContextMenuComponent {
     onPosition: (pos) => this.position.set(pos),
   });
 
-  private readonly el = inject(ElementRef<HTMLElement>);
-
   constructor() {
     const platformId = inject(PLATFORM_ID);
     if (!isPlatformBrowser(platformId)) return;
@@ -101,7 +98,7 @@ export class IdeContextMenuComponent {
   protected onContextMenu(e: MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
-    this.ctx.handleContextMenu(e, this.el.nativeElement.getBoundingClientRect());
+    this.ctx.handleContextMenu(e);
     this.isOpen.set(true);
   }
 

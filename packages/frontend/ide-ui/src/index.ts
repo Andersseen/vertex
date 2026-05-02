@@ -18,3 +18,5 @@ export * from './components/ide-context-menu/ide-context-menu.component';
 export * from './components/ide-toast/ide-toast.service';
 export * from './components/ide-toast/ide-toast.component';
 export * from './components/ide-breadcrumb/ide-breadcrumb.component';
+export * from './components/ide-tooltip/ide-tooltip.component';
+export * from './components/ide-drawer/ide-drawer.component';

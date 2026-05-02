@@ -144,4 +144,111 @@
       />
     </div>
   </section>
+
+  <!-- Accordion -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Accordion</h2>
+    <p class="demos-section__desc">Collapsible sections backed by <code>createAccordion</code>. Set <code>allowMultiple</code> to expand several at once.</p>
+    <div class="demos-preview">
+      <v-ide-accordion [allowMultiple]="false">
+        <v-ide-accordion-item itemId="setup" label="Setup">
+          <p class="demos-accordion-text">Run <code>bun install</code> to install all dependencies from the workspace root.</p>
+        </v-ide-accordion-item>
+        <v-ide-accordion-item itemId="build" label="Build">
+          <p class="demos-accordion-text">Run <code>bun build</code> to compile all packages respecting Turbo's dependency graph.</p>
+        </v-ide-accordion-item>
+        <v-ide-accordion-item itemId="deploy" label="Deploy" [disabled]="true">
+          <p class="demos-accordion-text">Deployment is disabled in this environment.</p>
+        </v-ide-accordion-item>
+      </v-ide-accordion>
+    </div>
+  </section>
+
+  <!-- Dropdown -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Dropdown</h2>
+    <p class="demos-section__desc">Click the trigger to open a positioned menu. Supports disabled items and separators.</p>
+    <div class="demos-preview demos-preview--row">
+      <v-ide-dropdown [items]="dropdownItems" (itemSelected)="onDropdownSelect($event)">
+        <v-ide-button dropdownTrigger variant="ghost">Actions ▾</v-ide-button>
+      </v-ide-dropdown>
+      @if (selectedDropdown()) {
+        <span class="demos-badge">Selected: {{ selectedDropdown() }}</span>
+      }
+    </div>
+  </section>
+
+  <!-- Context Menu -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Context Menu</h2>
+    <p class="demos-section__desc">Right-click inside the dashed area to trigger the context menu.</p>
+    <div class="demos-preview">
+      <v-ide-context-menu [items]="contextItems" (itemSelected)="onContextSelect($event)">
+        <div class="demos-context-area">
+          <span>Right-click here</span>
+          @if (contextItem()) {
+            <span class="demos-badge">Last: {{ contextItem() }}</span>
+          }
+        </div>
+      </v-ide-context-menu>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Toast</h2>
+    <p class="demos-section__desc">Transient notifications via <code>IdeToastService</code>. The <code>v-ide-toaster</code> outlet renders all active toasts.</p>
+    <div class="demos-preview demos-preview--row">
+      <v-ide-button variant="ghost" (clicked)="showToast('default')">Default</v-ide-button>
+      <v-ide-button variant="ghost" (clicked)="showToast('success')">Success</v-ide-button>
+      <v-ide-button variant="ghost" (clicked)="showToast('error')">Error</v-ide-button>
+      <v-ide-button variant="ghost" (clicked)="showToast('warning')">Warning</v-ide-button>
+      <v-ide-button variant="ghost" (clicked)="showToast('info')">Info</v-ide-button>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Breadcrumb</h2>
+    <p class="demos-section__desc">Navigation path indicator. The last item is marked as current and is non-interactive.</p>
+    <div class="demos-preview">
+      <v-ide-breadcrumb [items]="breadcrumbItems" (navigate)="onBreadcrumbNavigate($event)" />
+    </div>
+  </section>
+
+  <!-- Tooltip -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Tooltip</h2>
+    <p class="demos-section__desc">Appears on hover or focus. Supports <code>top</code>, <code>bottom</code>, <code>left</code>, and <code>right</code> placement with configurable open/close delay.</p>
+    <div class="demos-preview demos-preview--row demos-preview--tooltip">
+      <v-ide-tooltip text="Default button" placement="top">
+        <v-ide-button>Top</v-ide-button>
+      </v-ide-tooltip>
+      <v-ide-tooltip text="Ghost variant" placement="bottom">
+        <v-ide-button variant="ghost">Bottom</v-ide-button>
+      </v-ide-tooltip>
+      <v-ide-tooltip text="Accent button" placement="right">
+        <v-ide-button variant="accent">Right</v-ide-button>
+      </v-ide-tooltip>
+    </div>
+  </section>
+
+  <!-- Drawer -->
+  <section class="demos-section">
+    <h2 class="demos-section__title">Drawer</h2>
+    <p class="demos-section__desc">Slides in from an edge. Supports <code>left</code>, <code>right</code>, <code>top</code>, and <code>bottom</code> placement. Closes on overlay click or Escape.</p>
+    <div class="demos-preview demos-preview--row">
+      <v-ide-button variant="accent" (clicked)="drawerOpen.set(true)">Open Drawer</v-ide-button>
+      <v-ide-drawer
+        title="File Explorer"
+        placement="left"
+        [visible]="drawerOpen()"
+        (visibleChange)="drawerOpen.set($event)"
+      >
+        <p>Drawer content goes here. You can place a file tree, settings panel, or any secondary UI.</p>
+      </v-ide-drawer>
+    </div>
+  </section>
 </main>
+
+<v-ide-toaster />
