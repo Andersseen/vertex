@@ -40,7 +40,7 @@
 // Quartz overlay tooltip — rendered in document.body outside component scope
 .qz-tooltip {
   position: fixed;
-  z-index: 9000;
+  z-index: var(--ide-z-overlay);
   padding: 3px 8px;
   background-color: var(--ide-bg-elevated);
   color: var(--ide-text-primary);
@@ -52,4 +52,13 @@
   white-space: nowrap;
   pointer-events: none;
   line-height: 1.4;
+}
+
+.ide-overlay-point-anchor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--ide-border-width, 1px);
+  height: var(--ide-border-width, 1px);
+  pointer-events: none;
 }

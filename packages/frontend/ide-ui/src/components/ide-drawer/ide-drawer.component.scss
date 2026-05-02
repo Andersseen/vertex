@@ -2,13 +2,13 @@
   &__overlay {
     position: fixed;
     inset: 0;
-    z-index: 400;
+    z-index: var(--ide-z-drawer);
     background-color: var(--ide-bg-overlay);
   }
 
   &__panel {
     position: fixed;
-    z-index: 401;
+    z-index: calc(var(--ide-z-drawer) + 1);
     background-color: var(--ide-bg-surface);
     border: 1px solid var(--ide-border-default);
     display: flex;
@@ -19,7 +19,7 @@
       top: 0;
       left: 0;
       bottom: 0;
-      width: 280px;
+      width: var(--ide-size-drawer);
       border-left: none;
       border-radius: 0 var(--ide-radius-md) var(--ide-radius-md) 0;
     }
@@ -28,7 +28,7 @@
       top: 0;
       right: 0;
       bottom: 0;
-      width: 280px;
+      width: var(--ide-size-drawer);
       border-right: none;
       border-radius: var(--ide-radius-md) 0 0 var(--ide-radius-md);
     }
@@ -37,7 +37,7 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 280px;
+      height: var(--ide-size-drawer);
       border-top: none;
       border-radius: 0 0 var(--ide-radius-md) var(--ide-radius-md);
     }
@@ -46,7 +46,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 280px;
+      height: var(--ide-size-drawer);
       border-bottom: none;
       border-radius: var(--ide-radius-md) var(--ide-radius-md) 0 0;
     }
@@ -72,8 +72,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: var(--ide-size-control-sm);
+    height: var(--ide-size-control-sm);
     flex-shrink: 0;
     border: none;
     border-radius: var(--ide-radius-sm);

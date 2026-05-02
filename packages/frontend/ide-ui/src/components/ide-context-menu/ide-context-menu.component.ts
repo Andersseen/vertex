@@ -11,11 +11,20 @@ import {
   ViewContainerRef,
   viewChild,
   OnDestroy,
+  Renderer2,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OverlayService, OverlayRef } from 'quartz-headless';
 import { createContextMenu } from '@andersseen/headless-components/context-menu';
 import { createMenuList } from '@andersseen/headless-components/menu-list';
+import {
+  createPointAnchor,
+  focusFirstMenuItem,
+  getInteractiveMenuItems,
+  getMenuIndex,
+  toHeadlessMenuItem,
+} from '../shared/ide-menu.utils';
 
 export interface IdeContextMenuItemDef {
   id: string;
@@ -103,6 +112,8 @@ export class IdeContextMenuComponent implements OnDestroy {
   private readonly overlayService = inject(OverlayService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
   private readonly menuTemplate = viewChild.required<TemplateRef<unknown>>('menuTemplate');
   private overlayRef: OverlayRef | null = null;
   private anchorEl: HTMLElement | null = null;
@@ -113,7 +124,9 @@ export class IdeContextMenuComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.overlayRef?.destroy();
-    this.anchorEl?.remove();
+    if (this.anchorEl) {
+      this.renderer.removeChild(this.hostRef.nativeElement, this.anchorEl);
+    }
     this.overlayRef = null;
     this.anchorEl = null;
   }
@@ -143,43 +156,29 @@ export class IdeContextMenuComponent implements OnDestroy {
   }
 
   protected toMenuItem(item: IdeContextMenuItemDef) {
-    return {
-      id: item.id,
-      disabled: item.disabled,
-      intent: item.intent,
-    };
+    return toHeadlessMenuItem(item);
   }
 
   protected menuIndex(templateIndex: number): number {
-    const item = this.items()[templateIndex];
-    if (!item || item.separator) return -1;
-    return this.items().slice(0, templateIndex + 1).filter((i) => !i.separator).length - 1;
+    return getMenuIndex(this.items(), templateIndex);
   }
 
   private openAt(x: number, y: number): void {
     this.ensureAnchor();
     this.ensureOverlay();
-    this.menu.actions.setItems(this.items().filter((i) => !i.separator).map((i) => this.toMenuItem(i)));
-    this.anchorEl!.style.transform = `translate(${x}px, ${y}px)`;
+    this.menu.actions.setItems(getInteractiveMenuItems(this.items()));
+    const anchor = this.anchorEl;
+    if (!anchor) return;
+    this.renderer.setStyle(anchor, 'transform', `translate(${x}px, ${y}px)`);
     this.ctx.actions.open({ x, y });
     this.overlayRef?.open();
     this.isOpen.set(true);
-    setTimeout(() => this.focusFirstItem());
+    this.focusFirstItem();
   }
 
   private ensureAnchor(): void {
     if (this.anchorEl) return;
-    this.anchorEl = document.createElement('span');
-    this.anchorEl.setAttribute('aria-hidden', 'true');
-    this.anchorEl.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 1px;
-      height: 1px;
-      pointer-events: none;
-    `;
-    this.hostRef.nativeElement.appendChild(this.anchorEl);
+    this.anchorEl = createPointAnchor(this.renderer, this.hostRef);
   }
 
   private ensureOverlay(): void {
@@ -212,7 +211,6 @@ export class IdeContextMenuComponent implements OnDestroy {
   }
 
   private focusFirstItem(): void {
-    const first = document.querySelector<HTMLElement>(`#${this.menuId} [data-ide-menu-item]:not([data-disabled])`);
-    first?.focus();
+    focusFirstMenuItem(this.document, this.menuId);
   }
 }

@@ -8,7 +8,7 @@
 
   &__content {
     position: absolute;
-    z-index: 300;
+    z-index: var(--ide-z-tooltip);
     padding: var(--ide-space-1) var(--ide-space-2);
     background-color: var(--ide-bg-active);
     border: 1px solid var(--ide-border-default);

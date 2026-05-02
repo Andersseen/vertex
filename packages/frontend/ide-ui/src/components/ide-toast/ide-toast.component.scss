@@ -1,6 +1,6 @@
 .ide-toaster {
   position: fixed;
-  z-index: 500;
+  z-index: var(--ide-z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--ide-space-2);
@@ -92,8 +92,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: var(--ide-size-icon-md);
+    height: var(--ide-size-icon-md);
     flex-shrink: 0;
     border: none;
     border-radius: var(--ide-radius-sm);

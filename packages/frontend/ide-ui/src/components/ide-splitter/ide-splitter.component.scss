@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  z-index: 10;
+  z-index: var(--ide-z-splitter);
 
   .qz-splitter-container--horizontal > & {
     width: 4px;

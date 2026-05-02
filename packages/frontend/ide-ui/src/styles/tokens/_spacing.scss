@@ -14,6 +14,26 @@
   --ide-radius-md: 6px;
   --ide-radius-lg: 8px;
 
+  --ide-border-width: 1px;
+
   --ide-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --ide-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  --ide-z-dialog: 100;
+  --ide-z-splitter: 10;
+  --ide-z-tooltip: 300;
+  --ide-z-drawer: 400;
+  --ide-z-toast: 500;
+  --ide-z-overlay: 9000;
+
+  --ide-size-icon-sm: 16px;
+  --ide-size-icon-md: 20px;
+  --ide-size-control-sm: 24px;
+  --ide-size-control-md: 28px;
+  --ide-size-row-sm: 26px;
+  --ide-size-input: 32px;
+  --ide-size-drawer: 280px;
+
+  --ide-menu-min-width: 180px;
+  --ide-context-menu-min-width: 160px;
 }

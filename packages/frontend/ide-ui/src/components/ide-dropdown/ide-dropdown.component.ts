@@ -13,11 +13,19 @@ import {
   ChangeDetectionStrategy,
   OnDestroy,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OverlayService, OverlayRef } from 'quartz-headless';
 import type { OverlayPlacement } from 'quartz-headless';
 import { createDropdown } from '@andersseen/headless-components/dropdown';
 import { createMenuList } from '@andersseen/headless-components/menu-list';
+import {
+  focusFirstMenuItem,
+  getInteractiveMenuItemIds,
+  getInteractiveMenuItems,
+  getMenuIndex,
+  toHeadlessMenuItem,
+} from '../shared/ide-menu.utils';
 
 export interface IdeDropdownItemDef {
   id: string;
@@ -101,7 +109,7 @@ export class IdeDropdownComponent implements OnDestroy {
 
   protected readonly menuId = `ide-dropdown-menu-${++IdeDropdownComponent.idCounter}`;
   protected readonly isOpen = signal(false);
-  protected readonly itemIds = computed(() => this.items().filter((i) => !i.separator).map((i) => i.id));
+  protected readonly itemIds = computed(() => getInteractiveMenuItemIds(this.items()));
 
   protected readonly dropdown = createDropdown({
     placement: 'bottom',
@@ -119,6 +127,7 @@ export class IdeDropdownComponent implements OnDestroy {
   private readonly overlayService = inject(OverlayService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private overlayRef: OverlayRef | null = null;
 
   constructor() {
@@ -137,7 +146,7 @@ export class IdeDropdownComponent implements OnDestroy {
     this.dropdown.actions.open();
     this.overlayRef?.open();
     this.syncOpen(true);
-    setTimeout(() => this.focusFirstItem());
+    this.focusFirstItem();
   }
 
   close(): void {
@@ -174,17 +183,11 @@ export class IdeDropdownComponent implements OnDestroy {
   }
 
   protected toMenuItem(item: IdeDropdownItemDef) {
-    return {
-      id: item.id,
-      disabled: item.disabled,
-      intent: item.intent,
-    };
+    return toHeadlessMenuItem(item);
   }
 
   protected menuIndex(templateIndex: number): number {
-    const item = this.items()[templateIndex];
-    if (!item || item.separator) return -1;
-    return this.items().slice(0, templateIndex + 1).filter((i) => !i.separator).length - 1;
+    return getMenuIndex(this.items(), templateIndex);
   }
 
   private ensureOverlay(): void {
@@ -210,9 +213,7 @@ export class IdeDropdownComponent implements OnDestroy {
   }
 
   private menuItems() {
-    return this.items()
-      .filter((item) => !item.separator)
-      .map((item) => this.toMenuItem(item));
+    return getInteractiveMenuItems(this.items());
   }
 
   private selectById(id: string): void {
@@ -224,7 +225,6 @@ export class IdeDropdownComponent implements OnDestroy {
   }
 
   private focusFirstItem(): void {
-    const first = document.querySelector<HTMLElement>(`#${this.menuId} [data-ide-menu-item]:not([data-disabled])`);
-    first?.focus();
+    focusFirstMenuItem(this.document, this.menuId);
   }
 }

@@ -7,7 +7,7 @@
   }
 
   &__menu {
-    min-width: 180px;
+    min-width: var(--ide-menu-min-width);
     padding: var(--ide-space-1) 0;
     border: 1px solid var(--ide-border-default);
     border-radius: var(--ide-radius-md);
@@ -21,7 +21,7 @@
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: 26px;
+    min-height: var(--ide-size-row-sm);
     gap: var(--ide-space-2);
     padding: var(--ide-space-1) var(--ide-space-3);
     border: none;
@@ -58,8 +58,8 @@
   }
 
   &__item-icon {
-    width: 16px;
-    flex: 0 0 16px;
+    width: var(--ide-size-icon-sm);
+    flex: 0 0 var(--ide-size-icon-sm);
     color: var(--ide-text-muted);
     text-align: center;
   }
@@ -79,7 +79,7 @@
   }
 
   &__separator {
-    height: 1px;
+    height: var(--ide-border-width, 1px);
     background-color: var(--ide-border-subtle);
     margin: var(--ide-space-1) 0;
   }
