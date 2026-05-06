@@ -59,6 +59,7 @@ export class EditorConfigurator {
 
       // Read-only configuration
       EditorState.readOnly.of(true), // Always read-only
+      EditorView.editable.of(false),
       EditorState.tabSize.of(config.tabSize),
 
       // Minimal keymap (only navigation)

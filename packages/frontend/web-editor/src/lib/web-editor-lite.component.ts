@@ -154,6 +154,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
 
       // Always read-only in lite version
       EditorState.readOnly.of(true),
+      EditorView.editable.of(false),
 
       // Dynamic compartments
       this.themeCompartment.of(this.getThemeExtension()),
