@@ -90,6 +90,7 @@ export class EditorConfigurator {
   readonly languageCompartment = new Compartment();
   readonly themeCompartment = new Compartment();
   readonly readonlyCompartment = new Compartment();
+  readonly editableCompartment = new Compartment();
   readonly lineNumbersCompartment = new Compartment();
   readonly wordWrapCompartment = new Compartment();
 
@@ -104,6 +105,7 @@ export class EditorConfigurator {
       this.languageCompartment.of(config.language || []),
       this.themeCompartment.of(this.getThemeExtension(config.theme)),
       this.readonlyCompartment.of(EditorState.readOnly.of(config.readonly)),
+      this.editableCompartment.of(EditorView.editable.of(!config.readonly)),
       this.lineNumbersCompartment.of(config.lineNumbers ? lineNumbers() : []),
       this.wordWrapCompartment.of(
         config.wordWrap ? EditorView.lineWrapping : [],
