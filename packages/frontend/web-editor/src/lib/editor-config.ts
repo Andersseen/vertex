@@ -26,8 +26,7 @@ let autocompleteExtension: Extension | null = null;
 
 async function getSearchExtension(): Promise<Extension> {
   if (!searchExtension) {
-    const { searchKeymap, highlightSelectionMatches } =
-      await import("@codemirror/search");
+    const { searchKeymap } = await import("@codemirror/search");
     searchExtension = keymap.of(searchKeymap);
   }
   return searchExtension;

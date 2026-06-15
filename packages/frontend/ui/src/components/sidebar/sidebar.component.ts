@@ -29,6 +29,8 @@ export class SidebarComponent {
   readonly newFolder = output<void>();
   readonly folderToggle = output<VertexFolder>();
   readonly refresh = output<void>();
+  readonly rename = output<void>();
+  readonly delete = output<void>();
 
   protected readonly expandedFolders = signal<Set<string>>(new Set());
 

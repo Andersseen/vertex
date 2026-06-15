@@ -26,6 +26,7 @@ const subpaths = [
   'extras/lint/index',
   'extras/format/index',
   'extras/css/index',
+  'lsp/index',
 ]
 
 let failed = false

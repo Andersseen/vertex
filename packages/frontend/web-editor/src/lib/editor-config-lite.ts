@@ -16,7 +16,7 @@ import {
   ViewUpdate,
 } from "@codemirror/view";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { defaultKeymap, history } from "@codemirror/commands";
+import { defaultKeymap } from "@codemirror/commands";
 import {
   defaultHighlightStyle,
   LanguageSupport,

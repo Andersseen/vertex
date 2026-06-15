@@ -74,13 +74,13 @@ export interface WebEditorElement extends HTMLElement {
   // Events
   addEventListener<K extends keyof WebEditorElementEventMap>(
     type: K,
-    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => any,
+    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => unknown,
     options?: boolean | AddEventListenerOptions
   ): void;
 
   removeEventListener<K extends keyof WebEditorElementEventMap>(
     type: K,
-    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => any,
+    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => unknown,
     options?: boolean | EventListenerOptions
   ): void;
 }
@@ -94,6 +94,6 @@ export interface WebEditorElementEventMap extends HTMLElementEventMap {
 }
 
 // Utility functions
-export function getLanguageSupport(lang: string): Promise<any>;
+export function getLanguageSupport(lang: string): Promise<unknown>;
 export function isLanguageSupported(lang: string): boolean;
 export function getSupportedLanguages(): string[];

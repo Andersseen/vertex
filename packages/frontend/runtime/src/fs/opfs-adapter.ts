@@ -27,6 +27,61 @@ export class OPFSFS implements IVirtualFS {
     this.notify('delete', path)
   }
 
+  async deleteDirectory(path: string): Promise<void> {
+    await this.clearDir(path)
+    await this.fs.promises.rmdir(path).catch(() => {})
+    this.notify('delete', path)
+  }
+
+  async rename(oldPath: string, newPath: string): Promise<void> {
+    const content = await this.fs.promises.readFile(oldPath, { encoding: 'utf8' }).catch(() => null)
+    if (content !== null) {
+      await this.ensureDir(this.dirname(newPath))
+      await this.fs.promises.writeFile(newPath, content as string)
+      await this.fs.promises.unlink(oldPath)
+      this.notify('delete', oldPath)
+      this.notify('change', newPath)
+      return
+    }
+
+    // Directory rename: recursive copy + delete.
+    await this.copyDir(oldPath, newPath)
+    await this.deleteDirectory(oldPath)
+  }
+
+  private async clearDir(dir: string): Promise<void> {
+    const names = (await this.fs.promises.readdir(dir).catch(() => [])) as string[]
+    for (const name of names) {
+      if (name === '.' || name === '..') continue
+      const fullPath = `${dir}/${name}`.replace('//', '/')
+      const stat = await this.fs.promises.stat(fullPath)
+      if ((stat as { type?: string }).type === 'dir') {
+        await this.clearDir(fullPath)
+        await this.fs.promises.rmdir(fullPath).catch(() => {})
+      } else {
+        await this.fs.promises.unlink(fullPath).catch(() => {})
+      }
+    }
+  }
+
+  private async copyDir(oldDir: string, newDir: string): Promise<void> {
+    await this.ensureDir(newDir)
+    const entries = await this.fs.promises.readdir(oldDir)
+    for (const name of entries) {
+      if (name === '.' || name === '..') continue
+      const oldPath = `${oldDir}/${name}`.replace('//', '/')
+      const newPath = `${newDir}/${name}`.replace('//', '/')
+      const stat = await this.fs.promises.stat(oldPath)
+      if ((stat as { type?: string }).type === 'dir') {
+        await this.copyDir(oldPath, newPath)
+      } else {
+        const content = await this.fs.promises.readFile(oldPath, { encoding: 'utf8' })
+        await this.fs.promises.writeFile(newPath, content as string)
+        this.notify('change', newPath)
+      }
+    }
+  }
+
   async readDir(path: string): Promise<DirEntry[]> {
     const names = (await this.fs.promises.readdir(path)) as string[]
     const entries: DirEntry[] = []

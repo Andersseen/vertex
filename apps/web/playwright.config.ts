@@ -27,7 +27,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'bun run start --port 4201',
+    command: 'bun run start -- --port 4201',
     url: 'http://localhost:4201',
     reuseExistingServer: false,
   },

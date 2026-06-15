@@ -1,0 +1,20 @@
+{
+  "name": "@vertex/backend-core",
+  "version": "0.1.0",
+  "description": "Experimental shared terminal types and manager. Not yet wired into the workspace build.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "mkdir -p dist && echo 'Experimental package — no build step yet' > dist/.gitkeep",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "node-pty": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "~5.9.2"
+  }
+}

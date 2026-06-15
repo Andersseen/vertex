@@ -21,6 +21,7 @@
       "@vertex/core/web": ["../../packages/frontend/core/src/web/index.ts"],
       "@vertex/types": ["../../packages/frontend/types/src/index.ts"],
       "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"],
+      "@vertex/runtime/lsp": ["../../packages/frontend/runtime/src/lsp/index.ts"],
       "@vertex/runtime/build": ["../../packages/frontend/runtime/src/build/index.ts"],
       "@vertex/runtime/preview-wc-headless": ["../../packages/frontend/runtime/src/preview-wc-headless/index.ts"],
       "@vertex/runtime/preview-wc": ["../../packages/frontend/runtime/src/preview-wc/index.ts"],

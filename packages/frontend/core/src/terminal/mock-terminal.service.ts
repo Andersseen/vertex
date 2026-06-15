@@ -13,7 +13,7 @@ export class MockTerminalService implements TerminalBackendAdapter {
   private dataSubject = new Subject<string>();
   readonly onData$ = this.dataSubject.asObservable();
 
-  async connect(cwd?: string): Promise<void> {
+  async connect(_cwd?: string): Promise<void> {
     console.log("[MockTerminal] Terminal not available in web mode");
     this.dataSubject.next(
       "\r\n\x1b[36m╔═══════════════════════════════════════╗\x1b[0m\r\n" +
@@ -25,12 +25,12 @@ export class MockTerminalService implements TerminalBackendAdapter {
     return Promise.resolve();
   }
 
-  async write(data: string): Promise<void> {
+  async write(_data: string): Promise<void> {
     // No-op in web mode
     return Promise.resolve();
   }
 
-  async resize(cols: number, rows: number): Promise<void> {
+  async resize(_cols: number, _rows: number): Promise<void> {
     // No-op in web mode
     return Promise.resolve();
   }

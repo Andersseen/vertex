@@ -50,12 +50,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/vertex-editor.git"
+    "url": "https://github.com/Andersseen/vertex.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/vertex-editor/issues"
+    "url": "https://github.com/Andersseen/vertex/issues"
   },
-  "homepage": "https://github.com/your-username/vertex-editor#readme",
+  "homepage": "https://github.com/Andersseen/vertex#readme",
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",

@@ -32,11 +32,13 @@ function makeVfs(structure: Record<string, string | Record<string, string>>): IV
     },
     writeFile: async () => {},
     deleteFile: async () => {},
+    deleteDirectory: async () => {},
+    rename: async () => {},
     exists: async () => false,
     mkdir: async () => {},
     watch: () => () => {},
     clear: async () => {},
-  }
+  } as IVirtualFS
 }
 
 describe('vfsToFileSystemTree', () => {

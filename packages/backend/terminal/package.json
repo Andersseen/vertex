@@ -9,7 +9,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "build": "echo 'No build step needed for Node.js'"
+    "build": "mkdir -p dist && echo 'No build step needed for Node.js' > dist/.gitkeep"
+  },
+  "turbo": {
+    "outputs": []
   },
   "dependencies": {
     "@hono/node-server": "^1.11.0",

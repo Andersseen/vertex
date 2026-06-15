@@ -14,6 +14,7 @@ import { CommonModule } from "@angular/common";
 import { EditorState, Extension, Compartment } from "@codemirror/state";
 import { EditorView, basicSetup } from "codemirror";
 import { keymap } from "@codemirror/view";
+import { searchKeymap } from "@codemirror/search";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -165,6 +166,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
               return true;
             },
           },
+          ...searchKeymap,
         ]),
         ...this.extensions(),
       ],

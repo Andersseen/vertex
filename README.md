@@ -1,36 +1,38 @@
 # Vertex
 
-Vertex is an open source IDE platform built with Angular, Tauri, Bun, and CodeMirror 6.
+Vertex is an open source IDE platform built with Angular, Tauri, Bun, and CodeMirror 6. It runs in the browser, on the desktop, and as an embeddable web component.
 
 It contains:
 
 - A desktop IDE app (Tauri + Angular)
-- A web app
-- A reusable web editor package
+- A web app (Angular + Analog.js + Vite)
+- A reusable `<vertex-editor>` web component
+- A browser-native runtime (VirtualFS, Git, esbuild-wasm bundler, WebContainers preview, Cloudflare deploy)
 - Frontend and backend packages in a Bun/Turbo monorepo
 
 ## Status
 
-Active development.
+Active development — Phase 2 (browser build, preview, and deploy) is in progress.
 
 ## Monorepo Layout
 
 ```text
 apps/
   desktop/           # Tauri desktop app
-  web/               # Analog/Angular web app
+  web/               # Analog/Angular + Vite web app
   web-editor-demo/   # Demo app for web editor
 packages/
   frontend/
-    core/
-    ide-ui/
-    runtime/
-    types/
-    ui/
-    web-editor/
+    core/              # Angular services, Dexie DB, terminal adapter
+    ide-ui/            # Headless IDE UI components
+    runtime/           # Browser-native runtime (FS, Git, build, preview, deploy)
+    types/             # Shared types
+    ui/                # Layouts, CodeMirror editor, sidebar
+    web-editor/        # Publishable <vertex-editor> web component
   backend/
-    sidecar/
-    terminal/
+    sidecar/           # Bun/Hono filesystem sidecar
+    terminal/          # Node.js + node-pty terminal sidecar
+    core/              # (experimental) shared terminal types/manager/router
 scripts/
 ```
 
@@ -58,10 +60,10 @@ bun run build
 
 ## Web Editor One-Liner Install
 
-Install the standalone web component into any project:
+Install the standalone `<vertex-editor>` web component into any project:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
+curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public
 ```
 
 Basic usage:

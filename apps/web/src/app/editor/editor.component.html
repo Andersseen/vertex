@@ -7,7 +7,9 @@
     (fileSelect)="onFileSelect($event)"
     (folderToggle)="onFolderToggle($event)"
     (newFile)="onNewFile()"
-    (newFolder)="onNewFile()"
+    (newFolder)="onNewFolder()"
+    (rename)="onRename()"
+    (delete)="onDelete()"
   ></v-sidebar>
 
   <!-- Main Editor Area (with optional Preview split) -->
@@ -36,6 +38,7 @@
             <v-editor
               [file]="activeFile()"
               [showHeader]="false"
+              [extensions]="editorExtensions()"
               (contentChange)="onContentChange($event)"
               (save)="onSave()"
             ></v-editor>
@@ -48,6 +51,7 @@
         <v-editor
           [file]="activeFile()"
           [showHeader]="false"
+          [extensions]="editorExtensions()"
           (contentChange)="onContentChange($event)"
           (save)="onSave()"
           class="vx-flex-1"
@@ -86,3 +90,62 @@
   (visibleChange)="showCloneDialog.set($event)"
   (cloneSuccess)="onCloneSuccess($event)"
 />
+
+<!-- Open Folder Dialog -->
+<app-prompt-dialog
+  [visible]="showOpenFolderDialog()"
+  title="Open Folder"
+  message="Enter absolute path to workspace folder:"
+  [value]="openFolderPreset()"
+  confirmLabel="Open"
+  (visibleChange)="showOpenFolderDialog.set($event)"
+  (confirmValue)="onOpenFolderConfirm($event)"
+/>
+
+<!-- New File Dialog -->
+<app-prompt-dialog
+  [visible]="showNewFileDialog()"
+  title="New File"
+  message="Enter file name:"
+  placeholder="example.ts"
+  [value]="newFilePreset()"
+  confirmLabel="Create"
+  (visibleChange)="showNewFileDialog.set($event)"
+  (confirmValue)="onNewFileConfirm($event)"
+/>
+
+<!-- New Folder Dialog -->
+<app-prompt-dialog
+  [visible]="showNewFolderDialog()"
+  title="New Folder"
+  message="Enter folder name:"
+  placeholder="src"
+  [value]="newFolderPreset()"
+  confirmLabel="Create"
+  (visibleChange)="showNewFolderDialog.set($event)"
+  (confirmValue)="onNewFolderConfirm($event)"
+/>
+
+<!-- Rename Dialog -->
+<app-prompt-dialog
+  [visible]="showRenameDialog()"
+  title="Rename"
+  message="Enter new name:"
+  [value]="renamePreset()"
+  confirmLabel="Rename"
+  (visibleChange)="showRenameDialog.set($event)"
+  (confirmValue)="onRenameConfirm($event)"
+/>
+
+<!-- Delete Confirm Dialog -->
+<app-confirm-dialog
+  [visible]="showDeleteConfirmDialog()"
+  title="Delete"
+  [message]="deleteConfirmMessage()"
+  confirmLabel="Delete"
+  (visibleChange)="showDeleteConfirmDialog.set($event)"
+  (confirmed)="onDeleteConfirm()"
+/>
+
+<!-- Toast notifications -->
+<v-ide-toaster />

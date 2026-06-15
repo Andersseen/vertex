@@ -21,6 +21,14 @@ export class VirtualFS implements IVirtualFS {
     return this.adapter.deleteFile(path)
   }
 
+  deleteDirectory(path: string): Promise<void> {
+    return this.adapter.deleteDirectory(path)
+  }
+
+  rename(oldPath: string, newPath: string): Promise<void> {
+    return this.adapter.rename(oldPath, newPath)
+  }
+
   readDir(path: string): Promise<DirEntry[]> {
     return this.adapter.readDir(path)
   }

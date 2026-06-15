@@ -8,7 +8,9 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@vertex/types": ["../types/src/index.ts"],
-      "@vertex/core": ["../core/src/index.ts"]
+      "@vertex/core": ["../core/src/index.ts"],
+      "@vertex/runtime": ["../runtime/src/index.ts"],
+      "@vertex/runtime/lsp": ["../runtime/src/lsp/index.ts"]
     }
   },
   "include": ["src/**/*"],
