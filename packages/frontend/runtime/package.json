@@ -47,6 +47,10 @@
     "./css": {
       "types": "./src/extras/css/index.ts",
       "import": "./dist/extras/css/index.js"
+    },
+    "./lsp": {
+      "types": "./src/lsp/index.ts",
+      "import": "./dist/lsp/index.js"
     }
   },
   "files": ["dist", "src", "README.md", "LICENSE"],
@@ -65,7 +69,8 @@
     "@isomorphic-git/lightning-fs": "^4.6.2",
     "@webcontainer/api": "^1.6.4",
     "esbuild-wasm": "^0.28.0",
-    "isomorphic-git": "^1.37.5"
+    "isomorphic-git": "^1.37.5",
+    "typescript": "~5.9.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

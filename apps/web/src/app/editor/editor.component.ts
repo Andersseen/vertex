@@ -2,6 +2,7 @@ import {
   Component,
   signal,
   inject,
+  computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,11 +12,15 @@ import { SidebarComponent } from '@vertex/ui';
 import { BottomPanelComponent } from '@vertex/ui';
 import { TabsComponent } from '@vertex/ui';
 import { IdeSplitterComponent } from '@vertex/ide-ui';
+import { tsLspExtensions } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 import { RuntimeService } from '@vertex/core/web';
+import { IdeToastService } from '@vertex/ide-ui';
 import { CloneDialogComponent } from '../components/clone-dialog/clone-dialog.component';
 import { PreviewPanelComponent } from '../components/preview-panel/preview-panel.component';
+import { PromptDialogComponent } from '../components/prompt-dialog/prompt-dialog.component';
+import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
 import { EditorSessionService } from '../services/editor-session.service';
 
 function findFirstFile(folder: VertexFolder): VertexFile | null {
@@ -42,6 +47,8 @@ function findFirstFile(folder: VertexFolder): VertexFile | null {
     IdeSplitterComponent,
     CloneDialogComponent,
     PreviewPanelComponent,
+    PromptDialogComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +82,7 @@ export class EditorComponent {
   private readonly router = inject(Router);
   protected readonly runtime = inject(RuntimeService);
   protected readonly session = inject(EditorSessionService);
+  private readonly toast = inject(IdeToastService);
 
   protected readonly showCloneDialog = signal(false);
   protected readonly showPreview = signal(false);
@@ -82,9 +90,35 @@ export class EditorComponent {
   protected readonly rootFolder = signal<VertexFolder | null>(null);
   protected readonly workspacePath = signal<string>('');
 
+  protected readonly showOpenFolderDialog = signal(false);
+  protected readonly openFolderPreset = signal<string>('.');
+
+  protected readonly showNewFileDialog = signal(false);
+  protected readonly newFilePreset = signal<string>('');
+
+  protected readonly showNewFolderDialog = signal(false);
+  protected readonly newFolderPreset = signal<string>('');
+
+  protected readonly showRenameDialog = signal(false);
+  protected readonly renamePreset = signal<string>('');
+  private renameTarget: VertexFile | VertexFolder | null = null;
+
+  protected readonly showDeleteConfirmDialog = signal(false);
+  protected readonly deleteConfirmMessage = signal<string>('');
+  private deleteTarget: VertexFile | VertexFolder | null = null;
+
   protected readonly openFiles = this.session.files;
   protected readonly activeFileId = this.session.activeId;
   protected readonly activeFile = this.session.activeFile;
+  protected readonly editorExtensions = computed(() => {
+    const file = this.activeFile();
+    if (!file) return [];
+    const lang = file.language?.toLowerCase();
+    if (lang === 'typescript' || lang === 'javascript' || lang === 'ts' || lang === 'js') {
+      return tsLspExtensions(file.path);
+    }
+    return [];
+  });
 
   constructor() {
     const cloneUrl = this.route.snapshot.queryParamMap.get('clone');
@@ -157,19 +191,19 @@ export class EditorComponent {
   // ── Folder / File ops ───────────────────────────────────────────────────────
 
   openFolder(): void {
-    const path = window.prompt(
-      'Enter absolute path to workspace folder:',
-      this.rootFolder()?.path || '.',
-    );
-    if (path) {
-      this.fileService.setWorkspace(path).subscribe({
-        next: () => {
-          this.workspacePath.set(path);
-          this.loadDirectory(path);
-        },
-        error: () => this.loadDirectory(path),
-      });
-    }
+    this.openFolderPreset.set(this.rootFolder()?.path || '.');
+    this.showOpenFolderDialog.set(true);
+  }
+
+  onOpenFolderConfirm(path: string): void {
+    if (!path) return;
+    this.fileService.setWorkspace(path).subscribe({
+      next: () => {
+        this.workspacePath.set(path);
+        this.loadDirectory(path);
+      },
+      error: () => this.loadDirectory(path),
+    });
   }
 
   onFolderToggle(folder: VertexFolder): void {
@@ -211,17 +245,104 @@ export class EditorComponent {
   }
 
   onNewFile(): void {
-    const name = window.prompt('Enter file name:');
-    if (name) {
-      const newFile: VertexFile = {
-        id: `new-${Date.now()}`,
-        name,
-        path: name,
-        content: '',
-        language: 'text',
-        isDirty: true,
-      };
-      this.session.open(newFile);
+    this.newFilePreset.set('');
+    this.showNewFileDialog.set(true);
+  }
+
+  onNewFileConfirm(name: string): void {
+    if (!name) return;
+    const newFile: VertexFile = {
+      id: `new-${Date.now()}`,
+      name,
+      path: name,
+      content: '',
+      language: 'text',
+      isDirty: true,
+    };
+    this.session.open(newFile);
+    void this.persistNewFile(newFile.path, '');
+  }
+
+  onNewFolder(): void {
+    this.newFolderPreset.set('');
+    this.showNewFolderDialog.set(true);
+  }
+
+  async onNewFolderConfirm(name: string): Promise<void> {
+    if (!name) return;
+    if (this.runtime.isVirtualMode()) {
+      await this.runtime.createDirectory(name);
+    }
+    // Native mode would need sidecar support.
+    await this.refreshRootFolder();
+  }
+
+  onRename(): void {
+    const target = this.activeFile() ?? this.rootFolder();
+    if (!target) return;
+    this.renameTarget = target;
+    this.renamePreset.set(target.name);
+    this.showRenameDialog.set(true);
+  }
+
+  async onRenameConfirm(newName: string): Promise<void> {
+    const target = this.renameTarget;
+    if (!target || !newName || newName === target.name) return;
+
+    const parentPath = target.path.substring(0, target.path.lastIndexOf('/')) || '/';
+    const newPath = parentPath === '/' ? `/${newName}` : `${parentPath}/${newName}`;
+
+    if (this.runtime.isVirtualMode()) {
+      await this.runtime.rename(target.path, newPath);
+    }
+
+    if ('children' in target) {
+      // TODO: update open files inside renamed folder.
+    } else {
+      this.session.updateFile(target.id, { id: newPath, path: newPath, name: newName });
+    }
+
+    this.renameTarget = null;
+    await this.refreshRootFolder();
+  }
+
+  onDelete(): void {
+    const target = this.activeFile() ?? this.rootFolder();
+    if (!target) return;
+    this.deleteTarget = target;
+    this.deleteConfirmMessage.set(`Are you sure you want to delete "${target.name}"?`);
+    this.showDeleteConfirmDialog.set(true);
+  }
+
+  async onDeleteConfirm(): Promise<void> {
+    const target = this.deleteTarget;
+    if (!target) return;
+
+    if (this.runtime.isVirtualMode()) {
+      if ('children' in target) {
+        await this.runtime.deleteDirectory(target.path);
+      } else {
+        await this.runtime.deleteFile(target.path);
+        this.session.close(target);
+      }
+    }
+
+    this.deleteTarget = null;
+    await this.refreshRootFolder();
+  }
+
+  private async persistNewFile(path: string, content: string): Promise<void> {
+    if (this.runtime.isVirtualMode()) {
+      await this.runtime.writeFile(path, content);
+    }
+  }
+
+  private async refreshRootFolder(): Promise<void> {
+    if (!this.runtime.isVirtualMode()) return;
+    const folder = await this.runtime.loadSession();
+    if (folder) {
+      this.rootFolder.set(folder);
+      this.workspacePath.set(folder.path);
     }
   }
 
@@ -246,8 +367,10 @@ export class EditorComponent {
         );
       }
       this.session.markClean(file.id);
+      this.toast.present(`Saved ${file.name}`, 'success', 2000);
     } catch (err) {
       console.error('Failed to save file:', err);
+      this.toast.present(`Failed to save ${file.name}`, 'error', 3000);
     }
   }
 

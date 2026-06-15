@@ -89,6 +89,26 @@ export class RuntimeService {
     return this.opfs.writeFile(path, content);
   }
 
+  async deleteFile(path: string): Promise<void> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return this.opfs.deleteFile(path);
+  }
+
+  async createDirectory(path: string): Promise<void> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return this.opfs.mkdir(path);
+  }
+
+  async deleteDirectory(path: string): Promise<void> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return this.opfs.deleteDirectory(path);
+  }
+
+  async rename(oldPath: string, newPath: string): Promise<void> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return this.opfs.rename(oldPath, newPath);
+  }
+
   getGitClient(): GitClient | null {
     return this.gitClient;
   }

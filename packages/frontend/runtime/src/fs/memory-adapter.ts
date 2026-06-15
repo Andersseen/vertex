@@ -23,6 +23,44 @@ export class MemoryFS implements IVirtualFS {
     this.notify('delete', normalized)
   }
 
+  async deleteDirectory(path: string): Promise<void> {
+    const normalized = this.normalize(path)
+    const prefix = normalized === '/' ? '/' : normalized + '/'
+    for (const [filePath] of this.files) {
+      if (filePath === normalized || filePath.startsWith(prefix)) {
+        this.files.delete(filePath)
+        this.notify('delete', filePath)
+      }
+    }
+  }
+
+  async rename(oldPath: string, newPath: string): Promise<void> {
+    const oldNormalized = this.normalize(oldPath)
+    const newNormalized = this.normalize(newPath)
+    const content = this.files.get(oldNormalized)
+    if (content !== undefined) {
+      this.files.set(newNormalized, content)
+      this.files.delete(oldNormalized)
+      this.notify('delete', oldNormalized)
+      this.notify('change', newNormalized)
+      return
+    }
+
+    // Directory rename: move all children.
+    const oldPrefix = oldNormalized === '/' ? '/' : oldNormalized + '/'
+    const newPrefix = newNormalized === '/' ? '/' : newNormalized + '/'
+    for (const [filePath, fileContent] of this.files) {
+      if (filePath === oldNormalized || filePath.startsWith(oldPrefix)) {
+        const relative = filePath.slice(oldPrefix.length)
+        const target = newPrefix + relative
+        this.files.set(target, fileContent)
+        this.files.delete(filePath)
+        this.notify('delete', filePath)
+        this.notify('change', target)
+      }
+    }
+  }
+
   async readDir(path: string): Promise<DirEntry[]> {
     const dir = this.normalize(path)
     const prefix = dir === '/' ? '/' : dir + '/'

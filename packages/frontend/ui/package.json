@@ -30,6 +30,7 @@
     "@codemirror/view": "^6.40.0",
     "@vertex/core": "workspace:*",
     "@vertex/ide-ui": "workspace:*",
+    "@vertex/runtime": "workspace:*",
     "@vertex/types": "workspace:*",
     "codemirror": "^6.0.2",
     "rxjs": "~7.8.0",
