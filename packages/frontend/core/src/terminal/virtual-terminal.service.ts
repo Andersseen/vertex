@@ -230,7 +230,7 @@ export class VirtualTerminalService implements TerminalBackendAdapter {
         return;
       }
       // Check it's a directory by trying to read it
-      const entries = await fs.readDir(target);
+      await fs.readDir(target);
       this.cwd = target;
     } catch {
       this.printlnError(`cd: not a directory: ${args[0]}`);

@@ -214,7 +214,7 @@ export class WebEditorLiteComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private handleThemeChange(newTheme: EditorTheme): void {
+  private handleThemeChange(_newTheme: EditorTheme): void {
     if (!this.editorView) return;
 
     this.editorView.dispatch({

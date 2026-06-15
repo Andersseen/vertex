@@ -213,7 +213,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
         theme: this.getInitialTheme(),
         lineNumbers: this.lineNumbers(),
         tabSize: this.tabSize(),
-        onChange: (value) => {
+        onChange: (_value) => {
           // Read-only: changes only from external sources
           // This can be used to detect copy operations
         },

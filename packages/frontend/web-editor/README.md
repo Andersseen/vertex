@@ -4,8 +4,7 @@ A lightweight, standalone code editor Web Component built with Angular Elements 
 
 ## Features
 
-- 🚀 **Zero dependencies** - Single JS file, no build step required
-- 📦 **Web Component** - Works with any framework or vanilla JS
+- 📦 **Standalone Web Component** - Single JS file, no build step required in your project
 - 🎨 **Multiple themes** - Dark and light modes
 - 🔤 **Language support** - TypeScript, JavaScript, HTML, CSS, JSON, Markdown
 - 📱 **Responsive** - Adapts to container size
@@ -13,16 +12,18 @@ A lightweight, standalone code editor Web Component built with Angular Elements 
 - 🔧 **Customizable** - Line numbers, read-only mode, word wrap, and more
 - 🎯 **Zoneless Angular** - Uses signals, no zone.js overhead
 
+> **Note:** The full `<vertex-editor>` is editable. For read-only display, use `<vertex-editor read-only>`.
+
 ## Installation
 
 ### Option 1: One-liner with curl (Recommended)
 
 ```bash
 # Installs from GitHub Releases to ./public
-curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public
+curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public
 
 # Custom directory
-curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./static
+curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./static
 ```
 
 ### Option 2: Direct download from GitHub Releases
@@ -30,14 +31,14 @@ curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/inst
 ```bash
 # Download just the file (no examples)
 curl -L -o ./public/web-editor.min.js \
-  https://github.com/andersseen/vertex/releases/download/web-editor-latest/web-editor.min.js
+  https://github.com/Andersseen/vertex/releases/download/web-editor-latest/web-editor.min.js
 ```
 
 ### Option 3: Download installer and run
 
 ```bash
 # Download the installer
-curl -O https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs
+curl -O https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs
 
 # Run it
 node install.mjs ./public

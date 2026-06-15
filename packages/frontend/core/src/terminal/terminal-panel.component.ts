@@ -20,13 +20,6 @@ import type { TerminalBackendAdapter } from "./terminal-backend-adapter";
 import { debounceTime, fromEvent } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
-interface TerminalInstance {
-  id: string;
-  xterm: Terminal;
-  fitAddon: FitAddon;
-  container: HTMLDivElement;
-}
-
 @Component({
   selector: "v-terminal-panel",
   standalone: true,

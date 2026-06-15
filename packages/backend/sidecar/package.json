@@ -9,6 +9,9 @@
     "test": "bun test src/**/*.test.ts",
     "test:security": "bun test src/security/security.test.ts"
   },
+  "turbo": {
+    "outputs": ["sidecar-bin"]
+  },
   "dependencies": {
     "@hono/node-server": "^1.13.5",
     "hono": "^4.6.9"

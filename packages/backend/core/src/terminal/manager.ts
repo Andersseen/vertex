@@ -134,7 +134,7 @@ export class TerminalManager {
           COLORTERM: "truecolor",
           HOME: process.env.HOME || process.env.USERPROFILE || cwd,
           PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin",
-        } as { [key: string]: string },
+        } as Record<string, string>,
       });
 
       const session: TerminalSession = {
