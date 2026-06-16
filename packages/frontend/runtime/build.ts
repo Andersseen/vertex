@@ -1,5 +1,6 @@
 import { build } from 'bun'
 import path from 'node:path'
+import { copyFile } from 'node:fs/promises'
 
 // All runtime deps treated as external — consumer's bundler resolves them.
 const external = [
@@ -55,4 +56,8 @@ for (const entry of subpaths) {
 }
 
 if (failed) process.exit(1)
+
+// Copy raw TypeScript worker so consumers can instantiate it via new URL().
+await copyFile('./src/lsp/ts-worker.ts', './dist/lsp/ts-worker.ts')
+
 console.log('\nBuild complete → dist/')
