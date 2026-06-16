@@ -1,4 +1,7 @@
-import * as ts from 'typescript';
+import type * as ts from 'typescript';
+
+const TS_CDN = 'https://esm.sh/typescript@5.9.2';
+const tsModulePromise: Promise<typeof ts> = import(TS_CDN);
 
 interface FileRecord {
   content: string;
@@ -32,34 +35,43 @@ interface Array<T> {
 }
 `;
 
-const compilerOptions: ts.CompilerOptions = {
-  target: ts.ScriptTarget.ES2022,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
-  jsx: ts.JsxEmit.React,
-  allowJs: true,
-  strict: true,
-  noEmit: true,
-  noLib: true,
-};
+let languageService: ts.LanguageService | null = null;
 
-const servicesHost: ts.LanguageServiceHost = {
-  getScriptFileNames: () => [...files.keys(), '/lib.d.ts'],
-  getScriptVersion: (fileName) => files.get(fileName)?.version.toString() ?? '0',
-  getScriptSnapshot: (fileName) => {
-    if (fileName === '/lib.d.ts') return ts.ScriptSnapshot.fromString(LIB_D_TS);
-    const data = files.get(fileName);
-    if (!data) return undefined;
-    return ts.ScriptSnapshot.fromString(data.content);
-  },
-  getCurrentDirectory: () => '/',
-  getCompilationSettings: () => compilerOptions,
-  getDefaultLibFileName: () => '/lib.d.ts',
-  fileExists: (fileName) => fileName === '/lib.d.ts' || files.has(fileName),
-  readFile: (fileName) => (fileName === '/lib.d.ts' ? LIB_D_TS : files.get(fileName)?.content),
-};
+async function getLanguageService(): Promise<ts.LanguageService> {
+  if (languageService) return languageService;
 
-const languageService = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
+  const ts = await tsModulePromise;
+
+  const compilerOptions: ts.CompilerOptions = {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+    jsx: ts.JsxEmit.React,
+    allowJs: true,
+    strict: true,
+    noEmit: true,
+    noLib: true,
+  };
+
+  const servicesHost: ts.LanguageServiceHost = {
+    getScriptFileNames: () => [...files.keys(), '/lib.d.ts'],
+    getScriptVersion: (fileName) => files.get(fileName)?.version.toString() ?? '0',
+    getScriptSnapshot: (fileName) => {
+      if (fileName === '/lib.d.ts') return ts.ScriptSnapshot.fromString(LIB_D_TS);
+      const data = files.get(fileName);
+      if (!data) return undefined;
+      return ts.ScriptSnapshot.fromString(data.content);
+    },
+    getCurrentDirectory: () => '/',
+    getCompilationSettings: () => compilerOptions,
+    getDefaultLibFileName: () => '/lib.d.ts',
+    fileExists: (fileName) => fileName === '/lib.d.ts' || files.has(fileName),
+    readFile: (fileName) => (fileName === '/lib.d.ts' ? LIB_D_TS : files.get(fileName)?.content),
+  };
+
+  languageService = ts.createLanguageService(servicesHost, ts.createDocumentRegistry());
+  return languageService;
+}
 
 function updateFile(path: string, content: string): void {
   const record = files.get(path);
@@ -75,26 +87,30 @@ function removeFile(path: string): void {
   files.delete(path);
 }
 
-function getDiagnostics(path: string): ts.Diagnostic[] {
-  const syntactic = languageService.getSyntacticDiagnostics(path);
-  const semantic = languageService.getSemanticDiagnostics(path);
+async function getDiagnostics(path: string): Promise<ts.Diagnostic[]> {
+  const ls = await getLanguageService();
+  const ts = await tsModulePromise;
+  const syntactic = ls.getSyntacticDiagnostics(path);
+  const semantic = ls.getSemanticDiagnostics(path);
   return [...syntactic, ...semantic];
 }
 
-function getCompletions(path: string, offset: number): ts.CompletionEntryDetails[] {
-  const completions = languageService.getCompletionsAtPosition(path, offset, undefined);
+async function getCompletions(path: string, offset: number): Promise<ts.CompletionEntryDetails[]> {
+  const ls = await getLanguageService();
+  const completions = ls.getCompletionsAtPosition(path, offset, undefined);
   if (!completions) return [];
   return completions.entries
     .slice(0, 50)
-    .map((entry) => languageService.getCompletionEntryDetails(path, offset, entry.name, undefined, undefined, undefined, undefined))
+    .map((entry) => ls.getCompletionEntryDetails(path, offset, entry.name, undefined, undefined, undefined, undefined))
     .filter((d): d is ts.CompletionEntryDetails => d !== undefined);
 }
 
-function getQuickInfo(path: string, offset: number): ts.QuickInfo | undefined {
-  return languageService.getQuickInfoAtPosition(path, offset);
+async function getQuickInfo(path: string, offset: number): Promise<ts.QuickInfo | undefined> {
+  const ls = await getLanguageService();
+  return ls.getQuickInfoAtPosition(path, offset);
 }
 
-self.onmessage = (event: MessageEvent) => {
+self.onmessage = async (event: MessageEvent) => {
   const { id, type, payload } = event.data as { id: string; type: string; payload: unknown };
 
   try {
@@ -113,19 +129,19 @@ self.onmessage = (event: MessageEvent) => {
       }
       case 'diagnostics': {
         const { path } = payload as { path: string };
-        const diagnostics = getDiagnostics(path);
+        const diagnostics = await getDiagnostics(path);
         postMessage({ id, type, result: diagnostics });
         break;
       }
       case 'completions': {
         const { path, offset } = payload as { path: string; offset: number };
-        const completions = getCompletions(path, offset);
+        const completions = await getCompletions(path, offset);
         postMessage({ id, type, result: completions });
         break;
       }
       case 'quickInfo': {
         const { path, offset } = payload as { path: string; offset: number };
-        const info = getQuickInfo(path, offset);
+        const info = await getQuickInfo(path, offset);
         postMessage({ id, type, result: info });
         break;
       }

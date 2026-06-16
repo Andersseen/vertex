@@ -98,13 +98,14 @@ mock.module("@angular/core", () => ({
   InjectionToken: class { constructor(_name: string) { /* noop */ } },
   PLATFORM_ID: "platform_id",
   signal: (val: any) => {
-    const s: any = () => val;
-    s.set = (_v: any) => { /* noop */ };
-    s.update = (_fn: any) => { /* noop */ };
-    s.asReadonly = () => s;
+    let value = val;
+    const s: any = () => value;
+    s.set = (v: any) => { value = v; };
+    s.update = (fn: any) => { value = fn(value); };
+    s.asReadonly = () => () => value;
     return s;
   },
-  computed: (fn: any) => (() => fn()),
+  computed: (fn: any) => () => fn(),
   effect: (_fn: any) => { /* noop */ },
   untracked: (fn: any) => fn(),
   resource: (_opts: any) => ({}),
