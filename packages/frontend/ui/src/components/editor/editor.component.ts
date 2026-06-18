@@ -205,6 +205,11 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
+  protected hasLspSupport(): boolean {
+    const lang = this.file()?.language?.toLowerCase();
+    return lang === 'typescript' || lang === 'javascript' || lang === 'ts' || lang === 'js';
+  }
+
   protected getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
       typescript: "pi pi-file-edit text-blue-400",

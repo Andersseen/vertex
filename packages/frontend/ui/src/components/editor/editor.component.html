@@ -14,6 +14,9 @@
       </div>
 
       <div class="editor__actions">
+        @if (hasLspSupport()) {
+          <span class="editor__lsp-badge" title="Language Server Protocol active">LSP</span>
+        }
         <span class="editor__language">{{ file()?.language ?? "text" }}</span>
         <button
           class="editor__save-btn"

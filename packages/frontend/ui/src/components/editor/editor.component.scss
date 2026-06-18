@@ -110,6 +110,19 @@
     opacity: 0.4;
   }
 
+  // Element: LSP Badge
+  &__lsp-badge {
+    font-size: 8px;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $surface-0;
+    background-color: $primary-600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: default;
+  }
+
   // Element: Save Button
   &__save-btn {
     @include flex;
@@ -201,6 +214,25 @@
       .cm-tag { color: #e06c75; }
       .cm-attribute { color: #d19a66; }
       .cm-link { color: #61afef; text-decoration: underline; }
+
+      // TypeScript LSP hover tooltip
+      .cm-tooltip.vertex-ts-hover-tooltip {
+        background-color: $surface-900;
+        border: 1px solid $surface-700;
+        border-radius: 6px;
+        padding: $spacing-2 $spacing-3;
+        color: $surface-100;
+        font-family: $font-mono;
+        font-size: 12px;
+        line-height: 1.5;
+        max-width: 420px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+
+      // Lint diagnostics styling
+      .cm-diagnostic {
+        border-radius: 2px;
+      }
     }
   }
 }

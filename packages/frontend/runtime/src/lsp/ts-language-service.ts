@@ -96,7 +96,15 @@ export class TsLanguageService {
   async getQuickInfo(path: string, offset: number): Promise<string | undefined> {
     const info = await post<ts.QuickInfo | undefined>('quickInfo', { path, offset });
     if (!info) return undefined;
-    return info.displayParts?.map((p) => p.text).join('');
+
+    const display = info.displayParts?.map((p) => p.text).join('');
+    const docs =
+      typeof info.documentation?.[0] === 'string'
+        ? info.documentation[0]
+        : info.documentation?.[0]?.text;
+
+    if (!display && !docs) return undefined;
+    return docs ? `${display}\n\n${docs}` : display;
   }
 
   destroy(): void {
