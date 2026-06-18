@@ -15,17 +15,22 @@
  *   --url=<url>   Use custom URL to download web-editor.min.js
  *   --serve       Start local server and install from localhost
  *   --port=8080   Port for local server (default: 8080)
- * 
+ *   --lite        Install the read-only lite variant
+ *   --full        Install the full editable editor (default)
+ *
  * Examples:
- *   # Install from GitHub to current project
- *   npx github:your-username/vertex-editor/bin/install.mjs ./public
- * 
+ *   # Install full editor from GitHub to current project
+ *   npx github:Andersseen/vertex-editor/bin/install.mjs ./public
+ *
+ *   # Install lite variant from GitHub
+ *   npx github:Andersseen/vertex-editor/bin/install.mjs ./public --lite
+ *
  *   # Install from local monorepo
  *   node install.mjs ~/my-project/public --local
- * 
+ *
  *   # Use custom URL
  *   node install.mjs ./public --url=https://example.com/web-editor.min.js
- * 
+ *
  *   # Start local server and install from there
  *   node install.mjs --serve
  */
@@ -39,15 +44,24 @@ import { spawn } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = path.join(__dirname, '..');
-const LOCAL_BUILD_PATH = path.join(PACKAGE_ROOT, 'dist', 'web-editor.min.js');
-const LOCAL_SOURCEMAP_PATH = path.join(PACKAGE_ROOT, 'dist', 'web-editor.min.js.map');
 
-// GitHub raw URL (change this to your actual repo)
-const GITHUB_USER = 'your-username';
+let useLite = false;
+
+// Parse arguments early to know which variant to install
+process.argv.slice(2).forEach(arg => {
+  if (arg === '--lite') useLite = true;
+});
+
+const VARIANT = useLite ? 'lite' : 'full';
+const LOCAL_BUILD_PATH = path.join(PACKAGE_ROOT, 'dist', `web-editor${useLite ? '-lite' : ''}.min.js`);
+const LOCAL_SOURCEMAP_PATH = path.join(PACKAGE_ROOT, 'dist', `web-editor${useLite ? '-lite' : ''}.min.js.map`);
+
+// GitHub raw URL
+const GITHUB_USER = 'Andersseen';
 const GITHUB_REPO = 'vertex';
 const GITHUB_BRANCH = 'main';
-const REMOTE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor.min.js`;
-const REMOTE_SOURCEMAP_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor.min.js.map`;
+const REMOTE_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor${useLite ? '-lite' : ''}.min.js`;
+const REMOTE_SOURCEMAP_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/packages/frontend/web-editor/dist/web-editor${useLite ? '-lite' : ''}.min.js.map`;
 
 const args = process.argv.slice(2);
 let targetDir = './public';
@@ -65,6 +79,10 @@ args.forEach(arg => {
     useRemote = true;
   } else if (arg === '--serve') {
     serveMode = true;
+  } else if (arg === '--lite') {
+    useLite = true;
+  } else if (arg === '--full') {
+    useLite = false;
   } else if (arg.startsWith('--url=')) {
     customUrl = arg.replace('--url=', '');
   } else if (arg.startsWith('--port=')) {
@@ -134,10 +152,10 @@ function copyFile(src, dest) {
 function startLocalServer(port) {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
-      const filePath = req.url === '/web-editor.min.js' ? LOCAL_BUILD_PATH :
-                       req.url === '/web-editor.min.js.map' ? LOCAL_SOURCEMAP_PATH :
+      const filePath = req.url === `/${OUTPUT_FILE}` ? LOCAL_BUILD_PATH :
+                       req.url === `/${OUTPUT_SOURCEMAP_FILE}` ? LOCAL_SOURCEMAP_PATH :
                        null;
-      
+
       if (!filePath || !fs.existsSync(filePath)) {
         res.writeHead(404);
         res.end('Not found');
@@ -161,36 +179,40 @@ function startLocalServer(port) {
   });
 }
 
+const OUTPUT_FILE = useLite ? 'web-editor-lite.min.js' : 'web-editor.min.js';
+const OUTPUT_SOURCEMAP_FILE = useLite ? 'web-editor-lite.min.js.map' : 'web-editor.min.js.map';
+const CUSTOM_ELEMENT_TAG = useLite ? 'vertex-editor-lite' : 'vertex-editor';
+
 async function installFromLocal(absoluteTargetDir) {
   if (!fs.existsSync(LOCAL_BUILD_PATH)) {
     throw new Error('Local build not found. Run "npm run build" in the web-editor package first.');
   }
 
-  log('📦 Installing from local monorepo...', 'blue');
-  
-  const destPath = path.join(absoluteTargetDir, 'web-editor.min.js');
+  log(`📦 Installing ${VARIANT} variant from local monorepo...`, 'blue');
+
+  const destPath = path.join(absoluteTargetDir, OUTPUT_FILE);
   await copyFile(LOCAL_BUILD_PATH, destPath);
-  log('✓ Copied: web-editor.min.js', 'green');
+  log(`✓ Copied: ${OUTPUT_FILE}`, 'green');
 
   if (fs.existsSync(LOCAL_SOURCEMAP_PATH)) {
-    await copyFile(LOCAL_SOURCEMAP_PATH, path.join(absoluteTargetDir, 'web-editor.min.js.map'));
-    log('✓ Copied: web-editor.min.js.map', 'green');
+    await copyFile(LOCAL_SOURCEMAP_PATH, path.join(absoluteTargetDir, OUTPUT_SOURCEMAP_FILE));
+    log(`✓ Copied: ${OUTPUT_SOURCEMAP_FILE}`, 'green');
   }
 }
 
 async function installFromRemote(url, absoluteTargetDir) {
-  log(`📦 Downloading from remote...`, 'blue');
+  log(`📦 Downloading ${VARIANT} variant from remote...`, 'blue');
   log(`  URL: ${url}`, 'cyan');
-  
-  const destPath = path.join(absoluteTargetDir, 'web-editor.min.js');
+
+  const destPath = path.join(absoluteTargetDir, OUTPUT_FILE);
   await downloadFile(url, destPath);
-  log('✓ Downloaded: web-editor.min.js', 'green');
+  log(`✓ Downloaded: ${OUTPUT_FILE}`, 'green');
 
   // Try to download sourcemap
   try {
     const sourcemapUrl = url.replace('.min.js', '.min.js.map');
-    await downloadFile(sourcemapUrl, path.join(absoluteTargetDir, 'web-editor.min.js.map'));
-    log('✓ Downloaded: web-editor.min.js.map', 'green');
+    await downloadFile(sourcemapUrl, path.join(absoluteTargetDir, OUTPUT_SOURCEMAP_FILE));
+    log(`✓ Downloaded: ${OUTPUT_SOURCEMAP_FILE}`, 'green');
   } catch {
     // Sourcemap is optional
   }
@@ -209,8 +231,8 @@ async function main() {
       
       log(`📡 Starting local server on port ${servePort}...`, 'blue');
       log(`   Files available at:`, 'reset');
-      log(`   - http://localhost:${servePort}/web-editor.min.js`, 'cyan');
-      log(`   - http://localhost:${servePort}/web-editor.min.js.map`, 'cyan');
+      log(`   - http://localhost:${servePort}/${OUTPUT_FILE}`, 'cyan');
+      log(`   - http://localhost:${servePort}/${OUTPUT_SOURCEMAP_FILE}`, 'cyan');
       log(`\\nPress Ctrl+C to stop\\n`, 'yellow');
       
       const server = await startLocalServer(servePort);
@@ -256,9 +278,9 @@ async function main() {
     log('\\n✅ Installation complete!', 'green');
     log('\\n📖 Quick Start:', 'cyan');
     log(`  Include in your HTML:`, 'reset');
-    log(`     <script src="web-editor.min.js"><\\/script>`, 'cyan');
+    log(`     <script src="${OUTPUT_FILE}"><\\/script>`, 'cyan');
     log(`  Use the component:`, 'reset');
-    log(`     <vertex-editor language="typescript" theme="dark"><\\/vertex-editor>`, 'cyan');
+    log(`     <${CUSTOM_ELEMENT_TAG} language="typescript" theme="dark"><\\/${CUSTOM_ELEMENT_TAG}>`, 'cyan');
 
   } catch (error) {
     log(`\\n❌ Error: ${error.message}`, 'red');

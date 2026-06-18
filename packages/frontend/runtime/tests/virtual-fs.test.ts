@@ -114,7 +114,7 @@ describe('VirtualFS (memory mode)', () => {
 
   test('rawFs throws in memory mode', () => {
     const fs = new VirtualFS('memory')
-    expect(() => fs.rawFs).toThrow('rawFs solo disponible en modo opfs')
+    expect(() => fs.rawFs).toThrow('rawFs is only available in opfs mode')
   })
 
   test('proxies all operations correctly', async () => {

@@ -28,6 +28,8 @@ const subpaths = [
   'extras/format/index',
   'extras/css/index',
   'lsp/index',
+  'plugins/index',
+  'plugins/examples/index',
 ]
 
 let failed = false

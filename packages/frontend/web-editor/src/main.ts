@@ -5,10 +5,10 @@ import { provideZonelessChangeDetection } from "@angular/core";
 import { WebEditorComponent } from "./lib/web-editor.component";
 
 /**
- * Vertex Editor - Zoneless Web Component
+ * Vertex Editor - Full-featured code editor Web Component
  *
- * This web component uses Angular's experimental zoneless change detection
- * with signals for optimal performance and smaller bundle size.
+ * This web component uses Angular's zoneless change detection
+ * with signals for optimal performance.
  * No zone.js required!
  */
 

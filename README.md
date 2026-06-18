@@ -6,7 +6,7 @@ It contains:
 
 - A desktop IDE app (Tauri + Angular)
 - A web app (Angular + Analog.js + Vite)
-- A reusable `<vertex-editor>` web component
+- Reusable web components: `<vertex-editor>` (full editable) and `<vertex-editor-lite>` (read-only display)
 - A browser-native runtime (VirtualFS, Git, esbuild-wasm bundler, WebContainers preview, Cloudflare deploy)
 - Frontend and backend packages in a Bun/Turbo monorepo
 

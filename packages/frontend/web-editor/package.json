@@ -1,10 +1,20 @@
 {
   "name": "@vertex/web-editor",
   "version": "0.1.0",
-  "description": "A lightweight, standalone code editor Web Component built with Angular Elements and CodeMirror 6. Optimized for read-only code display with AOT compilation.",
+  "description": "Standalone code editor Web Components built with Angular Elements and CodeMirror 6. Includes a full editable editor (<vertex-editor>) and a read-only lite variant (<vertex-editor-lite>).",
   "main": "dist/web-editor.min.js",
   "module": "dist/web-editor.min.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/web-editor.min.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./lite": {
+      "import": "./dist/web-editor-lite.min.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "bin": {
     "vertex-editor": "./bin/install.mjs"
   },
@@ -14,10 +24,12 @@
     "README.md"
   ],
   "scripts": {
-    "build": "bun run build:aot",
-    "build:aot": "bun run clean && ng build --configuration production && bun run bundle:aot",
-    "build:jit": "bun run clean && bun run compile && bun run bundle:jit",
+    "build": "bun run clean && bun run build:aot && bun run build:lite:aot",
+    "build:aot": "ng build --project web-editor --configuration production && bun run bundle:aot",
+    "build:lite:aot": "ng build --project web-editor-lite --configuration production && bun run bundle:lite:aot",
+    "build:jit": "bun run compile && bun run bundle:jit",
     "bundle:aot": "echo 'import \"./web-editor/browser/main.js\";' > dist/entry.js && npx esbuild dist/entry.js --bundle --outfile=dist/web-editor.min.js --format=iife --global-name=WebEditor --minify --sourcemap --platform=browser && cp dist/web-editor.min.js dist/web-editor-aot.min.js && cp dist/web-editor.min.js.map dist/web-editor-aot.min.js.map",
+    "bundle:lite:aot": "echo 'import \"./web-editor-lite/browser/main.js\";' > dist/entry-lite.js && npx esbuild dist/entry-lite.js --bundle --outfile=dist/web-editor-lite.min.js --format=iife --global-name=WebEditorLite --minify --sourcemap --platform=browser && cp dist/web-editor-lite.min.js dist/web-editor-lite-aot.min.js && cp dist/web-editor-lite.min.js.map dist/web-editor-lite-aot.min.js.map",
     "bundle:jit": "esbuild dist/main.js --bundle --outfile=dist/web-editor.min.js --format=iife --global-name=WebEditor --minify --sourcemap --platform=browser --external:fs --external:path --external:os",
     "clean": "rm -rf dist",
     "compile": "tsc --project tsconfig.build.json",

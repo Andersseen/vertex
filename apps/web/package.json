@@ -42,7 +42,7 @@
     "@codemirror/view": "^6.40.0",
     "@isomorphic-git/lightning-fs": "^4.6.2",
     "@noble/hashes": "^2.2.0",
-    "@tauri-apps/api": "2.0.0-rc.0",
+    "@tauri-apps/api": "^2.5.0",
     "@vertex/core": "*",
     "@vertex/ide-ui": "workspace:*",
     "@vertex/runtime": "*",

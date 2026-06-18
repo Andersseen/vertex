@@ -11,8 +11,9 @@ import {
   viewChild,
 } from "@angular/core";
 import { EditorView, lineNumbers } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
 import { AttributeObserver } from "./attribute-observer";
-import { EditorConfigurator } from "./editor-config-lite";
+import { EditorConfigurator } from "./editor-config";
 import { SupportedLanguage, getLanguageSupport } from "./language-support";
 
 export type EditorTheme = "light" | "dark";
@@ -23,14 +24,14 @@ export interface CursorPosition {
 }
 
 /**
- * Vertex Editor Lite - Read-only code display component
+ * Vertex Editor - Full code editing component
  *
- * Optimized for displaying code with syntax highlighting.
- * All editing features have been removed to reduce bundle size.
+ * Supports syntax highlighting, editing, search, history, autocomplete,
+ * line numbers, word wrap, themes, and programmatic value updates.
  *
  * @usageNotes
- * Use this component when you only need to display code, not edit it.
- * For a full editing experience, consider using the full version.
+ * Use this component when you need a complete code editing experience.
+ * For read-only code display, use WebEditorLiteComponent instead.
  */
 @Component({
   selector: "v-editor-internal",
@@ -73,11 +74,6 @@ export interface CursorPosition {
       font-family: inherit !important;
       font-size: 0.9em;
     }
-
-    /* Hide cursor in read-only mode */
-    .cm-cursor {
-      display: none !important;
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -86,7 +82,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
 
   private hostElement = inject(ElementRef).nativeElement as HTMLElement;
 
-  // Inputs - simplified for display only
+  // Inputs
   readonly value = input<string>("");
   readonly language = input<SupportedLanguage>("typescript");
   readonly theme = input<EditorTheme>("dark");
@@ -94,8 +90,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   readonly height = input<string>("100%");
   readonly fontSize = input<string>("14");
   readonly tabSize = input<number>(2);
+  readonly readonly = input<boolean>(false);
+  readonly wordWrap = input<boolean>(false);
+  readonly placeholder = input<string>("");
+  readonly enableSearch = input<boolean>(true);
+  readonly enableAutocomplete = input<boolean>(true);
 
   // Outputs
+  readonly valueChange = output<string>();
   readonly cursorActivity = output<CursorPosition>();
   readonly ready = output<void>();
 
@@ -114,7 +116,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   private setupEffects(): void {
-    // Update value when input changes
+    // Update value when input changes (external updates only)
     effect(() => {
       const newValue = this.value();
       if (this.editorView && this._isInitialized) {
@@ -138,7 +140,6 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     effect(() => {
       const showLineNumbers = this.lineNumbers();
       if (this.editorView) {
-        // lineNumbers already imported statically
         this.editorView.dispatch({
           effects: this.configurator.lineNumbersCompartment.reconfigure(
             showLineNumbers ? lineNumbers() : [],
@@ -167,6 +168,35 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
         );
       }
     });
+
+    // Update readonly state
+    effect(() => {
+      const isReadonly = this.readonly();
+      if (this.editorView) {
+        this.editorView.dispatch({
+          effects: [
+            this.configurator.readonlyCompartment.reconfigure(
+              EditorState.readOnly.of(isReadonly),
+            ),
+            this.configurator.editableCompartment.reconfigure(
+              EditorView.editable.of(!isReadonly),
+            ),
+          ],
+        });
+      }
+    });
+
+    // Update word wrap
+    effect(() => {
+      const wrap = this.wordWrap();
+      if (this.editorView) {
+        this.editorView.dispatch({
+          effects: this.configurator.wordWrapCompartment.reconfigure(
+            wrap ? EditorView.lineWrapping : [],
+          ),
+        });
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -179,7 +209,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
     });
     this.attributeObserver.start();
 
-    this.initializeEditor(initialValue);
+    void this.initializeEditor(initialValue);
   }
 
   ngOnDestroy(): void {
@@ -206,20 +236,26 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   private async initializeEditor(initialValue: string): Promise<void> {
     const languageSupport = await getLanguageSupport(this.language());
 
+    const state = await this.configurator.createState({
+      value: initialValue,
+      language: languageSupport,
+      theme: this.getInitialTheme(),
+      readonly: this.readonly(),
+      lineNumbers: this.lineNumbers(),
+      wordWrap: this.wordWrap(),
+      tabSize: this.tabSize(),
+      placeholder: this.placeholder() || undefined,
+      enableSearch: this.enableSearch(),
+      enableAutocomplete: this.enableAutocomplete(),
+      onChange: (value) => this.valueChange.emit(value),
+      onCursorActivity: (position) => this.cursorActivity.emit(position),
+    });
+
     this.editorView = new EditorView({
-      state: this.configurator.createState({
-        value: initialValue,
-        language: languageSupport,
-        theme: this.getInitialTheme(),
-        lineNumbers: this.lineNumbers(),
-        tabSize: this.tabSize(),
-        onChange: (_value) => {
-          // Read-only: changes only from external sources
-          // This can be used to detect copy operations
-        },
-      }),
+      state,
       parent: this.editorContainer()?.nativeElement,
     });
+
     const container = this.editorContainer();
     if (container?.nativeElement.style) {
       container.nativeElement.style.height = this.height();
@@ -306,25 +342,21 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
+   * Insert text at the current cursor position
+   */
+  insertText(text: string): void {
+    if (!this.editorView || this.readonly()) return;
+
+    const { from, to } = this.editorView.state.selection.main;
+    this.editorView.dispatch({
+      changes: { from, to, insert: text },
+    });
+  }
+
+  /**
    * Focus the editor (for accessibility)
    */
   focus(): void {
     this.editorView?.focus();
   }
 }
-
-/**
- * FEATURES REMOVED in Lite version:
- *
- * 1. wordWrap input - Not essential for code display
- * 2. placeholder input - Code display always has content
- * 3. readonly input - Always read-only in lite version
- * 4. valueChange output - Use getValue() instead
- * 5. insertText() method - Not applicable for read-only
- *
- * TO RE-ENABLE EDITING FEATURES:
- * 1. Import from editor-config.ts instead of editor-config-lite.ts
- * 2. Add back: wordWrap, placeholder, readonly inputs
- * 3. Add back: valueChange output, insertText() method
- * 4. Remove EditorState.readOnly.of(true) from config
- */
