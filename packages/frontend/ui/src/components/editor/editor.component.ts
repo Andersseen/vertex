@@ -212,18 +212,16 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   protected getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
-      typescript: "pi pi-file-edit text-blue-400",
-      javascript: "pi pi-file-edit text-yellow-400",
-      html: "pi pi-code text-orange-500",
-      css: "pi pi-palette text-blue-500",
-      json: "pi pi-info-circle text-green-400",
-      md: "pi pi-file text-slate-400",
-      rust: "pi pi-cog text-orange-700",
-      python: "pi pi-bolt text-blue-300",
+      typescript: "TS",
+      javascript: "JS",
+      html: "HTML",
+      css: "CSS",
+      json: "JSON",
+      md: "MD",
+      rust: "RS",
+      python: "PY",
     };
-    return (
-      iconMap[language?.toLowerCase() ?? ""] ?? "pi pi-file text-slate-500"
-    );
+    return iconMap[language?.toLowerCase() ?? ""] ?? "FILE";
   }
 
   focus(): void {

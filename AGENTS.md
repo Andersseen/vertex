@@ -62,7 +62,7 @@ bun web-editor-demo:start            # build web-component + serve demo
 
 ## Angular selectors
 
-ESLint enforces `v-` prefix (components, kebab-case) and `v` prefix (directives, camelCase). Never use `ide-` or `vertex-` as selector prefixes.
+ESLint enforces the `v-` prefix (components, kebab-case) and `v` prefix (directives, camelCase) in shared libraries (`@vertex/ui`, `@vertex/ide-ui`, `@vertex/runtime`, `@vertex/web-editor`). Applications (`apps/web`, `apps/desktop`) may use the `app-` prefix for their own components. Never use `ide-` or `vertex-` as selector prefixes in shared packages.
 
 ```typescript
 @Component({ selector: "v-my-component" })   // correct
@@ -155,8 +155,8 @@ private readonly service = inject(MyService);
 // OnPush always
 @Component({ changeDetection: ChangeDetectionStrategy.OnPush })
 
-// Standalone — no NgModules
-@Component({ standalone: true, imports: [...] })
+// Standalone — no NgModules (default in Angular v20+, do not declare standalone: true)
+@Component({ imports: [...] })
 
 // New control flow
 @if (condition) { ... }

@@ -205,20 +205,6 @@ mock.module("@vertex/ui", () => ({
   TabsComponent: class {},
 }));
 
-console.log("Registering primeng mocks...");
-const mockModule = class {};
-mock.module("primeng/api", () => ({
-  ConfirmationService: class {},
-  MessageService: class {},
-  TreeNode: class {},
-  SharedModule: mockModule,
-}));
-mock.module("primeng/splitter", () => ({ SplitterModule: mockModule }));
-mock.module("primeng/toolbar", () => ({ ToolbarModule: mockModule }));
-mock.module("primeng/tree", () => ({ TreeModule: mockModule }));
-mock.module("primeng/divider", () => ({ DividerModule: mockModule }));
-mock.module("primeng/tabs", () => ({ TabsModule: mockModule }));
-
 mock.module("xterm", () => ({ 
   Terminal: class { 
     loadAddon() {} open() {} dispose() {} onData() { return { dispose: () => {} }; } write() {} 

@@ -8,9 +8,8 @@
       >
         <i
           class="tabs__icon"
-          [class]="getFileIcon(file.language)"
           [style.color]="getIconColor(file.language)"
-        ></i>
+        >{{ getFileIcon(file.language) }}</i>
         <span class="tabs__name">{{ file.name }}</span>
 
         @if (file.isDirty) {
@@ -24,7 +23,7 @@
             (click)="closeTab(file, $event)"
             aria-label="Close tab"
           >
-            <i class="pi pi-times"></i>
+            <span aria-hidden="true">×</span>
           </button>
         }
       </div>
@@ -35,7 +34,7 @@
       (click)="createNewTab()"
       aria-label="New tab"
     >
-      <i class="pi pi-plus"></i>
+      <span aria-hidden="true">+</span>
     </button>
   </div>
 </div>

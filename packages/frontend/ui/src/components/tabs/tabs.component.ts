@@ -39,16 +39,16 @@ export class TabsComponent {
 
   protected getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
-      typescript: "pi pi-file-edit",
-      javascript: "pi pi-file-edit",
-      html: "pi pi-code",
-      css: "pi pi-palette",
-      json: "pi pi-info-circle",
-      md: "pi pi-file",
-      rust: "pi pi-cog",
-      python: "pi pi-bolt",
+      typescript: "TS",
+      javascript: "JS",
+      html: "HTML",
+      css: "CSS",
+      json: "JSON",
+      md: "MD",
+      rust: "RS",
+      python: "PY",
     };
-    return iconMap[language?.toLowerCase() || ""] || "pi pi-file";
+    return iconMap[language?.toLowerCase() || ""] || "FILE";
   }
 
   protected getIconColor(language?: string): string {
