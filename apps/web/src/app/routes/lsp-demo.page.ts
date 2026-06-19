@@ -1,6 +1,7 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
 import { EditorComponent } from '@vertex/ui';
-import { tsLspExtensions } from '@vertex/ui';
+import { tsLspExtensions, warmupTsLsp } from '@vertex/ui';
+import { tsLanguageService, type LspStatus } from '@vertex/runtime/lsp';
 import { VertexFile } from '@vertex/types';
 
 const DEMO_TS_CODE = `// Vertex TypeScript LSP Demo
@@ -39,7 +40,12 @@ console.log(message);
   template: `
     <div class="lsp-demo">
       <header class="lsp-demo__header">
-        <h1>TypeScript LSP Demo</h1>
+        <div class="lsp-demo__title">
+          <h1>TypeScript LSP Demo</h1>
+          <span class="lsp-demo__status" [class]="'lsp-demo__status--' + lspStatus()">
+            {{ statusLabel() }}
+          </span>
+        </div>
         <p>
           Hover over symbols for type info, type <code>.</code> for autocomplete,
           and introduce type errors to see diagnostics.
@@ -49,8 +55,8 @@ console.log(message);
         <v-editor
           [file]="demoFile()"
           [extensions]="editorExtensions()"
-          (contentChange)="onContentChange($event)"
-        />
+          (contentChange)="onContentChange($event)">
+        </v-editor>
       </div>
     </div>
   `,
@@ -69,8 +75,15 @@ console.log(message);
       background: var(--ide-surface-900, #111);
     }
 
+    .lsp-demo__title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
     .lsp-demo__header h1 {
-      margin: 0 0 6px;
+      margin: 0;
       font-size: 18px;
       font-weight: 600;
     }
@@ -89,6 +102,32 @@ console.log(message);
       color: var(--ide-text, #ccc);
     }
 
+    .lsp-demo__status {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--ide-surface-700, #222);
+      color: var(--ide-text-muted, #888);
+    }
+
+    .lsp-demo__status--loading {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .lsp-demo__status--ready {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .lsp-demo__status--error {
+      background: #ef4444;
+      color: #fff;
+    }
+
     .lsp-demo__editor {
       flex: 1;
       min-height: 0;
@@ -97,6 +136,8 @@ console.log(message);
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class LspDemoPageComponent {
+  private readonly lsp = tsLanguageService;
+
   protected readonly demoFile = signal<VertexFile>({
     id: 'lsp-demo',
     name: 'lsp-demo.ts',
@@ -106,7 +147,40 @@ export default class LspDemoPageComponent {
     isDirty: false,
   });
 
+  protected readonly lspStatus = signal<LspStatus>('idle');
+  protected readonly statusLabel = signal('LSP idle');
+
   protected readonly editorExtensions = signal(tsLspExtensions('/lsp-demo.ts'));
+
+  constructor() {
+    // Subscribe to LSP status changes for UI feedback
+    this.lsp.onStatusChange((status) => {
+      this.lspStatus.set(status);
+      this.statusLabel.set(
+        status === 'loading'
+          ? 'LSP loading...'
+          : status === 'ready'
+          ? 'LSP ready'
+          : status === 'error'
+          ? 'LSP error'
+          : 'LSP idle',
+      );
+    });
+
+    // Prime the LSP by updating the file once on init
+    warmupTsLsp('/lsp-demo.ts', DEMO_TS_CODE).catch(() => {
+      // Errors are surfaced via status listeners.
+    });
+
+    effect(() => {
+      const file = this.demoFile();
+      if (file.content) {
+        this.lsp.updateFile(file.path, file.content).catch(() => {
+          // Errors are surfaced via status
+        });
+      }
+    });
+  }
 
   protected onContentChange(content: string): void {
     this.demoFile.update((file) => ({ ...file, content, isDirty: true }));

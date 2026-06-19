@@ -119,3 +119,16 @@ export function tsHoverExtension(path: string) {
 export function tsLspExtensions(path: string) {
   return [tsLintExtension(path), tsAutocompleteExtension(path), tsHoverExtension(path)];
 }
+
+/**
+ * Pre-load TypeScript so the first lint/completion/hover is fast.
+ * Call this once from the host component before the editor is shown.
+ */
+export async function warmupTsLsp(path: string, content: string): Promise<void> {
+  try {
+    await tsLanguageService.updateFile(path, content);
+    await tsLanguageService.getDiagnostics(path);
+  } catch {
+    // Errors are surfaced via tsLanguageService status listeners.
+  }
+}

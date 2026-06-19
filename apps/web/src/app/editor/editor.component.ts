@@ -16,7 +16,7 @@ import { tsLspExtensions } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 import { RuntimeService } from '@vertex/core/web';
-import { IdeToastService } from '@vertex/ide-ui';
+import { IdeToastService, IdeToasterComponent } from '@vertex/ide-ui';
 import { CloneDialogComponent } from '../components/clone-dialog/clone-dialog.component';
 import { PreviewPanelComponent } from '../components/preview-panel/preview-panel.component';
 import { PromptDialogComponent } from '../components/prompt-dialog/prompt-dialog.component';
@@ -45,6 +45,7 @@ function findFirstFile(folder: VertexFolder): VertexFile | null {
     BottomPanelComponent,
     TabsComponent,
     IdeSplitterComponent,
+    IdeToasterComponent,
     CloneDialogComponent,
     PreviewPanelComponent,
     PromptDialogComponent,

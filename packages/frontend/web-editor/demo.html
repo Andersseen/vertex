@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertex Editor Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #ddd;
+    }
+    h1, h2 { margin: 0 0 12px; }
+    .section {
+      margin-bottom: 32px;
+    }
+    .editor-box {
+      height: 320px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    code {
+      background: #1e1e1e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stats {
+      color: #888;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vertex Editor Demo</h1>
+
+  <div class="section">
+    <h2>&lt;vertex-editor&gt; — Full editable editor (~1.1 MB)</h2>
+    <div class="editor-box">
+      <vertex-editor
+        id="full"
+        value="// Try editing this TypeScript code\nconst greeting: string = 'Hello Vertex';\nconsole.log(greeting.toUpperCase());"
+        language="typescript"
+        theme="dark"
+        line-numbers="true"
+        height="100%">
+      </vertex-editor>
+    </div>
+    <div class="stats">Output: <code id="full-value">—</code></div>
+  </div>
+
+  <div class="section">
+    <h2>&lt;vertex-editor-lite&gt; — Read-only display (~450 KB)</h2>
+    <div class="editor-box">
+      <vertex-editor-lite
+        value="// Read-only code display\nfunction sum(a: number, b: number): number {\n  return a + b;\n}\nconsole.log(sum(2, 3));"
+        language="typescript"
+        theme="dark"
+        line-numbers="true"
+        height="100%">
+      </vertex-editor-lite>
+    </div>
+  </div>
+
+  <script src="dist/web-editor.min.js"></script>
+  <script src="dist/web-editor-lite.min.js"></script>
+  <script>
+    const full = document.getElementById('full');
+    const output = document.getElementById('full-value');
+
+    full.addEventListener('ready', () => {
+      output.textContent = full.getValue();
+    });
+
+    full.addEventListener('valueChange', (e) => {
+      output.textContent = e.detail;
+    });
+  </script>
+</body>
+</html>

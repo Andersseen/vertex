@@ -4,8 +4,8 @@ Standalone code editor Web Components built with Angular Elements and CodeMirror
 
 Two variants are available:
 
-- **`<vertex-editor>`** — Full editable code editor with history, search, autocomplete, and editing support.
-- **`<vertex-editor-lite>`** — Read-only, lightweight display variant optimized for smaller bundles.
+- **`<vertex-editor>`** — Full editable code editor with history, search, autocomplete, and editing support. (~1.1 MB minified, Angular Elements)
+- **`<vertex-editor-lite>`** — Read-only, lightweight display variant built as a native Web Component without Angular. (~450 KB minified)
 
 ## Features
 
@@ -113,6 +113,20 @@ For read-only code display, use `<vertex-editor-lite>`:
 ```
 
 The lite variant keeps the same attribute API for `value`, `language`, `theme`, `line-numbers`, `height`, and `font-size`, but removes editing, search, and autocomplete to reduce bundle size.
+
+## API Reference
+
+See [API.md](./API.md) for the complete attribute, method, event, and framework integration reference.
+
+## Quick Demo
+
+After building, open `demo.html` in a browser:
+
+```bash
+cd packages/frontend/web-editor
+bun run demo
+# open http://localhost:8080/demo.html
+```
 
 ## Framework Examples
 

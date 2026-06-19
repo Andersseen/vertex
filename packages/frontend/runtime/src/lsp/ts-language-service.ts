@@ -16,37 +16,89 @@ export interface CompletionItem {
   kind: string;
 }
 
-let workerInstance: Worker | null = null;
-let messageId = 0;
-const pending = new Map<string, { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }>();
+export type LspStatus = 'idle' | 'loading' | 'ready' | 'error';
 
-function getWorker(): Worker {
-  if (workerInstance) return workerInstance;
-  workerInstance = new Worker(new URL('./ts-worker.ts', import.meta.url), { type: 'module' });
-  workerInstance.onmessage = (event: MessageEvent) => {
-    const { id, result, error } = event.data as { id: string; result?: unknown; error?: string };
-    const handler = pending.get(id);
-    if (!handler) return;
-    pending.delete(id);
-    if (error) {
-      handler.reject(new Error(error));
-    } else {
-      handler.resolve(result);
-    }
-  };
-  workerInstance.onerror = (error) => {
-    console.error('[TsLanguageService] worker error', error);
-  };
-  return workerInstance;
+// Minimal ambient declarations so basic examples type-check without lib files.
+const LIB_D_TS = `
+declare const console: { log(...args: any[]): void; error(...args: any[]): void; warn(...args: any[]): void };
+declare const window: any;
+declare const document: any;
+declare const globalThis: any;
+interface Promise<T> {
+  then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2>;
+  catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<T | TResult>;
+}
+declare const Promise: {
+  new <T>(executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+  resolve<T>(value?: T | PromiseLike<T>): Promise<T>;
+  reject<T = never>(reason?: any): Promise<T>;
+};
+interface Array<T> {
+  length: number;
+  push(...items: T[]): number;
+  pop(): T | undefined;
+  map<U>(callbackfn: (value: T, index: number, array: T[]) => U): U[];
+  filter(callbackfn: (value: T, index: number, array: T[]) => any): T[];
+  forEach(callbackfn: (value: T, index: number, array: T[]) => void): void;
+}
+`;
+
+let tsModule: typeof ts | null = null;
+let languageService: ts.LanguageService | null = null;
+const files = new Map<string, { content: string; version: number }>();
+
+async function loadTypeScript(): Promise<typeof ts> {
+  if (tsModule) return tsModule;
+  tsModule = await import('typescript');
+  return tsModule;
 }
 
-function post<T>(type: string, payload: unknown): Promise<T> {
-  const id = `${++messageId}`;
-  const worker = getWorker();
-  return new Promise<T>((resolve, reject) => {
-    pending.set(id, { resolve: resolve as (value: unknown) => void, reject });
-    worker.postMessage({ id, type, payload });
-  });
+function getLanguageService(tsInstance: typeof ts): ts.LanguageService {
+  if (languageService) return languageService;
+
+  const compilerOptions: ts.CompilerOptions = {
+    target: tsInstance.ScriptTarget.ES2022,
+    module: tsInstance.ModuleKind.ESNext,
+    moduleResolution: tsInstance.ModuleResolutionKind.NodeNext,
+    jsx: tsInstance.JsxEmit.React,
+    allowJs: true,
+    strict: true,
+    noEmit: true,
+    noLib: true,
+  };
+
+  const servicesHost: ts.LanguageServiceHost = {
+    getScriptFileNames: () => [...files.keys(), '/lib.d.ts'],
+    getScriptVersion: (fileName) => files.get(fileName)?.version.toString() ?? '0',
+    getScriptSnapshot: (fileName) => {
+      if (fileName === '/lib.d.ts') return tsInstance.ScriptSnapshot.fromString(LIB_D_TS);
+      const data = files.get(fileName);
+      if (!data) return undefined;
+      return tsInstance.ScriptSnapshot.fromString(data.content);
+    },
+    getCurrentDirectory: () => '/',
+    getCompilationSettings: () => compilerOptions,
+    getDefaultLibFileName: () => '/lib.d.ts',
+    fileExists: (fileName) => fileName === '/lib.d.ts' || files.has(fileName),
+    readFile: (fileName) => (fileName === '/lib.d.ts' ? LIB_D_TS : files.get(fileName)?.content),
+  };
+
+  languageService = tsInstance.createLanguageService(servicesHost, tsInstance.createDocumentRegistry());
+  return languageService;
+}
+
+function updateFile(path: string, content: string): void {
+  const record = files.get(path);
+  if (record) {
+    record.content = content;
+    record.version += 1;
+  } else {
+    files.set(path, { content, version: 1 });
+  }
+}
+
+function removeFile(path: string): void {
+  files.delete(path);
 }
 
 function convertCategory(category: ts.DiagnosticCategory): DiagnosticResult['category'] {
@@ -63,16 +115,60 @@ function convertCategory(category: ts.DiagnosticCategory): DiagnosticResult['cat
 }
 
 export class TsLanguageService {
+  private status: LspStatus = 'idle';
+  private statusListeners = new Set<(status: LspStatus) => void>();
+  private loadPromise: Promise<void> | null = null;
+
+  onStatusChange(callback: (status: LspStatus) => void): () => void {
+    this.statusListeners.add(callback);
+    callback(this.status);
+    return () => this.statusListeners.delete(callback);
+  }
+
+  private setStatus(status: LspStatus): void {
+    this.status = status;
+    this.statusListeners.forEach((cb) => cb(status));
+  }
+
+  private async ensureLoaded(): Promise<void> {
+    if (tsModule) return;
+    if (this.loadPromise) return this.loadPromise;
+
+    this.setStatus('loading');
+    this.loadPromise = loadTypeScript()
+      .then((ts) => {
+        getLanguageService(ts);
+        this.setStatus('ready');
+      })
+      .catch((err) => {
+        console.error('[TsLanguageService] failed to load TypeScript', err);
+        this.setStatus('error');
+        throw err;
+      });
+
+    return this.loadPromise;
+  }
+
+  get currentStatus(): LspStatus {
+    return this.status;
+  }
+
   async updateFile(path: string, content: string): Promise<void> {
-    await post('update', { path, content });
+    await this.ensureLoaded();
+    updateFile(path, content);
   }
 
   async removeFile(path: string): Promise<void> {
-    await post('remove', { path });
+    await this.ensureLoaded();
+    removeFile(path);
   }
 
   async getDiagnostics(path: string): Promise<DiagnosticResult[]> {
-    const raw = (await post<ts.Diagnostic[]>('diagnostics', { path })) ?? [];
+    await this.ensureLoaded();
+    const ls = getLanguageService(tsModule!);
+    const syntactic = ls.getSyntacticDiagnostics(path);
+    const semantic = ls.getSemanticDiagnostics(path);
+    const raw = [...syntactic, ...semantic];
     return raw.map((d) => ({
       file: path,
       start: d.start ?? 0,
@@ -84,17 +180,26 @@ export class TsLanguageService {
   }
 
   async getCompletions(path: string, offset: number): Promise<CompletionItem[]> {
-    const raw = (await post<ts.CompletionEntryDetails[]>('completions', { path, offset })) ?? [];
-    return raw.map((entry) => ({
-      label: entry.name,
-      detail: entry.displayParts?.map((p) => p.text).join(''),
-      documentation: typeof entry.documentation?.[0] === 'string' ? entry.documentation[0] : entry.documentation?.[0]?.text,
-      kind: entry.kind,
-    }));
+    await this.ensureLoaded();
+    const ls = getLanguageService(tsModule!);
+    const completions = ls.getCompletionsAtPosition(path, offset, undefined);
+    if (!completions) return [];
+    return completions.entries
+      .slice(0, 50)
+      .map((entry) => ls.getCompletionEntryDetails(path, offset, entry.name, undefined, undefined, undefined, undefined))
+      .filter((d): d is ts.CompletionEntryDetails => d !== undefined)
+      .map((entry) => ({
+        label: entry.name,
+        detail: entry.displayParts?.map((p) => p.text).join(''),
+        documentation: typeof entry.documentation?.[0] === 'string' ? entry.documentation[0] : entry.documentation?.[0]?.text,
+        kind: entry.kind,
+      }));
   }
 
   async getQuickInfo(path: string, offset: number): Promise<string | undefined> {
-    const info = await post<ts.QuickInfo | undefined>('quickInfo', { path, offset });
+    await this.ensureLoaded();
+    const ls = getLanguageService(tsModule!);
+    const info = ls.getQuickInfoAtPosition(path, offset);
     if (!info) return undefined;
 
     const display = info.displayParts?.map((p) => p.text).join('');
@@ -108,10 +213,13 @@ export class TsLanguageService {
   }
 
   destroy(): void {
-    if (workerInstance) {
-      workerInstance.terminate();
-      workerInstance = null;
+    if (languageService) {
+      languageService.dispose();
+      languageService = null;
     }
+    tsModule = null;
+    files.clear();
+    this.setStatus('idle');
   }
 }
 
