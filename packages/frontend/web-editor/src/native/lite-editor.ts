@@ -3,7 +3,6 @@ import {
   defaultHighlightStyle,
   indentOnInput,
   syntaxHighlighting,
-  LanguageSupport,
 } from '@codemirror/language'
 import { oneDark } from '@codemirror/theme-one-dark'
 import {

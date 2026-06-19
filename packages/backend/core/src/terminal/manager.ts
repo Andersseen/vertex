@@ -1,11 +1,7 @@
 import { spawn as ptySpawn, type IPty } from "node-pty";
 import { resolve } from "path";
 import { existsSync, mkdirSync } from "fs";
-import {
-  execSync,
-  spawn as processSpawn,
-  type ChildProcess,
-} from "child_process";
+import { execSync } from "child_process";
 import type {
   TerminalSession,
   CreateTerminalOptions,
@@ -13,7 +9,6 @@ import type {
 } from "./types";
 
 // Check if node-pty is available
-let nodePtyAvailable = false;
 try {
   // Test if we can create a simple PTY
   const testPty = ptySpawn("echo", ["test"], {
@@ -23,11 +18,9 @@ try {
     cwd: process.cwd(),
   });
   testPty.kill();
-  nodePtyAvailable = true;
   console.log("[TerminalManager] node-pty is available");
-} catch (error) {
+} catch {
   console.warn("[TerminalManager] node-pty not available, using fallback mode");
-  nodePtyAvailable = false;
 }
 
 export class TerminalManager {

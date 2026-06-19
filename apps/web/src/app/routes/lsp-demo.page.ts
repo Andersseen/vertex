@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { EditorComponent } from '@vertex/ui';
 import { tsLspExtensions, warmupTsLsp } from '@vertex/ui';
 import { tsLanguageService, type LspStatus } from '@vertex/runtime/lsp';

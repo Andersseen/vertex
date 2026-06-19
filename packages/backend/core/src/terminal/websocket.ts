@@ -1,5 +1,3 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
 import type { ITerminalManager, TerminalMessage } from "./types";
 
 export interface WebSocketMessage {

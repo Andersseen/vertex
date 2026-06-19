@@ -89,7 +89,7 @@ export function tsAutocompleteExtension(path: string) {
 }
 
 export function tsHoverExtension(path: string) {
-  return hoverTooltip(async (view, pos, side) => {
+  return hoverTooltip(async (view, pos, _side) => {
     const content = view.state.doc.toString();
 
     try {
