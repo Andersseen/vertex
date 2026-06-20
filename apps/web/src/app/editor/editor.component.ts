@@ -66,14 +66,14 @@ function findFirstFile(folder: VertexFolder): VertexFile | null {
       border: none;
       border-radius: 4px;
       background: transparent;
-      color: var(--ide-text-muted, #555);
+      color: var(--ide-text-muted);
       cursor: pointer;
       z-index: 10;
       transition: background 0.15s, color 0.15s;
     }
     .vx-preview-toggle:hover {
-      background: var(--ide-surface-800, #1e1e1e);
-      color: var(--ide-text, #ccc);
+      background: var(--ide-bg-elevated);
+      color: var(--ide-text-primary);
     }
   `,
 })

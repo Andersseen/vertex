@@ -65,14 +65,14 @@ console.log(message);
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: var(--ide-bg-950, #0a0a0a);
-      color: var(--ide-text, #ddd);
+      background: var(--ide-bg-base);
+      color: var(--ide-text-primary);
     }
 
     .lsp-demo__header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--ide-border, #1e1e1e);
-      background: var(--ide-surface-900, #111);
+      border-bottom: 1px solid var(--ide-border-default);
+      background: var(--ide-bg-surface);
     }
 
     .lsp-demo__title {
@@ -95,11 +95,11 @@ console.log(message);
     }
 
     .lsp-demo__header code {
-      background: var(--ide-surface-800, #1e1e1e);
+      background: var(--ide-bg-elevated);
       padding: 1px 4px;
       border-radius: 3px;
       font-family: monospace;
-      color: var(--ide-text, #ccc);
+      color: var(--ide-text-primary);
     }
 
     .lsp-demo__status {
@@ -109,7 +109,7 @@ console.log(message);
       letter-spacing: 0.05em;
       padding: 2px 8px;
       border-radius: 4px;
-      background: var(--ide-surface-700, #222);
+      background: var(--ide-border-strong);
       color: var(--ide-text-muted, #888);
     }
 

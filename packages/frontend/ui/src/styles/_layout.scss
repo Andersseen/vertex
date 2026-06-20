@@ -1,12 +1,14 @@
 @use "theme" as *;
 
-// Global Layout Classes (replaces -vx system with standardized SCSS)
+// Global layout classes. These are consumed by host bindings and templates.
+// They are kept for backward compatibility but now derive from --ide-* tokens.
+
 .vx-layout {
   @include full-screen;
   display: flex;
   flex-direction: column;
-  background-color: $surface-950;
-  color: $surface-0;
+  background-color: var(--ide-bg-base);
+  color: var(--ide-text-inverse);
   overflow: hidden;
   font-family: $font-sans;
 }
@@ -48,7 +50,7 @@
   position: relative;
 }
 
-// Utility Gaps
+// Utility gaps
 .vx-gap-0 {
   gap: 0;
 }
@@ -65,32 +67,32 @@
   gap: 1rem;
 }
 
-// Utility Backgrounds
+// Utility backgrounds
 .vx-bg-950 {
-  background-color: $surface-950;
+  background-color: var(--ide-bg-base);
 }
 .vx-bg-900 {
-  background-color: $surface-900;
+  background-color: var(--ide-bg-surface);
 }
 .vx-bg-800 {
-  background-color: $surface-800;
+  background-color: var(--ide-bg-elevated);
 }
 
-// Utility Borders
+// Utility borders
 .vx-border-b {
-  border-bottom: 1px solid $surface-800;
+  border-bottom: 1px solid var(--ide-bg-elevated);
 }
 .vx-border-t {
-  border-top: 1px solid $surface-800;
+  border-top: 1px solid var(--ide-bg-elevated);
 }
 .vx-border-r {
-  border-right: 1px solid $surface-800;
+  border-right: 1px solid var(--ide-bg-elevated);
 }
 .vx-border-l {
-  border-left: 1px solid $surface-800;
+  border-left: 1px solid var(--ide-bg-elevated);
 }
 
-// Status Bar
+// Status bar
 .vx-statusbar {
   font-family: $font-sans;
   display: flex !important;
@@ -99,32 +101,32 @@
   width: 100%;
   padding: 0 0.75rem;
   height: 24px !important;
-  background-color: $surface-900;
-  border-top: 1px solid $surface-800;
+  background-color: var(--ide-bg-surface);
+  border-top: 1px solid var(--ide-bg-elevated);
   font-size: 10.5px;
   font-weight: 500;
-  color: $surface-400;
+  color: var(--ide-text-secondary);
 }
 
 .vx-divider {
   display: inline-block;
   width: 1px;
   height: 12px;
-  background-color: $surface-800;
+  background-color: var(--ide-bg-elevated);
   margin: 0 0.5rem;
   border-radius: 1px;
   opacity: 0.4;
 }
 
 .vx-text-success {
-  color: $success !important;
+  color: var(--ide-success-text) !important;
 }
 .vx-text-warning {
-  color: $warning !important;
+  color: var(--ide-warning-text) !important;
 }
 .vx-text-error {
-  color: $error !important;
+  color: var(--ide-error-text) !important;
 }
 .vx-text-info {
-  color: $info !important;
+  color: var(--ide-info-text) !important;
 }

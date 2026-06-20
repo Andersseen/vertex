@@ -1,8 +1,11 @@
-// Vertex UI - Main Styles Entry Point
-// Import this file in your global styles to get all design tokens
+// Vertex UI - Main styles entry point.
+// Import this file in your global styles together with @vertex/ide-ui tokens.
 
 @forward "theme";
 @forward "layout";
+
+// Make the shared --ide-* tokens available when this entry point is loaded.
+@use "@vertex/ide-ui/src/styles/tokens" as *;
 
 // Global reset and base styles
 *,
@@ -20,21 +23,21 @@ html {
 }
 
 body {
-  font-family: theme.$font-sans;
-  font-size: theme.$font-size-base;
-  line-height: theme.$line-height-normal;
-  color: theme.$surface-200;
-  background: theme.$surface-950;
+  font-family: var(--ide-font-sans);
+  font-size: var(--ide-text-base);
+  line-height: var(--ide-leading-normal);
+  color: var(--ide-text-primary);
+  background: var(--ide-bg-base);
 }
 
 // Focus visible polyfill
 :focus-visible {
-  outline: 2px solid theme.$primary-500;
+  outline: 2px solid var(--ide-accent);
   outline-offset: 2px;
 }
 
 // Selection styling
 ::selection {
-  background: theme.$primary-500;
-  color: theme.$surface-0;
+  background: var(--ide-accent);
+  color: var(--ide-text-inverse);
 }

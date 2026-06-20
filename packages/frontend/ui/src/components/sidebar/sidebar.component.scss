@@ -5,7 +5,7 @@
   @include full-height;
   @include full-width;
   @include flex-column;
-  background-color: $surface-900;
+  background-color: var(--ide-bg-surface);
   font-family: $font-sans;
   @include overflow-hidden;
 
@@ -13,8 +13,8 @@
   &__header {
     @include flex-between;
     height: 32px;
-    border-bottom: 1px solid $surface-800;
-    background-color: $surface-900;
+    border-bottom: 1px solid var(--ide-bg-elevated);
+    background-color: var(--ide-bg-surface);
     padding: 0 $spacing-3;
     flex-shrink: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -29,7 +29,7 @@
 
   // Element: Logo Icon
   &__logo-icon {
-    color: $surface-400;
+    color: var(--ide-text-secondary);
     flex-shrink: 0;
   }
 
@@ -39,7 +39,7 @@
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: $surface-200;
+    color: var(--ide-text-primary);
   }
 
   // Element: Actions

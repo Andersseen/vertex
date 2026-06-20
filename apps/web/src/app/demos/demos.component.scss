@@ -77,7 +77,7 @@
     color: var(--ide-text-primary, #f5f5f5);
     margin: 0;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--ide-border, #222);
+    border-bottom: 1px solid var(--ide-border-default);
   }
 
   &__desc {
@@ -101,7 +101,7 @@
 
 .demos-preview {
   background-color: var(--ide-bg-surface, #111);
-  border: 1px solid var(--ide-border, #222);
+  border: 1px solid var(--ide-border-default);
   border-radius: 8px;
   padding: 20px;
 

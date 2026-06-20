@@ -15,6 +15,12 @@
   --ide-weight-medium: 500;
   --ide-weight-semibold: 600;
 
+  // Font-weight aliases (consistent with --ide-font-sans/--ide-font-mono)
+  --ide-font-normal: var(--ide-weight-normal);
+  --ide-font-medium: var(--ide-weight-medium);
+  --ide-font-semibold: var(--ide-weight-semibold);
+  --ide-font-bold: 700;
+
   // Line heights
   --ide-leading-tight: 1.25;
   --ide-leading-normal: 1.5;

@@ -172,8 +172,8 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: var(--ide-bg-950, #0a0a0a);
-      border-left: 1px solid var(--ide-border, #1e1e1e);
+      background: var(--ide-bg-base);
+      border-left: 1px solid var(--ide-border-default);
     }
 
     /* ── toolbar ── */
@@ -182,7 +182,7 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       align-items: center;
       gap: 6px;
       padding: 4px 8px;
-      border-bottom: 1px solid var(--ide-border, #1e1e1e);
+      border-bottom: 1px solid var(--ide-border-default);
       min-height: 36px;
       flex-shrink: 0;
     }
@@ -193,13 +193,13 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       padding: 3px 10px;
       border-radius: 4px;
       border: none;
-      background: var(--ide-surface-800, #1e1e1e);
-      color: var(--ide-text, #ccc);
+      background: var(--ide-bg-elevated);
+      color: var(--ide-text-primary);
       font-size: 12px;
       cursor: pointer;
       transition: background 0.15s;
     }
-    .preview-btn:hover:not(:disabled) { background: var(--ide-surface-700, #2a2a2a); }
+    .preview-btn:hover:not(:disabled) { background: var(--ide-border-strong); }
     .preview-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .preview-btn--icon { padding: 3px 7px; }
     .preview-url {
@@ -239,7 +239,7 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       max-width: 280px;
     }
     .idle-msg p { margin: 0; line-height: 1.6; }
-    .idle-msg strong { color: var(--ide-text, #ccc); }
+    .idle-msg strong { color: var(--ide-text-primary); }
     .idle-hint { font-size: 11px; color: var(--ide-text-muted, #444); }
     .idle-icon { opacity: 0.2; }
 
@@ -248,15 +248,15 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background: var(--ide-surface-800, #141414);
-      border: 1px solid var(--ide-border, #222);
+      background: var(--ide-bg-elevated);
+      border: 1px solid var(--ide-border-default);
       border-radius: 8px;
       padding: 16px 20px;
       width: 100%;
       max-width: 280px;
     }
     .loading-card--error {
-      border-color: color-mix(in srgb, var(--ide-text-error, #f48771) 30%, transparent);
+      border-color: color-mix(in srgb, var(--ide-error-text) 30%, transparent);
     }
 
     .loading-title {
@@ -265,9 +265,9 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       gap: 8px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--ide-text, #ddd);
+      color: var(--ide-text-primary);
     }
-    .loading-title--error { color: var(--ide-text-error, #f48771); }
+    .loading-title--error { color: var(--ide-error-text); }
 
     /* ── stepper ── */
     .steps {
@@ -308,7 +308,7 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       color: #60a5fa;
     }
     .step--active .step-label {
-      color: var(--ide-text, #ddd);
+      color: var(--ide-text-primary);
       font-weight: 500;
     }
 
@@ -320,7 +320,7 @@ STEPS.forEach((s, i) => (PHASE_ORDER[s.phase] = i));
       margin: 0;
       font-family: monospace;
       font-size: 11px;
-      color: var(--ide-text-error, #f48771);
+      color: var(--ide-error-text);
       white-space: pre-wrap;
       word-break: break-word;
       max-height: 120px;

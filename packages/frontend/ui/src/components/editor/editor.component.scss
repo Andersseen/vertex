@@ -5,15 +5,15 @@
   @include full-height;
   @include full-width;
   @include flex-column;
-  background-color: $surface-950;
+  background-color: var(--ide-bg-base);
   font-family: $font-sans;
 
   // Element: Header
   &__header {
     @include flex-between;
     height: 32px;
-    background-color: $surface-900;
-    border-bottom: 1px solid $surface-800;
+    background-color: var(--ide-bg-surface);
+    border-bottom: 1px solid var(--ide-bg-elevated);
     flex-shrink: 0;
   }
 
@@ -24,8 +24,8 @@
     gap: $spacing-2;
     height: 100%;
     padding: 0 $spacing-4;
-    background-color: rgba($primary-500, 0.05);
-    border-right: 1px solid $surface-800;
+    background-color: var(--ide-accent-subtle);
+    border-right: 1px solid var(--ide-bg-elevated);
     position: relative;
 
     // Active indicator
@@ -36,9 +36,9 @@
       right: -1px;
       height: 16px;
       width: 2px;
-      background-color: $primary-500;
+      background-color: var(--ide-accent);
       transform: translateY(-50%);
-      box-shadow: 0 0 8px $primary-500;
+      box-shadow: 0 0 8px var(--ide-accent);
     }
   }
 
@@ -46,13 +46,14 @@
   &__tab-icon {
     font-size: $font-size-xs;
     opacity: 0.8;
+    font-style: normal;
   }
 
   // Element: Tab Name
   &__tab-name {
     font-size: 10px;
     font-weight: $font-weight-bold;
-    color: $surface-100;
+    color: var(--ide-text-primary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     opacity: 0.9;
@@ -63,7 +64,7 @@
   &__modified-indicator {
     width: 6px;
     height: 6px;
-    background-color: $primary-500;
+    background-color: var(--ide-accent);
     @include rounded(50%);
     margin-left: $spacing-1;
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -76,17 +77,17 @@
     padding: $spacing-1;
     background: transparent;
     border: none;
-    @include rounded(4px);
-    color: $surface-500;
+    @include rounded;
+    color: var(--ide-text-muted);
     cursor: pointer;
     @include transition;
 
     &:hover {
-      background-color: $surface-800;
-      color: $surface-200;
+      background-color: var(--ide-bg-elevated);
+      color: var(--ide-text-primary);
     }
 
-    i {
+    span {
       font-size: 8px;
     }
   }
@@ -106,7 +107,7 @@
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: $surface-500;
+    color: var(--ide-text-muted);
     opacity: 0.4;
   }
 
@@ -116,10 +117,10 @@
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: $surface-0;
-    background-color: $primary-600;
+    color: var(--ide-text-inverse);
+    background-color: var(--ide-accent-hover);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: var(--ide-radius-sm);
     cursor: default;
   }
 
@@ -129,21 +130,21 @@
     @include items-center;
     gap: $spacing-2;
     padding: $spacing-1 $spacing-3;
-    @include rounded(4px);
+    @include rounded;
     font-size: 9px;
     font-weight: $font-weight-semibold;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: $surface-0;
-    border: 1px solid $surface-700;
-    background-color: $surface-800;
+    color: var(--ide-text-inverse);
+    border: 1px solid var(--ide-border-strong);
+    background-color: var(--ide-bg-elevated);
     cursor: pointer;
     @include transition;
 
     &:hover:not(:disabled) {
-      background-color: $surface-700;
-      border-color: $primary-500;
-      box-shadow: 0 0 10px rgba($primary-500, 0.2);
+      background-color: var(--ide-border-strong);
+      border-color: var(--ide-accent);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--ide-accent) 20%, transparent);
     }
 
     &:active:not(:disabled) {
@@ -155,7 +156,7 @@
       cursor: not-allowed;
     }
 
-    i {
+    span {
       font-size: 9px;
     }
   }
@@ -180,14 +181,14 @@
       }
 
       .cm-gutters {
-        background-color: $surface-950 !important;
-        color: $surface-600 !important;
-        border-right: 1px solid $surface-800 !important;
+        background-color: var(--ide-bg-base) !important;
+        color: var(--ide-text-muted) !important;
+        border-right: 1px solid var(--ide-bg-elevated) !important;
       }
 
       .cm-activeLineGutter {
-        background-color: $surface-800 !important;
-        color: $surface-100 !important;
+        background-color: var(--ide-bg-elevated) !important;
+        color: var(--ide-text-primary) !important;
       }
 
       .cm-activeLine {
@@ -195,33 +196,32 @@
       }
 
       .cm-foldPlaceholder {
-        background: $surface-800 !important;
+        background: var(--ide-bg-elevated) !important;
         border: none !important;
-        color: $surface-400 !important;
+        color: var(--ide-text-secondary) !important;
       }
 
-      // Fallback syntax highlighting tokens (oneDark should cover these,
-      // but these ensure visibility if theme styles fail to load)
-      .cm-keyword { color: #c678dd; }
-      .cm-string, .cm-string2 { color: #98c379; }
-      .cm-comment { color: #5c6370; font-style: italic; }
-      .cm-number { color: #d19a66; }
+      // Fallback syntax highlighting tokens
+      .cm-keyword { color: var(--syntax-keyword); }
+      .cm-string, .cm-string2 { color: var(--syntax-string); }
+      .cm-comment { color: var(--syntax-comment); font-style: italic; }
+      .cm-number { color: var(--syntax-number); }
       .cm-variable, .cm-variable-2, .cm-variable-3 { color: #e06c75; }
       .cm-property { color: #e06c75; }
       .cm-type, .cm-class-name { color: #e5c07b; }
-      .cm-function, .cm-def { color: #61afef; }
+      .cm-function, .cm-def { color: var(--syntax-function); }
       .cm-operator { color: #56b6c2; }
       .cm-tag { color: #e06c75; }
-      .cm-attribute { color: #d19a66; }
-      .cm-link { color: #61afef; text-decoration: underline; }
+      .cm-attribute { color: var(--syntax-number); }
+      .cm-link { color: var(--syntax-function); text-decoration: underline; }
 
       // TypeScript LSP hover tooltip
       .cm-tooltip.vertex-ts-hover-tooltip {
-        background-color: $surface-900;
-        border: 1px solid $surface-700;
-        border-radius: 6px;
+        background-color: var(--ide-bg-surface);
+        border: 1px solid var(--ide-border-strong);
+        border-radius: var(--ide-radius-md);
         padding: $spacing-2 $spacing-3;
-        color: $surface-100;
+        color: var(--ide-text-primary);
         font-family: $font-mono;
         font-size: 12px;
         line-height: 1.5;
