@@ -1,6 +1,5 @@
 import { spawn as processSpawn, type ChildProcess } from "child_process";
 import { resolve } from "path";
-import { existsSync } from "fs";
 import type {
   TerminalSession,
   CreateTerminalOptions,

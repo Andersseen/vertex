@@ -1,5 +1,6 @@
 import { linter, Diagnostic } from '@codemirror/lint';
 import { autocompletion, CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete';
+import { hoverTooltip } from '@codemirror/view';
 import { tsLanguageService, type DiagnosticResult, type CompletionItem } from '@vertex/runtime/lsp';
 
 function mapCategory(category: DiagnosticResult['category']): Diagnostic['severity'] {
@@ -87,6 +88,47 @@ export function tsAutocompleteExtension(path: string) {
   });
 }
 
+export function tsHoverExtension(path: string) {
+  return hoverTooltip(async (view, pos, _side) => {
+    const content = view.state.doc.toString();
+
+    try {
+      await tsLanguageService.updateFile(path, content);
+      const info = await tsLanguageService.getQuickInfo(path, pos);
+      if (!info) return null;
+
+      const text = info;
+      if (!text.trim()) return null;
+
+      return {
+        pos,
+        above: true,
+        create() {
+          const dom = document.createElement('div');
+          dom.className = 'vertex-ts-hover-tooltip';
+          dom.textContent = text;
+          return { dom };
+        },
+      };
+    } catch {
+      return null;
+    }
+  });
+}
+
 export function tsLspExtensions(path: string) {
-  return [tsLintExtension(path), tsAutocompleteExtension(path)];
+  return [tsLintExtension(path), tsAutocompleteExtension(path), tsHoverExtension(path)];
+}
+
+/**
+ * Pre-load TypeScript so the first lint/completion/hover is fast.
+ * Call this once from the host component before the editor is shown.
+ */
+export async function warmupTsLsp(path: string, content: string): Promise<void> {
+  try {
+    await tsLanguageService.updateFile(path, content);
+    await tsLanguageService.getDiagnostics(path);
+  } catch {
+    // Errors are surfaced via tsLanguageService status listeners.
+  }
 }

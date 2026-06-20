@@ -49,10 +49,10 @@ export class VirtualFS implements IVirtualFS {
     return this.adapter.clear()
   }
 
-  // Solo disponible en modo OPFS — expone el FS raw para isomorphic-git
+  // Only available in OPFS mode — exposes the raw FS for isomorphic-git
   get rawFs(): OPFSFS['rawFs'] {
     if (this.adapter instanceof OPFSFS) return this.adapter.rawFs
-    throw new Error('rawFs solo disponible en modo opfs')
+    throw new Error('rawFs is only available in opfs mode')
   }
 
   get mode(): FSMode {

@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vitest",
+    "test": "bun test",
     "lint": "eslint .",
     "check-types": "tsc --noEmit"
   },

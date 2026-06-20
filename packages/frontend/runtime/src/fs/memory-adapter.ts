@@ -110,7 +110,7 @@ export class MemoryFS implements IVirtualFS {
 
   private notify(event: 'change' | 'add' | 'delete', path: string): void {
     this.watchers.get(path)?.forEach(cb => cb(event, path))
-    // Notificar watchers del root también
+    // Notify root watchers as well
     if (path !== '/') this.watchers.get('/')?.forEach(cb => cb(event, path))
   }
 }

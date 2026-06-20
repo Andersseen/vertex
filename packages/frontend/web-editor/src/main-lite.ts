@@ -1,9 +1,9 @@
 /**
  * Vertex Editor Lite - Entry Point
- * 
+ *
  * Minimal bundle optimized for read-only code display.
  * No editing features, no search, no autocomplete.
- * 
+ *
  * Expected bundle size: ~400-600KB minified
  */
 import "@angular/compiler";
@@ -21,8 +21,8 @@ async function bootstrapWebEditorLite(): Promise<void> {
     injector: app.injector,
   });
 
-  if (!customElements.get("vertex-editor")) {
-    customElements.define("vertex-editor", WebEditorLiteElement);
+  if (!customElements.get("vertex-editor-lite")) {
+    customElements.define("vertex-editor-lite", WebEditorLiteElement);
   }
 }
 
@@ -35,21 +35,21 @@ if (document.readyState === "loading") {
 
 /**
  * USAGE:
- * 
+ *
  * HTML:
- * <vertex-editor 
+ * <vertex-editor-lite
  *   value="const x = 1;"
  *   language="javascript"
  *   theme="dark"
  *   line-numbers="true">
- * </vertex-editor>
- * 
+ * </vertex-editor-lite>
+ *
  * Angular:
- * <vertex-editor 
+ * <vertex-editor-lite
  *   [attr.value]="code()"
  *   language="typescript"
  *   theme="light">
- * </vertex-editor>
- * 
+ * </vertex-editor-lite>
+ *
  * NOTE: Include schemas: [CUSTOM_ELEMENTS_SCHEMA] in your Angular component
  */

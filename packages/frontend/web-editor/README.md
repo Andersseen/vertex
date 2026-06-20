@@ -1,26 +1,34 @@
 # Vertex Editor
 
-A lightweight, standalone code editor Web Component built with Angular Elements and CodeMirror 6.
+Standalone code editor Web Components built with Angular Elements and CodeMirror 6.
+
+Two variants are available:
+
+- **`<vertex-editor>`** — Full editable code editor with history, search, autocomplete, and editing support. (~1.1 MB minified, Angular Elements)
+- **`<vertex-editor-lite>`** — Read-only, lightweight display variant built as a native Web Component without Angular. (~450 KB minified)
 
 ## Features
 
-- 📦 **Standalone Web Component** - Single JS file, no build step required in your project
-- 🎨 **Multiple themes** - Dark and light modes
-- 🔤 **Language support** - TypeScript, JavaScript, HTML, CSS, JSON, Markdown
-- 📱 **Responsive** - Adapts to container size
-- ⚡ **Lazy loading** - Languages load on demand
-- 🔧 **Customizable** - Line numbers, read-only mode, word wrap, and more
-- 🎯 **Zoneless Angular** - Uses signals, no zone.js overhead
+- 📦 **Standalone Web Components** — Single JS file each, no build step required in your project
+- 🎨 **Multiple themes** — Dark and light modes
+- 🔤 **Language support** — TypeScript, JavaScript, HTML, CSS, JSON, Markdown
+- 📱 **Responsive** — Adapts to container size
+- ⚡ **Lazy loading** — Languages load on demand
+- 🔧 **Customizable** — Line numbers, read-only mode, word wrap, and more
+- 🎯 **Zoneless Angular** — Uses signals, no zone.js overhead
 
-> **Note:** The full `<vertex-editor>` is editable. For read-only display, use `<vertex-editor read-only>`.
+> **Note:** For read-only display, prefer `<vertex-editor-lite>` over `<vertex-editor readonly>` — it ships a smaller bundle.
 
 ## Installation
 
 ### Option 1: One-liner with curl (Recommended)
 
 ```bash
-# Installs from GitHub Releases to ./public
+# Installs the full editable editor from GitHub Releases to ./public
 curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public
+
+# Install the read-only lite variant
+curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public --lite
 
 # Custom directory
 curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./static
@@ -81,6 +89,43 @@ After installation, include the script in your HTML:
   ></vertex-editor>
 </body>
 </html>
+```
+
+## Lite Variant
+
+For read-only code display, use `<vertex-editor-lite>`:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="web-editor-lite.min.js"></script>
+</head>
+<body>
+  <vertex-editor-lite
+    value="console.log('Hello World!');"
+    language="javascript"
+    theme="dark"
+    height="300px"
+  ></vertex-editor-lite>
+</body>
+</html>
+```
+
+The lite variant keeps the same attribute API for `value`, `language`, `theme`, `line-numbers`, `height`, and `font-size`, but removes editing, search, and autocomplete to reduce bundle size.
+
+## API Reference
+
+See [API.md](./API.md) for the complete attribute, method, event, and framework integration reference.
+
+## Quick Demo
+
+After building, open `demo.html` in a browser:
+
+```bash
+cd packages/frontend/web-editor
+bun run demo
+# open http://localhost:8080/demo.html
 ```
 
 ## Framework Examples

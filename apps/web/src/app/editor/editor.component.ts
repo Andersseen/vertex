@@ -16,7 +16,7 @@ import { tsLspExtensions } from '@vertex/ui';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 import { RuntimeService } from '@vertex/core/web';
-import { IdeToastService } from '@vertex/ide-ui';
+import { IdeToastService, IdeToasterComponent } from '@vertex/ide-ui';
 import { CloneDialogComponent } from '../components/clone-dialog/clone-dialog.component';
 import { PreviewPanelComponent } from '../components/preview-panel/preview-panel.component';
 import { PromptDialogComponent } from '../components/prompt-dialog/prompt-dialog.component';
@@ -45,6 +45,7 @@ function findFirstFile(folder: VertexFolder): VertexFile | null {
     BottomPanelComponent,
     TabsComponent,
     IdeSplitterComponent,
+    IdeToasterComponent,
     CloneDialogComponent,
     PreviewPanelComponent,
     PromptDialogComponent,
@@ -65,14 +66,14 @@ function findFirstFile(folder: VertexFolder): VertexFile | null {
       border: none;
       border-radius: 4px;
       background: transparent;
-      color: var(--ide-text-muted, #555);
+      color: var(--ide-text-muted);
       cursor: pointer;
       z-index: 10;
       transition: background 0.15s, color 0.15s;
     }
     .vx-preview-toggle:hover {
-      background: var(--ide-surface-800, #1e1e1e);
-      color: var(--ide-text, #ccc);
+      background: var(--ide-bg-elevated);
+      color: var(--ide-text-primary);
     }
   `,
 })

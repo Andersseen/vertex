@@ -1,5 +1,5 @@
-@use 'styles/theme' as *;
-@use 'styles/layout' as *;
+// Vertex Web App global styles.
+// Design tokens (--ide-*) are provided by @vertex/ide-ui and imported in main.ts.
 
 /* Terminal styles */
 .xterm {
@@ -13,15 +13,15 @@
 }
 
 .xterm-viewport {
-  background-color: #020617 !important;
+  background-color: var(--ide-bg-base) !important;
 }
 
 .xterm-rows {
-  background-color: #020617 !important;
+  background-color: var(--ide-bg-base) !important;
 }
 
 .xterm-text-layer {
-  background-color: #020617 !important;
+  background-color: var(--ide-bg-base) !important;
 }
 
 /* Hide any scrollbar artifacts in terminal */
@@ -72,16 +72,19 @@ v-bottom-panel v-terminal-panel {
 
 html,
 body {
-  @include full-screen;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
   margin: 0;
   padding: 0;
-  background-color: $surface-950;
-  color: $surface-0;
-  font-family: $font-sans;
+  background-color: var(--ide-bg-base);
+  color: var(--ide-text-inverse);
+  font-family: var(--ide-font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Animations using SCSS variables */
+/* Animations */
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -120,25 +123,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $surface-700;
+  background: var(--ide-border-strong);
   border-radius: 10px;
   &:hover {
-    background: $surface-600;
+    background: var(--ide-text-muted);
   }
 }
 
 .font-mono {
-  font-family: $font-mono;
+  font-family: var(--ide-font-mono);
 }
 .font-inter {
-  font-family: $font-sans;
+  font-family: var(--ide-font-sans);
 }
 
 :root {
-  --p-primary-500: #6366f1;
-  --p-primary-600: #4f46e5;
-  --p-primary-700: #4338ca;
-  --p-surface-0: #ffffff;
-  --p-surface-950: #020617;
   color-scheme: dark;
 }

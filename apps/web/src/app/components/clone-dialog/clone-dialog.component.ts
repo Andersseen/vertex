@@ -123,7 +123,7 @@ export class CloneDialogComponent {
       this.visibleChange.emit(false);
       this.cloneSuccess.emit(folder);
     } catch {
-      // error ya está en runtime.cloneError()
+      // error is already surfaced via runtime.cloneError()
     }
   }
 }

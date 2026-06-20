@@ -3,17 +3,20 @@
     <!-- Editor Header -->
     <header class="editor__header">
       <div class="editor__tab">
-        <i class="editor__tab-icon" [class]="getFileIcon(file()?.language)"></i>
+        <i class="editor__tab-icon">{{ getFileIcon(file()?.language) }}</i>
         <span class="editor__tab-name">{{ file()?.name ?? "Untitled" }}</span>
         @if (isDirty) {
           <span class="editor__modified-indicator" title="Modified"></span>
         }
         <button class="editor__close-btn" type="button" aria-label="Close file">
-          <i class="pi pi-times"></i>
+          <span aria-hidden="true">×</span>
         </button>
       </div>
 
       <div class="editor__actions">
+        @if (hasLspSupport()) {
+          <span class="editor__lsp-badge" title="Language Server Protocol active">LSP</span>
+        }
         <span class="editor__language">{{ file()?.language ?? "text" }}</span>
         <button
           class="editor__save-btn"
@@ -21,7 +24,7 @@
           (click)="saveFile()"
           [disabled]="!isDirty"
         >
-          <i class="pi pi-save"></i>
+          <span aria-hidden="true">↓</span>
           <span>Save</span>
         </button>
       </div>

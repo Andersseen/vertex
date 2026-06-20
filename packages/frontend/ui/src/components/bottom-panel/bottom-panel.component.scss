@@ -2,9 +2,9 @@
 
 // Block: Bottom Panel
 .bottom-panel {
-  background-color: $surface-950;
-  color: $surface-100;
-  border-top: 1px solid $surface-800;
+  background-color: var(--ide-bg-base);
+  color: var(--ide-text-primary);
+  border-top: 1px solid var(--ide-bg-elevated);
   font-family: $font-mono;
   @include flex-column;
   @include full-height;
@@ -23,7 +23,7 @@
     font-family: $font-mono;
     font-size: 11px;
     line-height: 1.4;
-    color: $surface-300;
+    color: var(--ide-text-secondary);
     white-space: pre-wrap;
     display: block;
   }
@@ -34,12 +34,12 @@
     @include items-start;
     gap: $spacing-2;
     padding: $spacing-1 $spacing-2;
-    @include rounded(4px);
+    @include rounded;
     cursor: pointer;
     @include transition;
 
     &:hover {
-      background: linear-gradient(90deg, rgba($primary-500, 0.05), transparent);
+      background: linear-gradient(90deg, var(--ide-accent-subtle), transparent);
     }
   }
 
@@ -50,11 +50,11 @@
     flex-shrink: 0;
 
     &--error {
-      color: $error;
+      color: var(--ide-error-text);
     }
 
     &--warning {
-      color: $warning;
+      color: var(--ide-warning-text);
     }
   }
 
@@ -66,13 +66,13 @@
   // Element: Problem Message
   &__problem-message {
     font-size: $font-size-xs;
-    color: $surface-300;
+    color: var(--ide-text-secondary);
   }
 
   // Element: Problem Meta
   &__problem-meta {
     font-size: 10px;
-    color: $surface-500;
+    color: var(--ide-text-muted);
     margin-left: $spacing-2;
   }
 
@@ -81,15 +81,15 @@
     padding: $spacing-0-5 0;
 
     &--success {
-      color: $success;
+      color: var(--ide-success-text);
     }
 
     &--warning {
-      color: $warning;
+      color: var(--ide-warning-text);
     }
 
     &--info {
-      color: $info;
+      color: var(--ide-info-text);
     }
   }
 
@@ -98,15 +98,15 @@
     padding: $spacing-0-5 0;
 
     &--success {
-      color: $success;
+      color: var(--ide-success-text);
     }
 
     &--warning {
-      color: $warning;
+      color: var(--ide-warning-text);
     }
 
     &--info {
-      color: $info;
+      color: var(--ide-info-text);
     }
   }
 
@@ -116,7 +116,7 @@
     overflow: hidden;
     height: 100%;
     width: 100%;
-    background-color: $surface-950;
+    background-color: var(--ide-bg-base);
 
     v-terminal-panel {
       display: block;

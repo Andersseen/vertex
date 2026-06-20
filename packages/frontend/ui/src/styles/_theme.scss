@@ -1,105 +1,94 @@
-// Vertex IDE Design System - Core Variables
-// Replaces Tailwind utility tokens with robust SCSS variables
+// Vertex UI design-system helpers.
+// This file no longer defines a separate palette; it consumes the --ide-* tokens
+// provided by @vertex/ide-ui so the whole application shares a single theme.
 
 // ============================================
-// COLORS - Surfaces
+// COLOR ALIASES (mapped to the shared --ide-* tokens)
+// Kept for backward compatibility with legacy components and landing pages.
+// Prefer using var(--ide-*) directly in new code.
 // ============================================
-$surface-0: #ffffff;
-$surface-50: #f8fafc;
-$surface-100: #f1f5f9;
-$surface-200: #e2e8f0;
-$surface-300: #cbd5e1;
-$surface-400: #94a3b8;
-$surface-500: #64748b;
-$surface-600: #475569;
-$surface-700: #334155;
-$surface-800: #1e293b;
-$surface-850: #162033;
-$surface-900: #0f172a;
-$surface-950: #020617;
+$surface-0: var(--ide-text-inverse);
+$surface-50: var(--ide-text-inverse);
+$surface-100: var(--ide-text-primary);
+$surface-200: var(--ide-text-primary);
+$surface-300: var(--ide-text-secondary);
+$surface-400: var(--ide-text-secondary);
+$surface-500: var(--ide-text-muted);
+$surface-600: var(--ide-text-muted);
+$surface-700: var(--ide-border-strong);
+$surface-800: var(--ide-bg-elevated);
+$surface-850: var(--ide-bg-elevated);
+$surface-900: var(--ide-bg-surface);
+$surface-950: var(--ide-bg-base);
 
-// ============================================
-// COLORS - Brand/Primary
-// ============================================
-$primary-50: #eef2ff;
-$primary-100: #e0e7ff;
-$primary-200: #c7d2fe;
-$primary-300: #a5b4fc;
-$primary-400: #818cf8;
-$primary-500: #6366f1;
-$primary-600: #4f46e5;
-$primary-700: #4338ca;
-$primary-800: #3730a3;
-$primary-900: #312e81;
+$primary-50: var(--ide-accent-subtle);
+$primary-100: var(--ide-accent-subtle);
+$primary-200: var(--ide-accent);
+$primary-300: var(--ide-accent);
+$primary-400: var(--ide-accent);
+$primary-500: var(--ide-accent);
+$primary-600: var(--ide-accent-hover);
+$primary-700: var(--ide-accent-hover);
+$primary-800: var(--ide-accent-hover);
+$primary-900: var(--ide-accent-hover);
 
-// ============================================
-// COLORS - Semantic
-// ============================================
-$success: #4ade80;
-$success-light: #86efac;
-$success-dark: #22c55e;
+$success: var(--ide-success-text);
+$success-light: var(--ide-success-text);
+$success-dark: var(--ide-success);
 
-$warning: #fbbf24;
-$warning-light: #fcd34d;
-$warning-dark: #f59e0b;
+$warning: var(--ide-warning-text);
+$warning-light: var(--ide-warning-text);
+$warning-dark: var(--ide-warning);
 
-$error: #f87171;
-$error-light: #fca5a5;
-$error-dark: #ef4444;
+$error: var(--ide-error-text);
+$error-light: var(--ide-error-text);
+$error-dark: var(--ide-error);
 
-$info: #60a5fa;
-$info-light: #93c5fd;
-$info-dark: #3b82f6;
+$info: var(--ide-info-text);
+$info-light: var(--ide-info-text);
+$info-dark: var(--ide-accent);
 
 // ============================================
 // TYPOGRAPHY
 // ============================================
-$font-sans:
-  "Inter",
-  system-ui,
-  -apple-system,
-  BlinkMacSystemFont,
-  "Segoe UI",
-  sans-serif;
-$font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+$font-sans: var(--ide-font-sans);
+$font-mono: var(--ide-font-mono);
 
-$font-size-xs: 0.625rem; // 10px
-$font-size-sm: 0.75rem; // 12px
-$font-size-base: 0.875rem; // 14px
-$font-size-md: 1rem; // 16px
-$font-size-lg: 1.125rem; // 18px
-$font-size-xl: 1.25rem; // 20px
+$font-size-xs: var(--ide-text-xs);
+$font-size-sm: var(--ide-text-sm);
+$font-size-base: var(--ide-text-base);
+$font-size-md: var(--ide-text-md);
+$font-size-lg: var(--ide-text-lg);
 
-$font-weight-normal: 400;
-$font-weight-medium: 500;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
+$font-weight-normal: var(--ide-font-normal);
+$font-weight-medium: var(--ide-font-medium);
+$font-weight-semibold: var(--ide-font-semibold);
+$font-weight-bold: var(--ide-font-bold);
 
-$line-height-tight: 1.25;
-$line-height-normal: 1.5;
+$line-height-tight: var(--ide-leading-tight);
+$line-height-normal: var(--ide-leading-normal);
 $line-height-relaxed: 1.75;
 
 // ============================================
 // SPACING SCALE
 // ============================================
-$spacing-0: 0;
+$spacing-0: var(--ide-space-0);
 $spacing-px: 1px;
-$spacing-0-5: 0.125rem; // 2px
-$spacing-1: 0.25rem; // 4px
-$spacing-2: 0.5rem; // 8px
-$spacing-3: 0.75rem; // 12px
-$spacing-4: 1rem; // 16px
-$spacing-5: 1.25rem; // 20px
-$spacing-6: 1.5rem; // 24px
-$spacing-8: 2rem; // 32px
-$spacing-10: 2.5rem; // 40px
-$spacing-12: 3rem; // 48px
+$spacing-0-5: var(--ide-space-0-5);
+$spacing-1: var(--ide-space-1);
+$spacing-2: var(--ide-space-2);
+$spacing-3: var(--ide-space-3);
+$spacing-4: var(--ide-space-4);
+$spacing-5: var(--ide-space-5);
+$spacing-6: var(--ide-space-6);
+$spacing-8: var(--ide-space-8);
+$spacing-10: var(--ide-space-10);
+$spacing-12: var(--ide-space-12);
 
 // ============================================
 // LAYOUT - Common Mixins
 // ============================================
 
-// Flexbox utilities
 @mixin flex {
   display: flex;
 }
@@ -170,7 +159,6 @@ $spacing-12: 3rem; // 48px
   gap: $size;
 }
 
-// Sizing utilities
 @mixin full-width {
   width: 100%;
 }
@@ -186,7 +174,6 @@ $spacing-12: 3rem; // 48px
   width: 100dvw;
 }
 
-// Position utilities
 @mixin relative {
   position: relative;
 }
@@ -199,7 +186,6 @@ $spacing-12: 3rem; // 48px
   position: fixed;
 }
 
-// Overflow utilities
 @mixin overflow-auto {
   overflow: auto;
 }
@@ -216,7 +202,6 @@ $spacing-12: 3rem; // 48px
   overflow-y: auto;
 }
 
-// Text utilities
 @mixin truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -243,7 +228,6 @@ $spacing-12: 3rem; // 48px
   text-transform: capitalize;
 }
 
-// Interactive utilities
 @mixin clickable {
   cursor: pointer;
   user-select: none;
@@ -253,13 +237,12 @@ $spacing-12: 3rem; // 48px
   transition: $property $duration $timing;
 }
 
-@mixin rounded($radius: 4px) {
+@mixin rounded($radius: var(--ide-radius-sm)) {
   border-radius: $radius;
 }
 
-// Focus and accessibility
 @mixin focus-ring {
-  outline: 2px solid $primary-500;
+  outline: 2px solid var(--ide-accent);
   outline-offset: 2px;
 }
 
@@ -275,7 +258,6 @@ $spacing-12: 3rem; // 48px
   border-width: 0;
 }
 
-// Scrollbar styling
 @mixin custom-scrollbar {
   &::-webkit-scrollbar {
     width: 8px;
@@ -287,12 +269,12 @@ $spacing-12: 3rem; // 48px
   }
 
   &::-webkit-scrollbar-thumb {
-    background: $surface-600;
-    border-radius: 4px;
+    background: var(--ide-text-muted);
+    border-radius: var(--ide-radius-sm);
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: $surface-500;
+    background: var(--ide-text-secondary);
   }
 }
 
@@ -300,21 +282,18 @@ $spacing-12: 3rem; // 48px
 // BEM HELPERS
 // ============================================
 
-// Block element
 @mixin block($name) {
   .#{$name} {
     @content;
   }
 }
 
-// Element
 @mixin element($name) {
   &__#{$name} {
     @content;
   }
 }
 
-// Modifier
 @mixin modifier($name) {
   &--#{$name} {
     @content;
@@ -325,11 +304,10 @@ $spacing-12: 3rem; // 48px
 // COMPONENT PATTERNS
 // ============================================
 
-// Button base
 @mixin button-base {
   @include flex-center;
   @include clickable;
-  @include rounded(4px);
+  @include rounded;
   @include transition;
   padding: $spacing-2 $spacing-3;
   border: none;
@@ -337,12 +315,12 @@ $spacing-12: 3rem; // 48px
   font-family: inherit;
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
-  color: $surface-200;
+  color: var(--ide-text-primary);
   gap: $spacing-2;
 
   &:hover {
-    background: $surface-800;
-    color: $surface-50;
+    background: var(--ide-bg-elevated);
+    color: var(--ide-text-inverse);
   }
 
   &:focus-visible {
@@ -355,40 +333,38 @@ $spacing-12: 3rem; // 48px
   }
 }
 
-// Panel/Card base
 @mixin panel-base {
-  background: $surface-900;
-  border: 1px solid $surface-800;
-  @include rounded(6px);
+  background: var(--ide-bg-surface);
+  border: 1px solid var(--ide-bg-elevated);
+  border-radius: var(--ide-radius-md);
 }
 
-// Input base
 @mixin input-base {
   width: 100%;
   padding: $spacing-2 $spacing-3;
-  background: $surface-800;
-  border: 1px solid $surface-700;
-  @include rounded(4px);
-  color: $surface-100;
+  background: var(--ide-bg-elevated);
+  border: 1px solid var(--ide-border-strong);
+  border-radius: var(--ide-radius-sm);
+  color: var(--ide-text-primary);
   font-size: $font-size-sm;
   font-family: inherit;
 
   &:focus {
     outline: none;
-    border-color: $primary-500;
+    border-color: var(--ide-accent);
   }
 
   &::placeholder {
-    color: $surface-500;
+    color: var(--ide-text-muted);
   }
 }
 
 // ============================================
 // Z-INDEX SCALE
 // ============================================
-$z-dropdown: 100;
-$z-sticky: 200;
-$z-modal: 300;
-$z-popover: 400;
-$z-tooltip: 500;
-$z-toast: 600;
+$z-dropdown: var(--ide-z-overlay);
+$z-sticky: var(--ide-z-overlay);
+$z-modal: var(--ide-z-overlay);
+$z-popover: var(--ide-z-overlay);
+$z-tooltip: var(--ide-z-tooltip);
+$z-toast: var(--ide-z-toast);

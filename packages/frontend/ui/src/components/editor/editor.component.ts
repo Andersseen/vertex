@@ -24,6 +24,7 @@ import { python } from "@codemirror/lang-python";
 import { markdown } from "@codemirror/lang-markdown";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { VertexFile } from "@vertex/types";
+import { PluginRegistry } from "@vertex/runtime/plugins";
 
 type Language =
   | "javascript"
@@ -60,6 +61,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   readonly file = input<VertexFile | null>(null);
   readonly showHeader = input(true);
   readonly extensions = input<Extension[]>([]);
+  readonly plugins = input<PluginRegistry | null>(null);
 
   // Outputs
   readonly contentChange = output<string>();
@@ -75,8 +77,8 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   protected readonly isDirty = false;
   private readonly languageCompartment = new Compartment();
 
-  ngAfterViewInit(): void {
-    this.initializeEditor();
+  async ngAfterViewInit(): Promise<void> {
+    await this.initializeEditor();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -143,9 +145,11 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  private initializeEditor(): void {
+  private async initializeEditor(): Promise<void> {
     const currentFile = this.file();
     const editorHost = this.editorHost();
+
+    const pluginExtensions = await this.plugins()?.resolveEditorExtensions() ?? [];
 
     const startState = EditorState.create({
       doc: currentFile?.content ?? "",
@@ -169,6 +173,7 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
           ...searchKeymap,
         ]),
         ...this.extensions(),
+        ...pluginExtensions,
       ],
     });
 
@@ -200,20 +205,23 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
+  protected hasLspSupport(): boolean {
+    const lang = this.file()?.language?.toLowerCase();
+    return lang === 'typescript' || lang === 'javascript' || lang === 'ts' || lang === 'js';
+  }
+
   protected getFileIcon(language?: string): string {
     const iconMap: Record<string, string> = {
-      typescript: "pi pi-file-edit text-blue-400",
-      javascript: "pi pi-file-edit text-yellow-400",
-      html: "pi pi-code text-orange-500",
-      css: "pi pi-palette text-blue-500",
-      json: "pi pi-info-circle text-green-400",
-      md: "pi pi-file text-slate-400",
-      rust: "pi pi-cog text-orange-700",
-      python: "pi pi-bolt text-blue-300",
+      typescript: "TS",
+      javascript: "JS",
+      html: "HTML",
+      css: "CSS",
+      json: "JSON",
+      md: "MD",
+      rust: "RS",
+      python: "PY",
     };
-    return (
-      iconMap[language?.toLowerCase() ?? ""] ?? "pi pi-file text-slate-500"
-    );
+    return iconMap[language?.toLowerCase() ?? ""] ?? "FILE";
   }
 
   focus(): void {

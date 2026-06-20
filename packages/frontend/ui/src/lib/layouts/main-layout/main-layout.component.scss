@@ -13,8 +13,8 @@
   width: 100%;
   display: flex !important;
   flex-direction: column !important;
-  background-color: $surface-950;
-  color: $surface-0;
+  background-color: var(--ide-bg-base);
+  color: var(--ide-text-inverse);
   font-family: $font-sans;
   overflow: hidden;
 }
@@ -22,38 +22,38 @@
 .vx-header {
   height: 38px;
   min-height: 38px;
-  background-color: $surface-900;
-  border-bottom: 1px solid $surface-800;
+  background-color: var(--ide-bg-surface);
+  border-bottom: 1px solid var(--ide-bg-elevated);
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   padding: 0 0.75rem;
-  z-index: 50;
+  z-index: var(--ide-z-splitter);
   flex-shrink: 0;
 }
 
 .vx-logo-container {
   width: 26px;
   height: 26px;
-  background: linear-gradient(135deg, $primary-500, $primary-700);
-  border-radius: 6px;
+  background: linear-gradient(135deg, var(--ide-accent), var(--ide-accent-hover));
+  border-radius: var(--ide-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 0 12px rgba($primary-500, 0.3);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ide-accent) 30%, transparent);
 }
 
 .vx-logo-text {
   font-size: 14px;
   font-weight: 800;
-  color: $surface-0;
+  color: var(--ide-text-inverse);
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .vx-ide-highlight {
-  color: $primary-400;
+  color: var(--ide-accent);
 }
 
 .vx-header-left,
@@ -61,8 +61,8 @@
   display: flex !important;
   align-items: center !important;
   gap: 0.5rem;
-  flex: 1 1 0%; /* Allow shrinking */
-  min-width: 0; /* Fix for flex-shrink */
+  flex: 1 1 0%;
+  min-width: 0;
 }
 
 .vx-header-right {
@@ -72,7 +72,7 @@
 .vx-app-title {
   font-size: 11px;
   font-weight: 700;
-  color: $surface-300;
+  color: var(--ide-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-left: 0.25rem;
@@ -81,7 +81,7 @@
 .vx-header-divider {
   width: 1px;
   height: 14px;
-  background-color: $surface-700;
+  background-color: var(--ide-border-strong);
   margin: 0 0.5rem;
 }
 
@@ -93,16 +93,16 @@
 .vx-menu-item {
   background: none;
   border: none;
-  color: $surface-400;
+  color: var(--ide-text-secondary);
   font-size: 12px;
   padding: 0.25rem 0.6rem;
-  border-radius: 4px;
+  border-radius: var(--ide-radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: $surface-800;
-    color: $surface-100;
+    background-color: var(--ide-bg-elevated);
+    color: var(--ide-text-primary);
   }
 }
 
@@ -110,17 +110,17 @@
   flex: 2 1 auto;
   display: flex !important;
   justify-content: center !important;
-  min-width: 0; /* Allow shrinking */
+  min-width: 0;
 }
 
 .vx-search-wrapper {
-  background-color: $surface-950;
-  border: 1px solid $surface-700;
-  border-radius: 6px;
+  background-color: var(--ide-bg-base);
+  border: 1px solid var(--ide-border-strong);
+  border-radius: var(--ide-radius-md);
   height: 26px;
   width: 100%;
   max-width: 380px;
-  min-width: 120px; /* Prevent it from disappearing too much */
+  min-width: 120px;
   display: flex !important;
   align-items: center !important;
   padding: 0 0.6rem;
@@ -129,41 +129,41 @@
 
   &:hover,
   &:focus-within {
-    border-color: $primary-500;
+    border-color: var(--ide-accent);
   }
 
-  i {
+  svg {
     font-size: 11px;
-    color: $surface-500;
+    color: var(--ide-text-muted);
   }
 }
 
 .vx-search-input {
   background: none;
   border: none;
-  color: $surface-200;
+  color: var(--ide-text-primary);
   font-size: 11px;
   flex: 1;
   outline: none;
 
   &::placeholder {
-    color: $surface-600;
+    color: var(--ide-text-muted);
   }
 }
 
 .vx-search-kbd {
   font-size: 9px;
-  background-color: $surface-800;
-  color: $surface-500;
+  background-color: var(--ide-bg-elevated);
+  color: var(--ide-text-muted);
   padding: 1px 4px;
-  border-radius: 3px;
-  border: 1px solid $surface-700;
+  border-radius: var(--ide-radius-sm);
+  border: 1px solid var(--ide-border-strong);
 }
 
 .vx-icon-btn {
   background: none;
   border: none;
-  color: $surface-400;
+  color: var(--ide-text-secondary);
   font-size: 13px;
   width: 28px;
   height: 28px;
@@ -175,29 +175,29 @@
   transition: all 0.2s;
 
   &:hover {
-    background-color: $surface-800;
-    color: $surface-100;
+    background-color: var(--ide-bg-elevated);
+    color: var(--ide-text-primary);
   }
 }
 
 .vx-user-avatar {
   width: 24px;
   height: 24px;
-  background-color: $surface-800;
+  background-color: var(--ide-bg-elevated);
   border-radius: 50%;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: $surface-400;
-  border: 1px solid $surface-700;
+  color: var(--ide-text-secondary);
+  border: 1px solid var(--ide-border-strong);
   cursor: pointer;
   margin-left: 0.25rem;
 
   &:hover {
-    border-color: $primary-500;
+    border-color: var(--ide-accent);
   }
 
-  i {
+  svg {
     font-size: 10px;
   }
 }
@@ -212,8 +212,8 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: $surface-900;
-  border-right: 1px solid $surface-800;
+  background-color: var(--ide-bg-surface);
+  border-right: 1px solid var(--ide-bg-elevated);
   overflow: hidden;
 }
 
@@ -222,16 +222,74 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: $surface-950;
+  background-color: var(--ide-bg-base);
   overflow: hidden;
 }
 
 .vx-bottom-panel {
   height: 100%;
   width: 100%;
-  background-color: $surface-900;
+  background-color: var(--ide-bg-surface);
   overflow: hidden;
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+// Status-bar items that replace Tailwind orphan classes
+.vx-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 0 0.5rem;
+  border-radius: var(--ide-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: var(--ide-bg-elevated);
+  }
+}
+
+.vx-status-item--tight {
+  gap: 0.25rem;
+}
+
+.vx-status-icon {
+  opacity: 0.7;
+}
+
+.vx-status-text {
+  font-size: 10.5px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.vx-status-text--emphasis {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.vx-status-text--muted {
+  color: var(--ide-text-muted);
+}
+
+.vx-status-text--bold {
+  font-weight: 700;
+}
+
+.vx-status-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 100%;
+  border-radius: var(--ide-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--ide-bg-elevated);
+  }
 }
 
 .animate-spin-slow {
@@ -250,6 +308,6 @@
 .divider-vx {
   width: 1px;
   height: 1rem;
-  background-color: $surface-700;
+  background-color: var(--ide-border-strong);
   margin: 0 1rem;
 }

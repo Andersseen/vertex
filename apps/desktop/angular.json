@@ -30,7 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": ["primeicons/primeicons.css", "@xterm/xterm/css/xterm.css", "src/styles.css"]
+            "styles": ["@xterm/xterm/css/xterm.css", "src/styles.css"]
           },
           "configurations": {
             "production": {

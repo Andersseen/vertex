@@ -55,6 +55,59 @@
           "defaultConfiguration": "production"
         }
       }
+    },
+    "web-editor-lite": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "vertex",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/web-editor-lite",
+            "index": "src/index.html",
+            "browser": "src/main-lite.ts",
+            "polyfills": [],
+            "tsConfig": "tsconfig.app-lite.json",
+            "inlineStyleLanguage": "scss",
+            "styles": [],
+            "scripts": [],
+            "aot": true,
+            "optimization": {
+              "scripts": true,
+              "styles": true,
+              "fonts": true
+            },
+            "sourceMap": false,
+            "namedChunks": false,
+            "extractLicenses": false,
+            "outputHashing": "none"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
     }
   },
   "cli": {

@@ -51,6 +51,14 @@
     "./lsp": {
       "types": "./src/lsp/index.ts",
       "import": "./dist/lsp/index.js"
+    },
+    "./plugins": {
+      "types": "./src/plugins/index.ts",
+      "import": "./dist/plugins/index.js"
+    },
+    "./plugins/examples": {
+      "types": "./src/plugins/examples/index.ts",
+      "import": "./dist/plugins/examples/index.js"
     }
   },
   "files": ["dist", "src", "README.md", "LICENSE"],
