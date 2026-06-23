@@ -4,7 +4,7 @@ test('LSP demo page loads with editor', async ({ page }) => {
   await page.goto('/lsp-demo');
 
   await expect(page).toHaveTitle(/Vertex IDE/);
-  await expect(page.locator('text=TypeScript LSP Demo')).toBeVisible();
+  await expect(page.locator('h1', { hasText: 'TypeScript LSP Demo' })).toBeVisible();
 
   const editor = page.locator('v-editor');
   await expect(editor).toBeVisible();
@@ -17,6 +17,6 @@ test('LSP demo page loads with editor', async ({ page }) => {
 test('LSP badge is visible for TypeScript files', async ({ page }) => {
   await page.goto('/lsp-demo');
 
-  const lspBadge = page.locator('text=LSP');
+  const lspBadge = page.locator('.editor__lsp-badge');
   await expect(lspBadge).toBeVisible();
 });

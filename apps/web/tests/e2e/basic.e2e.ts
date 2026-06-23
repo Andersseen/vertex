@@ -13,8 +13,8 @@ test('basic IDE layout loads', async ({ page }) => {
 test('can navigate to main sections', async ({ page }) => {
   await page.goto('/');
   
-  // Look for main IDE elements
-  const mainContent = page.locator('main, .main, .ide-container');
+  // Look for main landing content
+  const mainContent = page.locator('v-landing');
   await expect(mainContent).toBeVisible();
 });
 

@@ -12,23 +12,31 @@ export default defineConfig({
     baseURL: 'http://localhost:4201',
     trace: 'on-first-retry',
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-  ],
+  projects: process.env.CI
+    ? [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+      ]
+    : [
+        {
+          name: 'chromium',
+          use: { ...devices['Desktop Chrome'] },
+        },
+        {
+          name: 'firefox',
+          use: { ...devices['Desktop Firefox'] },
+        },
+        {
+          name: 'webkit',
+          use: { ...devices['Desktop Safari'] },
+        },
+      ],
   webServer: {
-    command: 'bun run start -- --port 4201',
+    command: process.env.CI ? 'bun run preview -- --port 4201' : 'bun run start -- --port 4201',
     url: 'http://localhost:4201',
     reuseExistingServer: false,
+    timeout: 120 * 1000,
   },
 });

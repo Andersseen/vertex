@@ -57,6 +57,9 @@ jobs:
 
       - run: bun install
 
+      - name: Build web app
+        run: bun run web:build
+
       - name: Get Playwright version
         id: playwright-version
         working-directory: apps/web

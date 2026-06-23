@@ -18,5 +18,5 @@ test('can navigate from landing to LSP demo', async ({ page }) => {
 
   await lspLink.click();
   await expect(page).toHaveURL(/\/lsp-demo/);
-  await expect(page.locator('text=TypeScript LSP Demo')).toBeVisible();
+  await expect(page.locator('h1', { hasText: 'TypeScript LSP Demo' })).toBeVisible();
 });
