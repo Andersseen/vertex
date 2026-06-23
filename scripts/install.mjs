@@ -10,6 +10,7 @@
  * 
  * Options:
  *   --local     Use local build (if inside monorepo)
+ *   --lite      Install the read-only lite variant
  *   --url=URL   Use custom URL
  */
 
@@ -26,21 +27,28 @@ const GITHUB_USER = 'andersseen';
 const GITHUB_REPO = 'vertex';
 const RELEASE_TAG = 'web-editor-latest';
 
-// Release download URLs (from GitHub Releases)
-const RELEASE_JS_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/web-editor.min.js`;
-const RELEASE_MAP_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/web-editor.min.js.map`;
-
-// Parse arguments
+// Parse arguments early to know which variant to install
 const args = process.argv.slice(2);
 let targetDir = './public';
 let useLocal = false;
+let useLite = false;
 let customUrl = null;
 
 for (const arg of args) {
   if (arg === '--local') useLocal = true;
+  else if (arg === '--lite') useLite = true;
   else if (arg.startsWith('--url=')) customUrl = arg.replace('--url=', '');
   else if (!arg.startsWith('--') && arg.length > 0) targetDir = arg;
 }
+
+const VARIANT = useLite ? 'lite' : 'full';
+const OUTPUT_FILE = useLite ? 'web-editor-lite.min.js' : 'web-editor.min.js';
+const OUTPUT_MAP_FILE = `${OUTPUT_FILE}.map`;
+const CUSTOM_ELEMENT_TAG = useLite ? 'vertex-editor-lite' : 'vertex-editor';
+
+// Release download URLs (from GitHub Releases)
+const RELEASE_JS_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/${OUTPUT_FILE}`;
+const RELEASE_MAP_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/${OUTPUT_MAP_FILE}`;
 
 // Detect if we're inside the vertex monorepo
 const isInsideMonorepo = fs.existsSync(path.join(__dirname, '..', 'package.json')) && 
@@ -130,20 +138,21 @@ const getHtmlExample = () => `<!DOCTYPE html>
   <h1>🚀 Vertex Editor</h1>
   <p>A lightweight code editor Web Component</p>
   <div class="editor">
-    <vertex-editor
-      value="const greeting = 'Hello World!';\nconsole.log(greeting);"
+    <${CUSTOM_ELEMENT_TAG}
+      value="const greeting = 'Hello World!';
+console.log(greeting);"
       language="typescript"
       theme="dark"
       lineNumbers="true"
       height="300px"
-    ></vertex-editor>
+    ></${CUSTOM_ELEMENT_TAG}>
   </div>
-  <script src="web-editor.min.js"></script>
+  <script src="${OUTPUT_FILE}"></script>
 </body>
 </html>`;
 
 const getReactExample = () => `import { useRef, useEffect } from 'react';
-import './web-editor.min.js';
+import './${OUTPUT_FILE}';
 
 export function CodeEditor({ code, language = 'typescript' }) {
   const editorRef = useRef(null);
@@ -153,7 +162,7 @@ export function CodeEditor({ code, language = 'typescript' }) {
   }, [code]);
 
   return (
-    <vertex-editor
+    <${CUSTOM_ELEMENT_TAG}
       ref={editorRef}
       language={language}
       theme="dark"
@@ -166,7 +175,7 @@ export function CodeEditor({ code, language = 'typescript' }) {
 
 const getVueExample = () => `<script setup>
 import { ref, onMounted } from 'vue';
-import './web-editor.min.js';
+import './${OUTPUT_FILE}';
 
 const props = defineProps({ code: String });
 const editor = ref(null);
@@ -177,7 +186,7 @@ onMounted(() => {
 <\/script>
 
 <template>
-  <vertex-editor ref="editor" :value="code" language="typescript" theme="dark" />
+  <${CUSTOM_ELEMENT_TAG} ref="editor" :value="code" language="typescript" theme="dark" />
 </template>`;
 
 // Main
@@ -191,12 +200,12 @@ async function main() {
       log(`✓ Created: ${targetDir}`, 'green');
     }
 
-    const jsDest = path.join(target, 'web-editor.min.js');
-    const mapDest = path.join(target, 'web-editor.min.js.map');
+    const jsDest = path.join(target, OUTPUT_FILE);
+    const mapDest = path.join(target, OUTPUT_MAP_FILE);
 
     // Install from source
     if (useLocal) {
-      const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', 'web-editor.min.js');
+      const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', OUTPUT_FILE);
       
       if (!fs.existsSync(localPath)) {
         log('❌ Local build not found!', 'red');
@@ -204,17 +213,17 @@ async function main() {
         process.exit(1);
       }
       
-      log('📦 Installing from local build...', 'blue');
+      log(`📦 Installing ${VARIANT} variant from local build...`, 'blue');
       await copy(localPath, jsDest);
       log('✓ Installed', 'green');
       
     } else if (customUrl) {
-      log(`📦 Downloading from custom URL...`, 'blue');
+      log(`📦 Downloading ${VARIANT} variant from custom URL...`, 'blue');
       await download(customUrl, jsDest);
       log('✓ Downloaded', 'green');
       
     } else {
-      log('📦 Downloading from GitHub Releases...', 'blue');
+      log(`📦 Downloading ${VARIANT} variant from GitHub Releases...`, 'blue');
       log(`  ${RELEASE_JS_URL.replace('https://', '')}`, 'gray');
       
       try {
@@ -228,7 +237,7 @@ async function main() {
       } catch (err) {
         if (isInsideMonorepo) {
           log('⚠️  Download failed, using local build...', 'yellow');
-          const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', 'web-editor.min.js');
+          const localPath = path.join(__dirname, '..', 'packages', 'frontend', 'web-editor', 'dist', OUTPUT_FILE);
           await copy(localPath, jsDest);
           log('✓ Installed from local build', 'green');
         } else {
@@ -260,8 +269,8 @@ async function main() {
     // Success
     log('\\n✅ Installation complete!', 'green');
     log('\\n📖 Quick Start:', 'cyan');
-    log('  <script src="web-editor.min.js"></script>');
-    log('  <vertex-editor value="const x = 1;" language="typescript"></vertex-editor>');
+    log(`  <script src="${OUTPUT_FILE}"></script>`);
+    log(`  <${CUSTOM_ELEMENT_TAG} value="const x = 1;" language="typescript"></${CUSTOM_ELEMENT_TAG}>`);
     log(`\\n🎉 Open ${targetDir}/vertex-editor-example.html to test!`, 'cyan');
 
   } catch (err) {
