@@ -3,6 +3,7 @@ import {
   signal,
   inject,
   computed,
+  DestroyRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -85,6 +86,14 @@ export class EditorComponent {
   protected readonly session = inject(EditorSessionService);
   private readonly toast = inject(IdeToastService);
 
+  /** Debounce window for persisting keystrokes to the virtual FS. */
+  private static readonly AUTOSAVE_DEBOUNCE_MS = 400;
+  /** Pending virtual-FS writes, keyed by file id, so keystrokes coalesce. */
+  private readonly pendingWrites = new Map<
+    string,
+    { timer: ReturnType<typeof setTimeout>; path: string; content: string }
+  >();
+
   protected readonly showCloneDialog = signal(false);
   protected readonly showPreview = signal(false);
   protected readonly cloneUrlPreset = signal<string>('');
@@ -122,6 +131,10 @@ export class EditorComponent {
   });
 
   constructor() {
+    // Flush any pending autosave when the editor is torn down (e.g. route
+    // change) so the last keystrokes are never dropped.
+    inject(DestroyRef).onDestroy(() => this.flushPendingWrites());
+
     const cloneUrl = this.route.snapshot.queryParamMap.get('clone');
     if (cloneUrl) {
       this.cloneUrlPreset.set(cloneUrl);
@@ -207,16 +220,22 @@ export class EditorComponent {
     });
   }
 
-  onFolderToggle(folder: VertexFolder): void {
-    if (folder.isExpanded && (!folder.children || folder.children.length === 0)) {
-      if (this.runtime.isVirtualMode()) return;
-      this.fileService
-        .getChildren(folder.path)
-        .subscribe((children: (VertexFile | VertexFolder)[]) => {
-          folder.children = children;
-          if (this.rootFolder()) this.rootFolder.set({ ...this.rootFolder()! });
-        });
+  async onFolderToggle(folder: VertexFolder): Promise<void> {
+    // Only load on expand, and only if we haven't loaded this level yet.
+    if (!folder.isExpanded || (folder.children && folder.children.length > 0)) return;
+
+    if (this.runtime.isVirtualMode()) {
+      folder.children = await this.runtime.loadChildren(folder.path);
+      if (this.rootFolder()) this.rootFolder.set({ ...this.rootFolder()! });
+      return;
     }
+
+    this.fileService
+      .getChildren(folder.path)
+      .subscribe((children: (VertexFile | VertexFolder)[]) => {
+        folder.children = children;
+        if (this.rootFolder()) this.rootFolder.set({ ...this.rootFolder()! });
+      });
   }
 
   async onFileSelect(file: VertexFile): Promise<void> {
@@ -358,6 +377,7 @@ export class EditorComponent {
 
     try {
       if (this.runtime.isVirtualMode()) {
+        this.cancelPendingWrite(file.id);
         await this.runtime.writeFile(file.path, file.content ?? '');
       } else {
         await new Promise<void>((res, rej) =>
@@ -388,10 +408,52 @@ export class EditorComponent {
     this.session.setContent(file.id, content);
 
     if (this.runtime.isVirtualMode()) {
-      this.runtime.writeFile(file.path, content).catch(() => {
-        this.session.setContent(file.id, content);
-      });
+      this.scheduleVirtualWrite(file.id, file.path, content);
     }
+  }
+
+  /**
+   * Coalesces rapid keystrokes into a single debounced write to the virtual FS.
+   * The in-memory session already has the latest content, so this only governs
+   * how often we hit OPFS. A failed write surfaces a toast and leaves the file
+   * dirty (it is not marked clean here).
+   */
+  private scheduleVirtualWrite(id: string, path: string, content: string): void {
+    clearTimeout(this.pendingWrites.get(id)?.timer);
+
+    const timer = setTimeout(() => {
+      this.pendingWrites.delete(id);
+      void this.persistVirtual(path, content);
+    }, EditorComponent.AUTOSAVE_DEBOUNCE_MS);
+
+    this.pendingWrites.set(id, { timer, path, content });
+  }
+
+  private async persistVirtual(path: string, content: string): Promise<void> {
+    try {
+      await this.runtime.writeFile(path, content);
+    } catch (err) {
+      console.error('Autosave failed:', err);
+      this.toast.present(`Failed to autosave ${path.split('/').pop()}`, 'error', 3000);
+    }
+  }
+
+  /** Cancels a file's pending debounced write (e.g. after an explicit save). */
+  private cancelPendingWrite(id: string): void {
+    clearTimeout(this.pendingWrites.get(id)?.timer);
+    this.pendingWrites.delete(id);
+  }
+
+  /**
+   * Persists every pending debounced write immediately, then clears them.
+   * Called on teardown so the last keystrokes are never lost to the debounce.
+   */
+  private flushPendingWrites(): void {
+    for (const { timer, path, content } of this.pendingWrites.values()) {
+      clearTimeout(timer);
+      void this.persistVirtual(path, content);
+    }
+    this.pendingWrites.clear();
   }
 
   private async restoreEditorState(): Promise<void> {

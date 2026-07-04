@@ -66,7 +66,7 @@ export class RuntimeService {
         },
       });
 
-      const folder = await this.buildFolderTree('/', name, '/');
+      const folder = await this.buildRootFolder('/', name);
       this.isVirtualMode.set(true);
       await this.saveSession(name, options.url, '/');
       return folder;
@@ -109,43 +109,58 @@ export class RuntimeService {
     return this.opfs.rename(oldPath, newPath);
   }
 
-  getGitClient(): GitClient | null {
-    return this.gitClient;
+  /**
+   * Reads the children of a directory on demand. Used to lazily expand a folder
+   * in the tree instead of walking the entire repo up front. Sub-directories
+   * come back collapsed with empty `children`.
+   */
+  async loadChildren(path: string): Promise<(VertexFile | VertexFolder)[]> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return this.readLevel(path);
   }
 
-  private async buildFolderTree(
-    dir: string,
-    name: string,
-    rootDir: string,
-  ): Promise<VertexFolder> {
+  private async buildRootFolder(dir: string, name: string): Promise<VertexFolder> {
+    return {
+      id: dir,
+      name,
+      path: dir,
+      children: await this.readLevel(dir),
+      isExpanded: true,
+    };
+  }
+
+  /**
+   * Reads exactly one directory level. Sub-directories are returned as collapsed
+   * folders with empty `children` so large repos don't get walked eagerly; call
+   * {@link loadChildren} when the user expands one.
+   */
+  private async readLevel(dir: string): Promise<(VertexFile | VertexFolder)[]> {
     if (!this.opfs) throw new Error('No FS');
 
     const entries = await this.opfs.readDir(dir);
-    const children: (VertexFile | VertexFolder)[] = [];
-
     const sorted = entries.sort((a, b) => {
       if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
 
+    const children: (VertexFile | VertexFolder)[] = [];
     for (const entry of sorted) {
       if (IGNORED_DIRS.has(entry.name)) continue;
 
       if (entry.type === 'directory') {
-        const subFolder = await this.buildFolderTree(entry.path, entry.name, rootDir);
-        children.push(subFolder);
+        children.push({
+          id: entry.path,
+          name: entry.name,
+          path: entry.path,
+          children: [],
+          isExpanded: false,
+        });
       } else {
         children.push(this.toVertexFile(entry.path, entry.name));
       }
     }
 
-    return {
-      id: dir,
-      name: dir === rootDir ? name : name,
-      path: dir,
-      children,
-      isExpanded: dir === rootDir,
-    };
+    return children;
   }
 
   private toVertexFile(path: string, name: string): VertexFile {
@@ -184,7 +199,7 @@ export class RuntimeService {
         return null;
       }
 
-      const folder = await this.buildFolderTree('/', session.name, '/');
+      const folder = await this.buildRootFolder('/', session.name);
       this.isVirtualMode.set(true);
       this.repoName.set(session.name);
       return folder;
