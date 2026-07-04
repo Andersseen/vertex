@@ -2,7 +2,35 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Vertex IDE UI Components', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock the filesystem sidecar so the editor renders a predictable tree
+    // Start from a clean slate so a previously-registered service worker or
+    // persisted session cannot influence the mocked filesystem state.
+    await page.goto('about:blank');
+    await page.evaluate(async () => {
+      if (!('serviceWorker' in navigator)) return;
+      const unregister = async () => {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      };
+      const clearCaches = async () => {
+        if (!('caches' in window)) return;
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      };
+      await Promise.all([unregister(), clearCaches()]);
+      sessionStorage.clear();
+      localStorage.clear();
+    });
+
+    // Prevent the production service worker from registering during tests.
+    await page.route('**/sw.js', (route) =>
+      route.fulfill({
+        status: 404,
+        contentType: 'text/plain',
+        body: 'Service worker disabled in tests',
+      }),
+    );
+
+    // Mock the filesystem sidecar so the editor renders a predictable tree.
     await page.route('http://127.0.0.1:3001/**', async (route) => {
       const url = route.request().url();
       const method = route.request().method();
@@ -81,6 +109,14 @@ test.describe('Vertex IDE UI Components', () => {
     await page.goto('/editor');
     await page.waitForLoadState('load');
     await expect(page.locator('v-sidebar')).toBeVisible({ timeout: 15000 });
+
+    // Wait for the mocked tree to be populated so every test starts from a
+    // known-good state.
+    const fileNode = page
+      .locator('.ide-tree-item__label')
+      .filter({ hasText: 'package.json' })
+      .first();
+    await expect(fileNode).toBeVisible({ timeout: 15000 });
   });
 
   test('sidebar explorer should render and interact', async ({ page }) => {
@@ -91,8 +127,11 @@ test.describe('Vertex IDE UI Components', () => {
     await expect(page.getByText('Explorer')).toBeVisible();
 
     // Verify the mocked file node exists
-    const fileNode = page.locator('.ide-tree-item__label').filter({ hasText: 'package.json' }).first();
-    await expect(fileNode).toBeVisible({ timeout: 15000 });
+    const fileNode = page
+      .locator('.ide-tree-item__label')
+      .filter({ hasText: 'package.json' })
+      .first();
+    await expect(fileNode).toBeVisible();
 
     // Check that we have nodes
     const nodeCount = await page.locator('.ide-tree-item__label').count();
@@ -101,8 +140,11 @@ test.describe('Vertex IDE UI Components', () => {
 
   test('tabs should switch correctly', async ({ page }) => {
     // 1. Wait for tree to be populated
-    const fileNode = page.locator('.ide-tree-item__label').filter({ hasText: 'package.json' }).first();
-    await expect(fileNode).toBeVisible({ timeout: 10000 });
+    const fileNode = page
+      .locator('.ide-tree-item__label')
+      .filter({ hasText: 'package.json' })
+      .first();
+    await expect(fileNode).toBeVisible({ timeout: 15000 });
 
     // 2. Open a file
     await fileNode.click();
@@ -112,7 +154,7 @@ test.describe('Vertex IDE UI Components', () => {
 
     // 3. Verify active tab
     const activeTab = tabs.locator('.tabs__item--active');
-    await expect(activeTab).toBeVisible({ timeout: 10000 });
+    await expect(activeTab).toBeVisible({ timeout: 15000 });
     await expect(activeTab).toContainText('package.json');
   });
 
@@ -141,8 +183,14 @@ test.describe('Vertex IDE UI Components', () => {
       // Verification of content visibility
       if (tab.name === 'Problems') {
         await expect(
-          page.locator('.bottom-panel__problem').first()
-            .or(page.locator('.bottom-panel__console-item').filter({ hasText: 'No problems detected' }))
+          page
+            .locator('.bottom-panel__problem')
+            .first()
+            .or(
+              page
+                .locator('.bottom-panel__console-item')
+                .filter({ hasText: 'No problems detected' }),
+            ),
         ).toBeVisible();
       }
     }

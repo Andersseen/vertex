@@ -29,12 +29,25 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Only cache same-origin GET requests. Sidecar/API requests (e.g. to
+  // 127.0.0.1:3001) must reach the network unmodified.
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
-      return fetch(event.request).catch(() => caches.match('/index.html'));
+
+      return fetch(event.request).catch(() => {
+        // SPA fallback: only for navigation requests so API/data requests
+        // surface real failures instead of returning HTML.
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+        throw new Error('Network request failed');
+      });
     }),
   );
 });
