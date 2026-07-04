@@ -359,7 +359,9 @@ export class EditorComponent {
 
   private async refreshRootFolder(): Promise<void> {
     if (!this.runtime.isVirtualMode()) return;
-    const folder = await this.runtime.loadSession();
+    // Rebuild from the FS while keeping expanded folders open, so a mutation
+    // reflects on disk without collapsing the tree or leaving stale open nodes.
+    const folder = await this.runtime.refreshTree(this.rootFolder());
     if (folder) {
       this.rootFolder.set(folder);
       this.workspacePath.set(folder.path);

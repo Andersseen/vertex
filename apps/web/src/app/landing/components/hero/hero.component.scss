@@ -21,7 +21,7 @@
     line-height: 1.15;
     letter-spacing: -0.02em;
     margin: 0 0 $spacing-5;
-    background: linear-gradient(135deg, $surface-0 40%, $primary-400);
+    background: linear-gradient(135deg, var(--ide-text-primary) 40%, $primary-400);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -51,7 +51,7 @@
     background-color: $surface-850;
     border: 1px solid $surface-700;
     border-radius: 8px;
-    color: $surface-0;
+    color: var(--ide-text-primary);
     font-size: 14px;
     font-family: $font-mono;
     outline: none;

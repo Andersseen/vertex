@@ -3,6 +3,7 @@ import { VirtualFS, GitClient, OPFSFS } from '@vertex/runtime';
 import type { GitCloneOptions, IVirtualFS } from '@vertex/runtime';
 import type { VertexFile, VertexFolder } from '@vertex/types';
 import { db } from '../db/vertex.db';
+import * as fileTree from './file-tree';
 
 export interface CloneProgress {
   phase: string;
@@ -12,15 +13,6 @@ export interface CloneProgress {
 }
 
 const SESSION_VERSION = 1;
-
-const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', '.angular', 'build', '.next']);
-
-const LANGUAGE_MAP: Record<string, string> = {
-  ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
-  html: 'html', css: 'css', scss: 'css', json: 'json', md: 'markdown',
-  py: 'python', rs: 'rust', go: 'go', sh: 'bash', yaml: 'yaml', yml: 'yaml',
-  toml: 'toml', txt: 'text',
-};
 
 @Injectable({ providedIn: 'root' })
 export class RuntimeService {
@@ -66,7 +58,7 @@ export class RuntimeService {
         },
       });
 
-      const folder = await this.buildRootFolder('/', name);
+      const folder = await fileTree.buildRootFolder(this.opfs, '/', name);
       this.isVirtualMode.set(true);
       await this.saveSession(name, options.url, '/');
       return folder;
@@ -116,63 +108,19 @@ export class RuntimeService {
    */
   async loadChildren(path: string): Promise<(VertexFile | VertexFolder)[]> {
     if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
-    return this.readLevel(path);
-  }
-
-  private async buildRootFolder(dir: string, name: string): Promise<VertexFolder> {
-    return {
-      id: dir,
-      name,
-      path: dir,
-      children: await this.readLevel(dir),
-      isExpanded: true,
-    };
+    return fileTree.readLevel(this.opfs, path);
   }
 
   /**
-   * Reads exactly one directory level. Sub-directories are returned as collapsed
-   * folders with empty `children` so large repos don't get walked eagerly; call
-   * {@link loadChildren} when the user expands one.
+   * Rebuilds the tree from the FS after a structural change (new folder, rename,
+   * delete) while preserving the user's expansion. Only previously-loaded levels
+   * are re-read, so folders don't collapse and no open-but-empty nodes are left
+   * behind. Falls back to a fresh top-level build if there is no previous tree.
    */
-  private async readLevel(dir: string): Promise<(VertexFile | VertexFolder)[]> {
-    if (!this.opfs) throw new Error('No FS');
-
-    const entries = await this.opfs.readDir(dir);
-    const sorted = entries.sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-
-    const children: (VertexFile | VertexFolder)[] = [];
-    for (const entry of sorted) {
-      if (IGNORED_DIRS.has(entry.name)) continue;
-
-      if (entry.type === 'directory') {
-        children.push({
-          id: entry.path,
-          name: entry.name,
-          path: entry.path,
-          children: [],
-          isExpanded: false,
-        });
-      } else {
-        children.push(this.toVertexFile(entry.path, entry.name));
-      }
-    }
-
-    return children;
-  }
-
-  private toVertexFile(path: string, name: string): VertexFile {
-    const ext = name.split('.').pop()?.toLowerCase() ?? '';
-    return {
-      id: path,
-      name,
-      path,
-      content: '',
-      language: LANGUAGE_MAP[ext] ?? 'text',
-      isDirty: false,
-    };
+  async refreshTree(previous: VertexFolder | null): Promise<VertexFolder | null> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    if (!previous) return null;
+    return fileTree.refreshTree(this.opfs, previous);
   }
 
   private async saveSession(name: string, url: string, dir: string): Promise<void> {
@@ -199,7 +147,7 @@ export class RuntimeService {
         return null;
       }
 
-      const folder = await this.buildRootFolder('/', session.name);
+      const folder = await fileTree.buildRootFolder(this.opfs, '/', session.name);
       this.isVirtualMode.set(true);
       this.repoName.set(session.name);
       return folder;
