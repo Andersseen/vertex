@@ -3,6 +3,7 @@ import { VirtualFS, GitClient, OPFSFS } from '@vertex/runtime';
 import type { GitCloneOptions, IVirtualFS } from '@vertex/runtime';
 import type { VertexFile, VertexFolder } from '@vertex/types';
 import { db } from '../db/vertex.db';
+import * as fileTree from './file-tree';
 
 export interface CloneProgress {
   phase: string;
@@ -12,15 +13,6 @@ export interface CloneProgress {
 }
 
 const SESSION_VERSION = 1;
-
-const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', '.angular', 'build', '.next']);
-
-const LANGUAGE_MAP: Record<string, string> = {
-  ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
-  html: 'html', css: 'css', scss: 'css', json: 'json', md: 'markdown',
-  py: 'python', rs: 'rust', go: 'go', sh: 'bash', yaml: 'yaml', yml: 'yaml',
-  toml: 'toml', txt: 'text',
-};
 
 @Injectable({ providedIn: 'root' })
 export class RuntimeService {
@@ -66,7 +58,7 @@ export class RuntimeService {
         },
       });
 
-      const folder = await this.buildFolderTree('/', name, '/');
+      const folder = await fileTree.buildRootFolder(this.opfs, '/', name);
       this.isVirtualMode.set(true);
       await this.saveSession(name, options.url, '/');
       return folder;
@@ -109,55 +101,26 @@ export class RuntimeService {
     return this.opfs.rename(oldPath, newPath);
   }
 
-  getGitClient(): GitClient | null {
-    return this.gitClient;
+  /**
+   * Reads the children of a directory on demand. Used to lazily expand a folder
+   * in the tree instead of walking the entire repo up front. Sub-directories
+   * come back collapsed with empty `children`.
+   */
+  async loadChildren(path: string): Promise<(VertexFile | VertexFolder)[]> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    return fileTree.readLevel(this.opfs, path);
   }
 
-  private async buildFolderTree(
-    dir: string,
-    name: string,
-    rootDir: string,
-  ): Promise<VertexFolder> {
-    if (!this.opfs) throw new Error('No FS');
-
-    const entries = await this.opfs.readDir(dir);
-    const children: (VertexFile | VertexFolder)[] = [];
-
-    const sorted = entries.sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'directory' ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
-
-    for (const entry of sorted) {
-      if (IGNORED_DIRS.has(entry.name)) continue;
-
-      if (entry.type === 'directory') {
-        const subFolder = await this.buildFolderTree(entry.path, entry.name, rootDir);
-        children.push(subFolder);
-      } else {
-        children.push(this.toVertexFile(entry.path, entry.name));
-      }
-    }
-
-    return {
-      id: dir,
-      name: dir === rootDir ? name : name,
-      path: dir,
-      children,
-      isExpanded: dir === rootDir,
-    };
-  }
-
-  private toVertexFile(path: string, name: string): VertexFile {
-    const ext = name.split('.').pop()?.toLowerCase() ?? '';
-    return {
-      id: path,
-      name,
-      path,
-      content: '',
-      language: LANGUAGE_MAP[ext] ?? 'text',
-      isDirty: false,
-    };
+  /**
+   * Rebuilds the tree from the FS after a structural change (new folder, rename,
+   * delete) while preserving the user's expansion. Only previously-loaded levels
+   * are re-read, so folders don't collapse and no open-but-empty nodes are left
+   * behind. Falls back to a fresh top-level build if there is no previous tree.
+   */
+  async refreshTree(previous: VertexFolder | null): Promise<VertexFolder | null> {
+    if (!this.opfs) throw new Error('No virtual FS — clone a repo first');
+    if (!previous) return null;
+    return fileTree.refreshTree(this.opfs, previous);
   }
 
   private async saveSession(name: string, url: string, dir: string): Promise<void> {
@@ -184,7 +147,7 @@ export class RuntimeService {
         return null;
       }
 
-      const folder = await this.buildFolderTree('/', session.name, '/');
+      const folder = await fileTree.buildRootFolder(this.opfs, '/', session.name);
       this.isVirtualMode.set(true);
       this.repoName.set(session.name);
       return folder;

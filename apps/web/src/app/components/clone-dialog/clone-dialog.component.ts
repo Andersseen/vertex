@@ -56,6 +56,14 @@ import {
           (valueChange)="token.set($event)"
         />
 
+        <!-- Token privacy warning -->
+        @if (token().trim()) {
+          <v-ide-alert
+            severity="warning"
+            text="Your token is sent through a public CORS proxy (cors.isomorphic-git.org) to reach GitHub from the browser. For private repos, use a self-hosted proxy or a fine-grained, read-only token you can revoke."
+          />
+        }
+
         <!-- Progress -->
         @if (runtime.isCloning()) {
           <div style="display: flex; flex-direction: column; gap: 8px;">

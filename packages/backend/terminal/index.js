@@ -20,6 +20,26 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // ============================================
 const BASE_PORT = Number(process.env.TERMINAL_PORT) || 3002;
 const WORKSPACE_PATH = process.env.WORKSPACE_PATH || process.cwd();
+const ALLOWED_ORIGINS = (
+  process.env.TERMINAL_CORS_ORIGIN ||
+  "http://localhost:4200,http://localhost:4201,http://localhost:5173,http://localhost:1420,tauri://localhost"
+)
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+/**
+ * A missing Origin header means a non-browser client (curl, a native app).
+ * Browsers ALWAYS send Origin on cross-origin fetch/WebSocket connections and
+ * page JS cannot forge it, so a drive-by web page can never reach us with an
+ * absent or spoofed Origin. Only same-machine tooling can — and that already
+ * has full shell access anyway. So allow-missing is safe and matches the FS
+ * sidecar's CORS behaviour.
+ */
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  return ALLOWED_ORIGINS.includes(origin);
+}
 
 console.log("╔════════════════════════════════════════╗");
 console.log("║  Vertex Terminal Sidecar (Node.js)     ║");
@@ -42,16 +62,25 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:4200",
-      "http://localhost:4201",
-      "http://localhost:1420",
-    ],
+    origin: (origin) => (isAllowedOrigin(origin) ? origin : null),
     allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
+
+// Origin enforcement. CORS only blocks reading a cross-origin *response* — it
+// does NOT stop the side effects of a "simple" request (a text/plain POST skips
+// the preflight and still runs server-side). Since a single POST here can spawn
+// a shell, we must reject a disallowed Origin outright rather than trust CORS.
+app.use("*", async (c, next) => {
+  const origin = c.req.header("origin");
+  if (!isAllowedOrigin(origin)) {
+    console.warn(`[Security] Rejected HTTP request from origin: ${origin}`);
+    return c.json({ error: "Origin not allowed" }, 403);
+  }
+  await next();
+});
 
 // Health check
 app.get("/", (c) => {
@@ -198,7 +227,21 @@ async function startServer() {
       res.end(responseBody);
     });
 
-    const wss = new WebSocketServer({ server, path: "/ws" });
+    const wss = new WebSocketServer({
+      server,
+      path: "/ws",
+      // WebSocket upgrades bypass CORS entirely, so a random page you visit
+      // could otherwise open ws://localhost:<port>/ws and drive a shell on your
+      // machine. Reject any connection whose Origin is not explicitly allowed.
+      verifyClient: ({ origin }, done) => {
+        if (isAllowedOrigin(origin)) {
+          done(true);
+        } else {
+          console.warn(`[Security] Rejected WebSocket from origin: ${origin}`);
+          done(false, 403, "Origin not allowed");
+        }
+      },
+    });
 
     // WebSocket connections
     wss.on("connection", (ws) => {

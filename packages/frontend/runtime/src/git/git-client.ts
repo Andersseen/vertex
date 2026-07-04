@@ -9,17 +9,48 @@ import type {
   IGitClient,
 } from '../types/git.types'
 
+// Public proxy provided by the isomorphic-git project. Fine for anonymous
+// clones of public repos, but it can observe any Authorization header that
+// passes through it — so private-repo tokens should use a self-hosted proxy.
+const DEFAULT_CORS_PROXY = 'https://cors.isomorphic-git.org'
+
+/** A row of `git.statusMatrix`: `[filepath, head, workdir, stage]`. */
+export type StatusMatrixRow = [string, number, number, number]
+
+/**
+ * Buckets an isomorphic-git status matrix into modified / added / deleted /
+ * untracked. Extracted as a pure function so the classification is unit-testable
+ * without a real git repo. The codes follow isomorphic-git's HEAD/WORKDIR/STAGE
+ * convention (0 = absent, 1 = unchanged from HEAD, 2 = present/changed).
+ */
+export function categorizeStatusMatrix(matrix: StatusMatrixRow[]): GitStatus {
+  const result: GitStatus = { modified: [], added: [], deleted: [], untracked: [] }
+
+  for (const [filepath, head, workdir, stage] of matrix) {
+    if (head === 1 && workdir === 2) result.modified.push(filepath)
+    else if (head === 0 && workdir === 2 && stage === 2) result.added.push(filepath)
+    else if (head === 1 && workdir === 0) result.deleted.push(filepath)
+    else if (head === 0 && workdir === 2 && stage === 0) result.untracked.push(filepath)
+  }
+
+  return result
+}
+
 export class GitClient implements IGitClient {
-  constructor(private fs: OPFSFS) {}
+  private readonly corsProxy: string
+
+  constructor(private fs: OPFSFS, corsProxy: string = DEFAULT_CORS_PROXY) {
+    this.corsProxy = corsProxy
+  }
 
   async clone(options: GitCloneOptions): Promise<void> {
-    const { url, dir = '/', branch, depth = 1, token, onProgress } = options
+    const { url, dir = '/', branch, depth = 1, token, corsProxy, onProgress } = options
     await git.clone({
       fs: this.fs.rawFs,
       http,
       dir,
       url,
-      corsProxy: 'https://cors.isomorphic-git.org',
+      corsProxy: corsProxy ?? this.corsProxy,
       ref: branch,
       singleBranch: true,
       depth,
@@ -35,6 +66,7 @@ export class GitClient implements IGitClient {
       fs: this.fs.rawFs,
       http,
       dir,
+      corsProxy: this.corsProxy,
       headers: token ? { Authorization: `token ${token}` } : {},
     })
   }
@@ -44,6 +76,7 @@ export class GitClient implements IGitClient {
       fs: this.fs.rawFs,
       http,
       dir,
+      corsProxy: this.corsProxy,
       headers: { Authorization: `token ${token}` },
     })
   }
@@ -62,16 +95,7 @@ export class GitClient implements IGitClient {
 
   async status(dir: string): Promise<GitStatus> {
     const matrix = await git.statusMatrix({ fs: this.fs.rawFs, dir })
-    const result: GitStatus = { modified: [], added: [], deleted: [], untracked: [] }
-
-    for (const [filepath, head, workdir, stage] of matrix) {
-      if (head === 1 && workdir === 2) result.modified.push(filepath)
-      else if (head === 0 && workdir === 2 && stage === 2) result.added.push(filepath)
-      else if (head === 1 && workdir === 0) result.deleted.push(filepath)
-      else if (head === 0 && workdir === 2 && stage === 0) result.untracked.push(filepath)
-    }
-
-    return result
+    return categorizeStatusMatrix(matrix as StatusMatrixRow[])
   }
 
   async log(dir: string, limit = 20): Promise<GitLogEntry[]> {

@@ -21,6 +21,13 @@ import { readTsConfigPaths, readViteAliases } from "./config-resolver";
 
 let initialized = false;
 
+// esbuild-wasm loads its binary from a URL. The default points at a CDN, which
+// is fine online but blocks offline / self-hosted use — override it (e.g. to a
+// same-origin `/esbuild.wasm`) via the Bundler constructor. Note esbuild's init
+// is process-global, so the first Bundler to initialize wins for the session.
+const DEFAULT_ESBUILD_WASM_URL =
+  "https://esm.sh/esbuild-wasm@0.28.0/esbuild.wasm";
+
 async function clearDir(fs: IVirtualFS, dir: string): Promise<void> {
   let entries;
   try {
@@ -39,17 +46,24 @@ async function clearDir(fs: IVirtualFS, dir: string): Promise<void> {
   }
 }
 
+export interface BundlerOptions {
+  /** Override the esbuild-wasm binary URL (defaults to the esm.sh CDN). */
+  wasmURL?: string;
+}
+
 export class Bundler implements IBundler {
   private readonly fs: IVirtualFS;
+  private readonly wasmURL: string;
 
-  constructor(fs: IVirtualFS) {
+  constructor(fs: IVirtualFS, options: BundlerOptions = {}) {
     this.fs = fs;
+    this.wasmURL = options.wasmURL ?? DEFAULT_ESBUILD_WASM_URL;
   }
 
   private async init(): Promise<void> {
     if (initialized) return;
     await esbuild.initialize({
-      wasmURL: "https://esm.sh/esbuild-wasm@0.28.0/esbuild.wasm",
+      wasmURL: this.wasmURL,
       worker: true,
     });
     initialized = true;
