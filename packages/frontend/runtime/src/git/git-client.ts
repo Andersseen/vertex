@@ -9,17 +9,26 @@ import type {
   IGitClient,
 } from '../types/git.types'
 
+// Public proxy provided by the isomorphic-git project. Fine for anonymous
+// clones of public repos, but it can observe any Authorization header that
+// passes through it — so private-repo tokens should use a self-hosted proxy.
+const DEFAULT_CORS_PROXY = 'https://cors.isomorphic-git.org'
+
 export class GitClient implements IGitClient {
-  constructor(private fs: OPFSFS) {}
+  private readonly corsProxy: string
+
+  constructor(private fs: OPFSFS, corsProxy: string = DEFAULT_CORS_PROXY) {
+    this.corsProxy = corsProxy
+  }
 
   async clone(options: GitCloneOptions): Promise<void> {
-    const { url, dir = '/', branch, depth = 1, token, onProgress } = options
+    const { url, dir = '/', branch, depth = 1, token, corsProxy, onProgress } = options
     await git.clone({
       fs: this.fs.rawFs,
       http,
       dir,
       url,
-      corsProxy: 'https://cors.isomorphic-git.org',
+      corsProxy: corsProxy ?? this.corsProxy,
       ref: branch,
       singleBranch: true,
       depth,
@@ -35,6 +44,7 @@ export class GitClient implements IGitClient {
       fs: this.fs.rawFs,
       http,
       dir,
+      corsProxy: this.corsProxy,
       headers: token ? { Authorization: `token ${token}` } : {},
     })
   }
@@ -44,6 +54,7 @@ export class GitClient implements IGitClient {
       fs: this.fs.rawFs,
       http,
       dir,
+      corsProxy: this.corsProxy,
       headers: { Authorization: `token ${token}` },
     })
   }

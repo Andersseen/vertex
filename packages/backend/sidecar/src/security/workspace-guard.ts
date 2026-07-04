@@ -5,12 +5,37 @@ import { resolve, normalize, sep } from "node:path";
  * Prevents path traversal attacks by validating all paths against allowed base directory
  */
 export class WorkspaceGuard {
-  private readonly allowedBase: string;
+  private allowedBase: string;
+  private readonly rootBoundary: string;
   private readonly maxFileSize: number;
 
-  constructor(basePath: string, maxFileSizeBytes: number = 10 * 1024 * 1024) {
+  /**
+   * @param basePath - Initial workspace root.
+   * @param maxFileSizeBytes - Max file size for read/write operations.
+   * @param rootBoundary - Outer boundary the workspace may never escape, even
+   *   when the client changes it via `setAllowedBase`. Defaults to `basePath`,
+   *   which means the workspace can only be narrowed to subdirectories unless a
+   *   wider boundary (e.g. the user's home directory) is supplied explicitly.
+   */
+  constructor(
+    basePath: string,
+    maxFileSizeBytes: number = 10 * 1024 * 1024,
+    rootBoundary?: string,
+  ) {
     this.allowedBase = normalize(resolve(basePath));
+    this.rootBoundary = rootBoundary
+      ? normalize(resolve(rootBoundary))
+      : this.allowedBase;
     this.maxFileSize = maxFileSizeBytes;
+  }
+
+  /**
+   * True if `child` is `parent` itself or lives inside it. A trailing separator
+   * on `parent` prevents partial matches (e.g. `/workspace` vs `/workspace2`).
+   */
+  private isWithin(child: string, parent: string): boolean {
+    const parentWithSep = parent.endsWith(sep) ? parent : parent + sep;
+    return child === parent || child.startsWith(parentWithSep);
   }
 
   /**
@@ -23,20 +48,8 @@ export class WorkspaceGuard {
       return null;
     }
 
-    // Normalize and resolve the path
     const resolved = normalize(resolve(this.allowedBase, inputPath));
-
-    // Ensure the resolved path starts with allowed base
-    // Add trailing separator to prevent partial matches (e.g., /workspace vs /workspace2)
-    const baseWithSep = this.allowedBase.endsWith(sep)
-      ? this.allowedBase
-      : this.allowedBase + sep;
-
-    if (!resolved.startsWith(baseWithSep) && resolved !== this.allowedBase) {
-      return null;
-    }
-
-    return resolved;
+    return this.isWithin(resolved, this.allowedBase) ? resolved : null;
   }
 
   /**
@@ -95,11 +108,31 @@ export class WorkspaceGuard {
   }
 
   /**
-   * Updates the allowed base path (e.g., when user selects a new workspace)
-   * @param newBasePath - The new base path to set
+   * Updates the allowed base path (e.g., when the user selects a new workspace).
+   * The new path must stay within `rootBoundary`, so a compromised or
+   * overreaching caller cannot repoint the workspace at arbitrary disk
+   * locations (`/`, `/etc`, another user's home, …).
+   * @param newBasePath - The new base path to set.
+   * @returns The resolved absolute path if accepted, or null if it escapes the
+   *   configured root boundary.
    */
-  setAllowedBase(newBasePath: string): void {
-    (this as any).allowedBase = normalize(resolve(newBasePath));
+  setAllowedBase(newBasePath: string): string | null {
+    if (!newBasePath || typeof newBasePath !== "string") {
+      return null;
+    }
+    const resolved = normalize(resolve(newBasePath));
+    if (!this.isWithin(resolved, this.rootBoundary)) {
+      return null;
+    }
+    this.allowedBase = resolved;
+    return resolved;
+  }
+
+  /**
+   * Gets the outer boundary the workspace may never escape.
+   */
+  getRootBoundary(): string {
+    return this.rootBoundary;
   }
 
   /**

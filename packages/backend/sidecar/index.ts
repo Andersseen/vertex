@@ -2,6 +2,7 @@ import { Hono, type Context, type Next } from "hono";
 import { cors } from "hono/cors";
 import { readdir, readFile, writeFile, stat, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
+import { homedir } from "node:os";
 import {
   WorkspaceGuard,
   RateLimiter,
@@ -13,18 +14,22 @@ import {
 
 const PORT = Number(process.env.SIDECAR_PORT) || 3001;
 const WORKSPACE_PATH = process.env.WORKSPACE_PATH || process.cwd();
+// Outer boundary the workspace may never escape, even via POST /fs/workspace.
+// Defaults to the user's home directory so folder-picking still works, while
+// blocking a repoint to `/`, `/etc`, or another user's files.
+const WORKSPACE_ROOT = process.env.WORKSPACE_ROOT || homedir();
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024; // 10MB
 const RATE_LIMIT_REQ = Number(process.env.RATE_LIMIT_REQ) || 100;
 const RATE_LIMIT_WINDOW = Number(process.env.RATE_LIMIT_WINDOW) || 60; // seconds
 const CORS_ORIGIN =
   process.env.CORS_ORIGIN ||
-  "http://localhost:4200,http://localhost:4201,http://localhost:1420";
+  "http://localhost:4200,http://localhost:4201,http://localhost:5173,http://localhost:1420";
 
 // Parse allowed origins
 const allowedOrigins = CORS_ORIGIN.split(",").map((o) => o.trim());
 
 // Initialize security modules
-const guard = new WorkspaceGuard(WORKSPACE_PATH, MAX_FILE_SIZE);
+const guard = new WorkspaceGuard(WORKSPACE_PATH, MAX_FILE_SIZE, WORKSPACE_ROOT);
 const rateLimiter = new RateLimiter(RATE_LIMIT_REQ, RATE_LIMIT_WINDOW * 1000);
 
 console.log(`[Security] Workspace: ${guard.getAllowedBase()}`);
@@ -35,6 +40,7 @@ console.log(
   `[Security] Rate limit: ${RATE_LIMIT_REQ} req/${RATE_LIMIT_WINDOW}s`,
 );
 console.log(`[Security] Allowed origins: ${allowedOrigins.join(", ")}`);
+console.log(`[Security] Workspace root boundary: ${guard.getRootBoundary()}`);
 
 // ==================== APP SETUP ====================
 
@@ -55,6 +61,19 @@ app.use(
     credentials: true,
   }),
 );
+
+// Origin enforcement. CORS only blocks reading a cross-origin *response*; it
+// does not stop the side effects of a "simple" request (a text/plain POST skips
+// the preflight and still runs). Since a POST here can write files on disk, a
+// disallowed Origin must be rejected outright. A missing Origin is a non-browser
+// client (curl/native app) and is allowed, matching the CORS policy above.
+app.use("*", async (c: Context, next: Next) => {
+  const origin = c.req.header("origin");
+  if (origin && !allowedOrigins.includes(origin)) {
+    return c.json({ error: "Origin not allowed" }, 403);
+  }
+  await next();
+});
 
 // Security headers middleware
 app.use("*", async (c: Context, next: Next) => {
@@ -349,13 +368,22 @@ app.post("/fs/workspace", async (c) => {
       return c.json({ error: "Path is not a directory" }, 400);
     }
 
-    // Update the workspace guard with new path
-    guard.setAllowedBase(newPath);
+    // Update the workspace guard — rejected if the path escapes the root
+    // boundary (prevents repointing the workspace at `/`, `/etc`, etc.).
+    const applied = guard.setAllowedBase(newPath);
+    if (!applied) {
+      return c.json(
+        {
+          error: `Access denied: workspace must stay within ${guard.getRootBoundary()}`,
+        },
+        403,
+      );
+    }
 
-    console.log(`[Workspace] Changed to: ${newPath}`);
+    console.log(`[Workspace] Changed to: ${applied}`);
     return c.json({
       success: true,
-      path: newPath,
+      path: applied,
       message: "Workspace updated successfully",
     });
   } catch (error) {

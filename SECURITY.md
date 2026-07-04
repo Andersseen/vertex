@@ -96,6 +96,60 @@ All inputs are validated:
 - Content: Validated as UTF-8 string with size limits
 - Filenames: Validated for invalid characters and path components
 
+### 8. Origin Enforcement (CSRF / drive-by protection)
+
+**Implementation**: Origin-check middleware (FS + terminal sidecars) and
+WebSocket `verifyClient` (terminal sidecar).
+
+CORS alone is not sufficient for a localhost service: it blocks a page from
+*reading* a cross-origin response, but a "simple" request (a `text/plain` POST
+that skips the preflight) still executes server-side, and WebSocket upgrades
+bypass CORS entirely. Because a single request can write files or spawn a
+shell, both sidecars now reject any request whose `Origin` header is present
+and not on the allowlist, and the terminal WebSocket rejects disallowed origins
+at the upgrade handshake. A missing `Origin` (non-browser clients like curl) is
+allowed — browsers always send a truthful, unforgeable `Origin`, so a drive-by
+web page can never reach the sidecars.
+
+**Configuration**:
+
+```bash
+# FS sidecar
+CORS_ORIGIN=http://localhost:5173,http://localhost:1420
+# Terminal sidecar
+TERMINAL_CORS_ORIGIN=http://localhost:5173,http://localhost:1420
+```
+
+### 9. Workspace Root Boundary
+
+**Implementation**: `WorkspaceGuard` root boundary + `POST /fs/workspace` check.
+
+`POST /fs/workspace` lets the client switch the active workspace folder. To
+prevent it from being repointed at arbitrary disk locations (`/`, `/etc`,
+another user's home), the new path must stay within a configured root boundary.
+
+**Configuration**:
+
+```bash
+WORKSPACE_ROOT=/Users/me/projects   # defaults to the user's home directory
+```
+
+### 10. Git Token Handling (CORS proxy)
+
+Cloning from the browser routes requests through a CORS proxy because git hosts
+do not send CORS headers. The **default proxy is public**
+(`cors.isomorphic-git.org`) and can observe any `Authorization` header that
+passes through it. For **private repositories**:
+
+- Prefer a self-hosted proxy (`@isomorphic-git/cors-proxy`) via
+  `GitCloneOptions.corsProxy` or the `GitClient` constructor.
+- Use a fine-grained, read-only, revocable token — never a classic full-scope
+  PAT.
+- The clone dialog surfaces this warning whenever a token is entered.
+
+Deploy tokens (Cloudflare) are sent directly to `api.cloudflare.com` (no third
+party) and are never persisted to IndexedDB/localStorage.
+
 ## Deployment Security
 
 ### Environment Variables

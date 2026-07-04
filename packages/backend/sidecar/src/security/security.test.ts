@@ -47,6 +47,56 @@ describe("WorkspaceGuard", () => {
     });
   });
 
+  describe("setAllowedBase (workspace root boundary)", () => {
+    it("defaults the boundary to basePath — only subdirectories are accepted", () => {
+      expect(guard.setAllowedBase("/home/user/workspace/project")).toBe(
+        "/home/user/workspace/project",
+      );
+      // Sibling outside the initial base is rejected when no wider boundary set.
+      expect(guard.setAllowedBase("/home/user/other")).toBeNull();
+    });
+
+    it("rejects repointing the workspace to arbitrary disk locations", () => {
+      const g = new WorkspaceGuard(
+        "/home/user/workspace",
+        undefined,
+        "/home/user",
+      );
+      expect(g.setAllowedBase("/")).toBeNull();
+      expect(g.setAllowedBase("/etc")).toBeNull();
+      expect(g.setAllowedBase("/home/user2")).toBeNull();
+      expect(g.setAllowedBase("/home/user/../user2")).toBeNull();
+    });
+
+    it("accepts any folder within the configured root boundary", () => {
+      const g = new WorkspaceGuard(
+        "/home/user/workspace",
+        undefined,
+        "/home/user",
+      );
+      expect(g.setAllowedBase("/home/user/projects/app")).toBe(
+        "/home/user/projects/app",
+      );
+      expect(g.getAllowedBase()).toBe("/home/user/projects/app");
+    });
+
+    it("re-scopes validatePath after the base changes", () => {
+      const g = new WorkspaceGuard(
+        "/home/user/workspace",
+        undefined,
+        "/home/user",
+      );
+      g.setAllowedBase("/home/user/projects");
+      expect(g.validatePath("/home/user/projects/a.ts")).toBeTruthy();
+      expect(g.validatePath("/home/user/workspace/a.ts")).toBeNull();
+    });
+
+    it("rejects null/empty new base", () => {
+      expect(guard.setAllowedBase("")).toBeNull();
+      expect(guard.setAllowedBase(null as any)).toBeNull();
+    });
+  });
+
   describe("validateFilename", () => {
     it("should allow valid filenames", () => {
       expect(guard.validateFilename("file.ts")).toBe(true);
