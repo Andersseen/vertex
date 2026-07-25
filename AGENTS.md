@@ -51,12 +51,27 @@ bun test                             # unit tests (Bun)
 bun test:e2e                         # Playwright e2e (apps/web) → localhost:4201
 bun test:e2e:ui                      # Playwright with UI
 
-# Deploy
+# Deploy — Cloudflare is the only target, see docs/DEPLOYMENT.md
+bun run deploy                       # alias of web:deploy
 bun web:deploy                       # vite build + wrangler pages deploy → Cloudflare Pages
 
 # Web editor demo
 bun web-editor-demo:start            # build web-component + serve demo
 ```
+
+---
+
+## CI/CD
+
+One pipeline, one platform. `.github/workflows/ci.yml` runs `quality` (lint → types → unit),
+then `e2e` (Playwright, non-blocking) and `deploy` in parallel. `deploy` only runs for pushes to
+`main`, targets the GitHub `production` environment, and publishes `apps/web/dist/client` to the
+Cloudflare Pages project `vertex-web`. Shared setup lives in `.github/actions/setup`.
+
+`.github/workflows/release-web-editor.yml` publishes the web-component bundles to the rolling
+`web-editor-latest` GitHub Release when `packages/frontend/web-editor/**` changes.
+
+Never add a second deploy provider — see [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md).
 
 ---
 

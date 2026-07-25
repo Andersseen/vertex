@@ -1,5 +1,6 @@
+# Cloudflare Pages project for the Vertex web app.
+# This is the single deploy target for the whole repo — see docs/DEPLOYMENT.md.
+
 name = "vertex-web"
 pages_build_output_dir = "dist/client"
-
-[vars]
-# Add any environment variables here
+compatibility_date = "2026-07-25"

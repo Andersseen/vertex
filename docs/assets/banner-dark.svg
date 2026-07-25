@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="380" viewBox="0 0 1080 380" role="img" aria-label="Vertex — the IDE that lives in your browser tab">
+  <defs>
+    <linearGradient id="mark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5b4fc" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+    <linearGradient id="wordmark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#c7d2fe" />
+    </linearGradient>
+    <radialGradient id="glow" cx="18%" cy="12%" r="72%">
+      <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.42" />
+      <stop offset="55%" stop-color="#4f46e5" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glow2" cx="88%" cy="92%" r="60%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1e293b" stroke-width="1" stroke-opacity="0.55" />
+    </pattern>
+    <clipPath id="card">
+      <rect width="1080" height="380" rx="20" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1080" height="380" fill="#020617" />
+    <rect width="1080" height="380" fill="url(#grid)" />
+    <rect width="1080" height="380" fill="url(#glow)" />
+    <rect width="1080" height="380" fill="url(#glow2)" />
+
+    <!-- logo mark -->
+    <g transform="translate(84, 96) scale(5.2)">
+      <path d="M7 8L16 24L25 8" stroke="url(#mark)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      <circle cx="16" cy="24" r="2.6" fill="#ffffff" />
+      <circle cx="16" cy="24" r="1.5" fill="#818cf8" />
+    </g>
+
+    <!-- wordmark + copy -->
+    <g font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+      <text x="330" y="152" fill="url(#wordmark)" font-size="86" font-weight="700" letter-spacing="10">VERTEX</text>
+      <text x="334" y="204" fill="#a5b4fc" font-size="22" font-weight="600" letter-spacing="4.5">THE IDE THAT LIVES IN A BROWSER TAB</text>
+      <text x="334" y="252" fill="#94a3b8" font-size="23" font-weight="400">Clone any GitHub repo. Edit, build, preview, deploy — zero install.</text>
+
+      <!-- chips -->
+      <g font-size="17" font-weight="600">
+        <rect x="334" y="284" width="120" height="38" rx="19" fill="#4f46e5" fill-opacity="0.16" stroke="#4f46e5" stroke-opacity="0.55" />
+        <text x="394" y="309" fill="#c7d2fe" text-anchor="middle">Browser</text>
+
+        <rect x="466" y="284" width="120" height="38" rx="19" fill="#4f46e5" fill-opacity="0.16" stroke="#4f46e5" stroke-opacity="0.55" />
+        <text x="526" y="309" fill="#c7d2fe" text-anchor="middle">Desktop</text>
+
+        <rect x="598" y="284" width="188" height="38" rx="19" fill="#4f46e5" fill-opacity="0.16" stroke="#4f46e5" stroke-opacity="0.55" />
+        <text x="692" y="309" fill="#c7d2fe" text-anchor="middle">Web Component</text>
+
+        <rect x="798" y="284" width="152" height="38" rx="19" fill="#22d3ee" fill-opacity="0.12" stroke="#22d3ee" stroke-opacity="0.45" />
+        <text x="874" y="309" fill="#a5f3fc" text-anchor="middle">Local-first</text>
+      </g>
+    </g>
+
+    <rect x="0.5" y="0.5" width="1079" height="379" rx="20" fill="none" stroke="#1e293b" stroke-width="1" />
+  </g>
+</svg>

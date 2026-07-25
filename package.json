@@ -1,22 +1,33 @@
 {
   "name": "vertex",
   "version": "0.0.1",
-  "description": "A lightweight, high-performance IDE built with Angular 21, Tauri, Bun, and CodeMirror 6.",
+  "description": "The IDE that lives in a browser tab — clone any GitHub repo, then edit, build, preview and deploy it with zero install.",
   "author": "Andrii Pap",
   "license": "MIT",
   "keywords": [
     "ide",
-    "angular",
-    "tauri",
+    "web-ide",
+    "browser-ide",
+    "code-editor",
     "codemirror",
+    "angular",
+    "analogjs",
+    "tauri",
     "bun",
     "rust",
     "monorepo",
-    "high-performance"
+    "webcontainers",
+    "isomorphic-git",
+    "opfs",
+    "esbuild"
   ],
+  "homepage": "https://vertex.andersseen.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/andriipap/vertex"
+    "url": "git+https://github.com/Andersseen/vertex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Andersseen/vertex/issues"
   },
   "scripts": {
     "build": "turbo run build",
@@ -38,6 +49,7 @@
     "web:dev": "cd apps/web && bun run start",
     "web:build": "cd apps/web && bun run build",
     "web:test": "cd apps/web && bun run test",
+    "deploy": "bun run web:deploy",
     "web:deploy": "cd apps/web && bun run deploy",
     "desktop:dev": "cd apps/desktop && source ~/.cargo/env && bun run tauri:dev",
     "desktop:build": "cd apps/desktop && source ~/.cargo/env && bun run tauri:build",

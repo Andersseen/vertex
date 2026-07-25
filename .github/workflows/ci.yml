@@ -1,0 +1,139 @@
+name: CI
+
+# Single pipeline for the whole monorepo:
+#   quality -> e2e
+#           -> deploy (Cloudflare Pages, main only)
+#
+# Cloudflare is the one and only deploy target. See docs/DEPLOYMENT.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: "1.3.11"
+  # Keep in sync with the `wrangler` devDependency in apps/web/package.json.
+  WRANGLER_VERSION: "3.114.17"
+  CF_PAGES_PROJECT: vertex-web
+  PRODUCTION_URL: https://vertex.andersseen.dev
+
+jobs:
+  quality:
+    name: Lint · Types · Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run check-types
+
+      - name: Unit tests
+        run: bun test
+
+  e2e:
+    name: E2E · Playwright
+    needs: quality
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Build web app
+        run: bun run web:build
+
+      - name: Resolve Playwright version
+        id: playwright-version
+        working-directory: apps/web
+        run: echo "PLAYWRIGHT_VERSION=$(bunx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.PLAYWRIGHT_VERSION }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: apps/web
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        run: bun run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+          if-no-files-found: ignore
+
+  deploy:
+    name: Deploy · Cloudflare Pages
+    needs: quality
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: production
+      url: https://vertex.andersseen.dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Build web app
+        timeout-minutes: 10
+        run: bun run web:build
+
+      - name: Publish to Cloudflare Pages
+        id: cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          workingDirectory: apps/web
+          command: pages deploy dist/client --project-name=${{ env.CF_PAGES_PROJECT }} --branch=main
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "### 🚀 Deployed to Cloudflare Pages"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Production | ${PRODUCTION_URL} |"
+            echo "| Build alias | ${DEPLOYMENT_URL:-—} |"
+            echo "| Project | \`${CF_PAGES_PROJECT}\` |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}

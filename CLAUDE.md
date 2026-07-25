@@ -19,6 +19,7 @@ bun lint           # lint the whole monorepo
 bun check-types    # typecheck the whole monorepo
 bun test           # unit tests
 bun test:e2e       # Playwright e2e
+bun run deploy     # build + publish to Cloudflare Pages (the only deploy target)
 ```
 
 ## Key conventions

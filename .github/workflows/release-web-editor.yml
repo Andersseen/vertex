@@ -2,74 +2,76 @@ name: Release Web Editor
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/frontend/web-editor/**'
-      - '.github/workflows/release-web-editor.yml'
+      - "packages/frontend/web-editor/**"
+      - ".github/workflows/release-web-editor.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: release-web-editor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-release:
+  release:
+    name: Build & publish bundles
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Bun
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: "1.3.11"
+      - uses: ./.github/actions/setup
 
-    - name: Install dependencies
-      run: bun install
+      - name: Build web editor
+        working-directory: packages/frontend/web-editor
+        run: bun run build
 
-    - name: Build web-editor
-      working-directory: packages/frontend/web-editor
-      run: bun run build
+      - name: Publish rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: web-editor-latest
+          name: Web Editor (Latest)
+          body: |
+            Latest build of the Vertex web editor custom elements.
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: web-editor-latest
-        name: Web Editor (Latest)
-        body: |
-          Latest build of Vertex Web Editor
-          
-          ## Variants
-          
-          - `web-editor.min.js` — Full editable editor (`<vertex-editor>`), ~1.1 MB
-          - `web-editor-lite.min.js` — Read-only display editor (`<vertex-editor-lite>`), ~450 KB
-          
-          ## Installation
-          
-          ### Quick install (curl)
-          ```bash
-          # Full editable editor
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/packages/frontend/web-editor/bin/install.mjs | node - ./public
-          
-          # Read-only lite variant
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/packages/frontend/web-editor/bin/install.mjs | node - ./public --lite
-          ```
-          
-          ### Direct download
-          ```bash
-          # Full editor
-          curl -L -o web-editor.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor.min.js
-          
-          # Lite variant
-          curl -L -o web-editor-lite.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor-lite.min.js
-          ```
-        files: |
-          packages/frontend/web-editor/dist/web-editor.min.js
-          packages/frontend/web-editor/dist/web-editor.min.js.map
-          packages/frontend/web-editor/dist/web-editor-aot.min.js
-          packages/frontend/web-editor/dist/web-editor-aot.min.js.map
-          packages/frontend/web-editor/dist/web-editor-lite.min.js
-          packages/frontend/web-editor/dist/web-editor-lite.min.js.map
-          packages/frontend/web-editor/dist/web-editor-lite-aot.min.js
-          packages/frontend/web-editor/dist/web-editor-lite-aot.min.js.map
-        fail_on_unmatched_files: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ## Variants
+
+            | Bundle | Element | Size | Use case |
+            | --- | --- | --- | --- |
+            | `web-editor.min.js` | `<vertex-editor>` | ~1.1 MB | Full editable editor |
+            | `web-editor-lite.min.js` | `<vertex-editor-lite>` | ~450 KB | Read-only code display |
+
+            ## Install
+
+            ```bash
+            # Full editable editor
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/packages/frontend/web-editor/bin/install.mjs | node - ./public
+
+            # Read-only lite variant
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/packages/frontend/web-editor/bin/install.mjs | node - ./public --lite
+            ```
+
+            ## Direct download
+
+            ```bash
+            curl -L -o web-editor.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor.min.js
+            curl -L -o web-editor-lite.min.js https://github.com/${{ github.repository }}/releases/download/web-editor-latest/web-editor-lite.min.js
+            ```
+
+            Built from `${{ github.sha }}`.
+          files: |
+            packages/frontend/web-editor/dist/web-editor.min.js
+            packages/frontend/web-editor/dist/web-editor.min.js.map
+            packages/frontend/web-editor/dist/web-editor-aot.min.js
+            packages/frontend/web-editor/dist/web-editor-aot.min.js.map
+            packages/frontend/web-editor/dist/web-editor-lite.min.js
+            packages/frontend/web-editor/dist/web-editor-lite.min.js.map
+            packages/frontend/web-editor/dist/web-editor-lite-aot.min.js
+            packages/frontend/web-editor/dist/web-editor-lite-aot.min.js.map
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
