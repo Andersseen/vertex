@@ -5,7 +5,7 @@
       <div class="editor__tab">
         <i class="editor__tab-icon">{{ getFileIcon(file()?.language) }}</i>
         <span class="editor__tab-name">{{ file()?.name ?? "Untitled" }}</span>
-        @if (isDirty) {
+        @if (isDirty()) {
           <span class="editor__modified-indicator" title="Modified"></span>
         }
         <button class="editor__close-btn" type="button" aria-label="Close file">
@@ -22,7 +22,7 @@
           class="editor__save-btn"
           type="button"
           (click)="saveFile()"
-          [disabled]="!isDirty"
+          [disabled]="!isDirty()"
         >
           <span aria-hidden="true">↓</span>
           <span>Save</span>

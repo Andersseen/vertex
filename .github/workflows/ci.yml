@@ -2,7 +2,8 @@ name: CI
 
 # Single pipeline for the whole monorepo:
 #   quality -> e2e
-#           -> deploy (Cloudflare Pages, main only)
+#           -> deploy web (Cloudflare Pages, main only)
+#           -> deploy docs (Cloudflare Pages, main only)
 #
 # Cloudflare is the one and only deploy target. See docs/DEPLOYMENT.md.
 
@@ -22,10 +23,12 @@ permissions:
 
 env:
   BUN_VERSION: "1.3.11"
-  # Keep in sync with the `wrangler` devDependency in apps/web/package.json.
-  WRANGLER_VERSION: "3.114.17"
+  # Keep in sync with the root `wrangler` devDependency.
+  WRANGLER_VERSION: "4.114.0"
   CF_PAGES_PROJECT: vertex-web
+  CF_DOCS_PAGES_PROJECT: vertex-docs
   PRODUCTION_URL: https://vertex.andersseen.dev
+  DOCS_PRODUCTION_URL: https://vertex-docs.pages.dev
 
 jobs:
   quality:
@@ -41,11 +44,25 @@ jobs:
       - name: Lint
         run: bun run lint
 
+      - name: Package boundaries
+        run: bun run check:boundaries
+
       - name: Typecheck
         run: bun run check-types
 
       - name: Unit tests
         run: bun test
+
+      - name: Build documentation
+        run: bun run docs:build
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vertex-docs-dist
+          path: apps/docs/dist
+          retention-days: 1
+          if-no-files-found: error
 
   e2e:
     name: E2E · Playwright
@@ -137,3 +154,53 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
         env:
           DEPLOYMENT_URL: ${{ steps.cloudflare.outputs.deployment-url }}
+
+  deploy-docs:
+    name: Deploy docs · Cloudflare Pages
+    needs: quality
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: documentation
+      url: https://vertex-docs.pages.dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Download tested documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: vertex-docs-dist
+          path: apps/docs/dist
+
+      - name: Publish documentation to Cloudflare Pages
+        id: cloudflare-docs
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: ${{ env.WRANGLER_VERSION }}
+          packageManager: bun
+          workingDirectory: apps/docs
+          command: pages deploy dist --project-name=${{ env.CF_DOCS_PAGES_PROJECT }} --branch=main
+
+      - name: Documentation deployment summary
+        run: |
+          {
+            echo "### 📚 Documentation deployed to Cloudflare Pages"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Production | ${DOCS_PRODUCTION_URL} |"
+            echo "| Build alias | ${DEPLOYMENT_URL:-—} |"
+            echo "| Project | \`${CF_DOCS_PAGES_PROJECT}\` |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          DEPLOYMENT_URL: ${{ steps.cloudflare-docs.outputs.deployment-url }}

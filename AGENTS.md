@@ -11,11 +11,13 @@ apps/
   web/          → Angular 21 + Analog.js + Vite main app (→ localhost:5173)
   desktop/      → Tauri + Rust
   web-editor-demo/ → standalone web component demo
+  docs/         → Astro Starlight public documentation
 packages/
   frontend/
     ide-ui/     → @vertex/ide-ui — IDE components (headless + CSS custom props)
     ui/         → @vertex/ui — layouts, CodeMirror editor, sidebar
     runtime/    → @vertex/runtime — VirtualFS + GitClient + Build + Preview + Deploy (browser)
+    editor-core/→ @vertex/editor-core — framework-free CodeMirror configuration + language profiles
     core/       → @vertex/core — Angular services (RuntimeService, PreferencesService, Dexie DB)
     types/      → @vertex/types — shared types
     web-editor/ → @vertex/web-editor — Angular Element standalone (publishable web component)
@@ -36,7 +38,7 @@ bun dev:all                          # web + terminal sidecar + rust sidecar in 
 bun desktop:dev                      # Tauri desktop (requires Rust + Cargo)
 
 # Build
-bun build                            # full build via Turbo (respects dependencies)
+bun run build                        # full build via Turbo (respects dependencies)
 bun web:build                        # Analog/Vite web app only
 bun web-editor:build                 # web component (esbuild bundle → dist/web-editor.min.js)
 
@@ -57,6 +59,11 @@ bun web:deploy                       # vite build + wrangler pages deploy → Cl
 
 # Web editor demo
 bun web-editor-demo:start            # build web-component + serve demo
+
+# Documentation
+bun docs:dev                         # build editor bundles + start Starlight
+bun docs:build                       # production documentation build
+bun docs:deploy                      # build + deploy to Cloudflare Pages vertex-docs
 ```
 
 ---
@@ -64,9 +71,11 @@ bun web-editor-demo:start            # build web-component + serve demo
 ## CI/CD
 
 One pipeline, one platform. `.github/workflows/ci.yml` runs `quality` (lint → types → unit),
-then `e2e` (Playwright, non-blocking) and `deploy` in parallel. `deploy` only runs for pushes to
-`main`, targets the GitHub `production` environment, and publishes `apps/web/dist/client` to the
-Cloudflare Pages project `vertex-web`. Shared setup lives in `.github/actions/setup`.
+then `e2e` (Playwright, non-blocking), `deploy`, and `deploy-docs` in parallel.
+Production deploys only run for pushes to `main`. The web job publishes
+`apps/web/dist/client` to `vertex-web`; the docs job publishes the tested
+`apps/docs/dist` artifact to `vertex-docs`. Shared setup lives in
+`.github/actions/setup`.
 
 `.github/workflows/release-web-editor.yml` publishes the web-component bundles to the rolling
 `web-editor-latest` GitHub Release when `packages/frontend/web-editor/**` changes.
@@ -124,6 +133,9 @@ To add Dexie tables: `db.version(2).stores({...})` in `packages/frontend/core/sr
 apps/web (Angular app)
   └── uses @vertex/core, @vertex/ide-ui, @vertex/runtime, @vertex/ui
 
+@vertex/editor-core
+  └── shared CodeMirror engine primitives; no Angular, runtime, Git, preview, or workbench dependencies
+
 @vertex/core
   ├── db/vertex.db.ts         → VertexDatabase (Dexie), SessionRecord, PreferenceRecord
   ├── services/               → WorkspaceService, PreferencesService, ConfigService
@@ -148,6 +160,10 @@ apps/web (Angular app)
   ├── web-editor.component.ts      → <vertex-editor> (full web component)
   └── web-editor-lite.component.ts → display-only, ~500KB vs ~1.6MB
 ```
+
+Product boundaries and allowed dependency direction are defined in
+[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Run `bun run check:boundaries`
+after changing package imports.
 
 The terminal uses **dependency injection** via `TERMINAL_BACKEND_ADAPTER`. In web: `VirtualTerminalService`; in desktop: can connect to node-pty or WebContainers.
 

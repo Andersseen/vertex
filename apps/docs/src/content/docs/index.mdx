@@ -1,0 +1,46 @@
+---
+title: Vertex documentation
+description: Build on the Vertex editor without confusing an editor, a browser workbench, and an installed application.
+template: splash
+hero:
+  tagline: One shared editing foundation, three intentionally different product surfaces.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+    - text: Embed the editor
+      link: /editor/installation/
+      icon: external
+      variant: minimal
+    - text: View on GitHub
+      link: https://github.com/Andersseen/vertex
+      icon: github
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import EditorDemo from '../../components/EditorDemo.astro';
+
+<CardGrid>
+  <Card title="Browser workbench">
+    Clone and persist repositories in the browser, edit them, run build and
+    preview workflows, and deploy through explicit runtime adapters.
+  </Card>
+  <Card title="Installed app">
+    Reuse the workbench and editor while Tauri supplies native filesystem,
+    process, terminal, and lifecycle capabilities.
+  </Card>
+  <Card title="Embeddable editor">
+    Add `<vertex-editor>` or the read-only `<vertex-editor-lite>` to plain HTML,
+    Angular, React, Vue, Astro, or another host.
+  </Card>
+</CardGrid>
+
+## The boundary that matters
+
+The editor is not a miniature IDE. Preview, Git, filesystems, terminals, and
+deployment belong to product workbenches. Keeping that boundary lets the
+embedded editor stay useful in learning platforms, documentation, demos, and
+application-specific tools without inheriting the full Vertex runtime.
+
+<EditorDemo />

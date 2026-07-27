@@ -1,98 +1,135 @@
 # Deployment
 
-Vertex has **one deploy target: Cloudflare**. There is no Vercel, Netlify or GitHub Pages
-path — a single axis keeps the pipeline, the docs and the GitHub *Deployments* tab honest.
+Vertex uses one deployment platform: Cloudflare. The monorepo publishes two
+independent static products to Cloudflare Pages through the same GitHub Actions
+pipeline.
 
-| | |
-| --- | --- |
-| **Platform** | Cloudflare Pages |
-| **Project** | `vertex-web` |
-| **Production URL** | <https://vertex.andersseen.dev> |
-| **Build output** | `apps/web/dist/client` (static, prerendered by Analog/Vite) |
-| **Config** | [`apps/web/wrangler.toml`](../apps/web/wrangler.toml) |
-| **Pipeline** | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) → job `deploy` |
-| **GitHub environment** | `production` |
+| Surface | Pages project | Production URL | Build output | GitHub environment |
+| --- | --- | --- | --- | --- |
+| Browser workbench | `vertex-web` | <https://vertex.andersseen.dev> | `apps/web/dist/client` | `production` |
+| Documentation | `vertex-docs` | <https://vertex-docs.pages.dev> | `apps/docs/dist` | `documentation` |
 
----
+The documentation URL can later become `docs.vertex.andersseen.dev` without
+changing its build or deployment command.
 
-## The pipeline
+## Pipeline
 
 ```mermaid
 flowchart LR
-  A[push to main] --> B[quality<br/>lint · types · unit]
+  A[push to main] --> B[quality<br/>lint · types · unit · docs build]
   B --> C[e2e<br/>Playwright]
-  B --> D[deploy<br/>Cloudflare Pages]
-  D --> E[environment: production<br/>vertex.andersseen.dev]
+  B --> D[deploy web<br/>vertex-web]
+  B --> E[deploy docs<br/>tested artifact]
+  D --> F[vertex.andersseen.dev]
+  E --> G[vertex-docs.pages.dev]
 ```
 
-* `quality` runs on every push **and** every pull request.
-* `e2e` is `continue-on-error` — it reports, it does not block the release.
-* `deploy` only runs for pushes to `main`, and only after `quality` is green.
-* The job declares `environment: production`, so GitHub records a real deployment
-  pointing at the production domain (not at the throwaway `*.pages.dev` build alias).
-  The build alias is still printed in the job summary for debugging.
+- `quality` runs for pushes and pull requests.
+- The documentation is built once in `quality` and uploaded as the
+  `vertex-docs-dist` GitHub artifact.
+- `deploy-docs` downloads that exact tested artifact; it does not rebuild it.
+- Production deploy jobs only run for pushes to `main` after `quality` passes.
+- `workflow_dispatch` can replay the pipeline from the Actions tab.
+- E2E currently reports failures without blocking deployment.
 
-Every deploy is fully replayable from the Actions tab via **Run workflow**
-(`workflow_dispatch`), which redeploys the current `main`.
+The pipeline is
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 
----
+## One-time Cloudflare setup
 
-## Required secrets
-
-Set these once in **Settings → Secrets and variables → Actions**:
-
-| Secret | Where to get it |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Cloudflare dashboard → My Profile → API Tokens → *Edit Cloudflare Workers* template, scoped to the account below. Needs `Cloudflare Pages: Edit`. |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare dashboard → Workers & Pages → account ID in the right sidebar. |
-
-Nothing else is needed — the Pages project name and the output directory live in
-`wrangler.toml` and in the workflow `env` block, not in secrets.
-
----
-
-## Deploying from your machine
-
-Same command shape as CI, so local and remote can never drift:
+The Direct Upload Pages projects must exist before their first non-interactive
+CI deployment.
 
 ```bash
-bun run deploy       # = bun run web:deploy = vite build + wrangler pages deploy
+bunx wrangler login
+bunx wrangler pages project create vertex-docs --production-branch main
 ```
 
-You need `wrangler login` (or `CLOUDFLARE_API_TOKEN` exported) first. The wrangler
-version used by CI is pinned in `ci.yml` (`WRANGLER_VERSION`) and must match the
-`wrangler` devDependency in `apps/web/package.json`.
+The existing web project remains `vertex-web`.
 
----
+Cloudflare serves a Pages project at `<PROJECT>.pages.dev`, so the initial docs
+URL is `https://vertex-docs.pages.dev`.
 
-## Static asset headers
+## GitHub secrets
 
-Cross-origin isolation is required for WebContainers (`SharedArrayBuffer`). It is served
-from Pages via:
+Set these repository secrets in **Settings → Secrets and variables → Actions**:
 
-* [`apps/web/public/_headers`](../apps/web/public/_headers) — `Cross-Origin-Opener-Policy`
-  and `Cross-Origin-Embedder-Policy`
-* [`apps/web/public/_redirects`](../apps/web/public/_redirects) — SPA fallback
-
-Both files are copied verbatim into `dist/client` by Vite and are read natively by
-Cloudflare Pages. If the preview panel stops working after a deploy, check these first.
-
----
-
-## What is *not* deployed here
-
-| Artifact | How it ships |
+| Secret | Required value |
 | --- | --- |
-| `@vertex/web-editor` bundles | GitHub Release `web-editor-latest`, built by [`release-web-editor.yml`](../.github/workflows/release-web-editor.yml) |
-| Desktop app (Tauri) | Built locally with `bun desktop:build`; no CI release job yet |
-| Backend sidecars | Dev-only, run on the developer machine |
+| `CLOUDFLARE_API_TOKEN` | Account API token with `Cloudflare Pages: Edit` |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID that owns both Pages projects |
 
----
+The same narrowly scoped credentials deploy both static sites. Project names,
+branches, and output directories are normal workflow configuration and are not
+secrets.
 
-## Roadmap note
+## Wrangler
 
-Cloudflare is steering new static projects towards **Workers with static assets** rather
-than Pages. Vertex stays on Pages while the custom domain and the current project are
-attached to it; migrating is a config change (`assets` binding in `wrangler.toml` plus
-`wrangler deploy`) and a DNS re-point, tracked as a future task. The deploy surface stays
-Cloudflare either way.
+Wrangler is centralized as a root development dependency. CI pins the exact
+same version through `WRANGLER_VERSION`.
+
+The docs configuration is
+[`apps/docs/wrangler.jsonc`](../apps/docs/wrangler.jsonc):
+
+```jsonc
+{
+  "name": "vertex-docs",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-07-27"
+}
+```
+
+CI uses Direct Upload:
+
+```bash
+wrangler pages deploy dist --project-name=vertex-docs --branch=main
+```
+
+## Local deployment
+
+Authenticate once:
+
+```bash
+bunx wrangler login
+```
+
+Then deploy either surface:
+
+```bash
+bun web:deploy
+bun docs:deploy
+```
+
+`bun docs:deploy` builds the web-editor bundles, builds Starlight, and uploads
+`apps/docs/dist`.
+
+## Custom docs domain
+
+After the first successful deployment:
+
+1. Open `Workers & Pages → vertex-docs → Custom domains`.
+2. Add `docs.vertex.andersseen.dev`.
+3. Let Cloudflare create or validate the DNS record.
+4. Change `site` in `apps/docs/astro.config.mjs`.
+5. Change `DOCS_PRODUCTION_URL` and the `documentation` environment URL in CI.
+
+The `site` value controls canonical URLs and the generated sitemap, so it must
+match the real production hostname.
+
+## Web workbench headers
+
+The browser workbench requires cross-origin isolation for WebContainers:
+
+- [`apps/web/public/_headers`](../apps/web/public/_headers)
+- [`apps/web/public/_redirects`](../apps/web/public/_redirects)
+
+These files are copied to `dist/client` and interpreted by Cloudflare Pages.
+The documentation does not require those headers.
+
+## Other artifacts
+
+| Artifact | Distribution |
+| --- | --- |
+| `@vertex/web-editor` bundles | GitHub Release `web-editor-latest` |
+| Desktop application | Local Tauri build; CI release is not wired yet |
+| Backend sidecars | Local/installed development only |

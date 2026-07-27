@@ -4,6 +4,16 @@
   "description": "Vertex IDE - UI Components",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./lsp": {
+      "import": "./src/lib/lsp/ts-lsp-extension.ts",
+      "types": "./src/lib/lsp/ts-lsp-extension.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "test": "ng test",
@@ -29,6 +39,7 @@
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.40.0",
     "@vertex/core": "workspace:*",
+    "@vertex/editor-core": "workspace:*",
     "@vertex/ide-ui": "workspace:*",
     "@vertex/runtime": "workspace:*",
     "@vertex/types": "workspace:*",

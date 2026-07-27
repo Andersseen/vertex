@@ -1,0 +1,30 @@
+---
+interface Props {
+  code?: string;
+  language?: "javascript" | "typescript" | "html" | "css" | "json";
+}
+
+const {
+  code = `type Surface = "web" | "installed" | "embedded";
+
+const vertex = {
+  editor: "shared",
+  products: new Set<Surface>(["web", "installed", "embedded"]),
+};`,
+  language = "typescript",
+} = Astro.props;
+---
+
+<div class="vertex-editor-demo not-content">
+  <vertex-editor-lite
+    value={code}
+    language={language}
+    theme="dark"
+    line-numbers="true"
+    word-wrap="true"
+    height="288px"
+    aria-label="Vertex editor example"
+  ></vertex-editor-lite>
+</div>
+
+<script is:inline src="/vendor/web-editor-lite.min.js"></script>

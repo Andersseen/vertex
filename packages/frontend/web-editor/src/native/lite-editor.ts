@@ -21,6 +21,7 @@ const OBSERVED_ATTRIBUTES = [
   'language',
   'theme',
   'line-numbers',
+  'word-wrap',
   'height',
   'font-size',
 ] as const;
@@ -37,6 +38,7 @@ export class VertexEditorLiteElement extends HTMLElement {
   private languageCompartment = new Compartment();
   private themeCompartment = new Compartment();
   private lineNumbersCompartment = new Compartment();
+  private wordWrapCompartment = new Compartment();
 
   private _ready = false;
   private _pendingValue: string | null = null;
@@ -44,6 +46,62 @@ export class VertexEditorLiteElement extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+  }
+
+  get value(): string {
+    return this.getValue();
+  }
+
+  set value(value: string) {
+    this.setAttribute('value', value);
+  }
+
+  get language(): SupportedLanguage {
+    return (this.getAttribute('language') ?? 'javascript') as SupportedLanguage;
+  }
+
+  set language(value: SupportedLanguage) {
+    this.setAttribute('language', value);
+  }
+
+  get theme(): EditorTheme {
+    return (this.getAttribute('theme') ?? 'dark') as EditorTheme;
+  }
+
+  set theme(value: EditorTheme) {
+    this.setAttribute('theme', value);
+  }
+
+  get lineNumbers(): boolean {
+    return this.getAttribute('line-numbers') !== 'false';
+  }
+
+  set lineNumbers(value: boolean) {
+    this.setAttribute('line-numbers', String(value));
+  }
+
+  get wordWrap(): boolean {
+    return this.getAttribute('word-wrap') === 'true';
+  }
+
+  set wordWrap(value: boolean) {
+    this.setAttribute('word-wrap', String(value));
+  }
+
+  get height(): string {
+    return this.getAttribute('height') ?? '100%';
+  }
+
+  set height(value: string) {
+    this.setAttribute('height', value);
+  }
+
+  get fontSize(): string {
+    return this.getAttribute('font-size') ?? '14';
+  }
+
+  set fontSize(value: string) {
+    this.setAttribute('font-size', value);
   }
 
   connectedCallback(): void {
@@ -76,6 +134,9 @@ export class VertexEditorLiteElement extends HTMLElement {
       case 'line-numbers':
         this.updateLineNumbers();
         break;
+      case 'word-wrap':
+        this.updateWordWrap();
+        break;
       case 'height':
         this.updateHeight();
         break;
@@ -96,6 +157,8 @@ export class VertexEditorLiteElement extends HTMLElement {
       .container {
         width: 100%;
         height: 100%;
+        min-width: 0;
+        min-height: 0;
         overflow: auto;
         font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", "Monaco", "Consolas", monospace;
         font-size: var(--vertex-editor-font-size, 14px);
@@ -106,6 +169,8 @@ export class VertexEditorLiteElement extends HTMLElement {
       }
       .cm-scroller {
         font-family: inherit !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
       .cm-gutters {
         font-family: inherit !important;
@@ -113,6 +178,11 @@ export class VertexEditorLiteElement extends HTMLElement {
       }
       .cm-cursor {
         display: none !important;
+      }
+      @media (pointer: coarse) {
+        .container {
+          font-size: var(--vertex-editor-touch-font-size, 16px);
+        }
       }
     `;
 
@@ -147,6 +217,9 @@ export class VertexEditorLiteElement extends HTMLElement {
         this.themeCompartment.of(this.getThemeExtension(theme)),
         this.languageCompartment.of(langSupport ? [langSupport] : []),
         this.lineNumbersCompartment.of(showLineNumbers ? lineNumbers() : []),
+        this.wordWrapCompartment.of(
+          this.getAttribute('word-wrap') === 'true' ? EditorView.lineWrapping : [],
+        ),
       ],
     });
 
@@ -154,6 +227,11 @@ export class VertexEditorLiteElement extends HTMLElement {
       state,
       parent: container,
     });
+    this.editorView.contentDOM.setAttribute(
+      'aria-label',
+      this.getAttribute('aria-label') ?? 'Code viewer',
+    );
+    this.editorView.contentDOM.setAttribute('aria-readonly', 'true');
 
     this.updateHeight();
     this.updateFontSize();
@@ -196,6 +274,16 @@ export class VertexEditorLiteElement extends HTMLElement {
     });
   }
 
+  private updateWordWrap(): void {
+    if (!this.editorView) return;
+    const wrap = this.getAttribute('word-wrap') === 'true';
+    this.editorView.dispatch({
+      effects: this.wordWrapCompartment.reconfigure(
+        wrap ? EditorView.lineWrapping : [],
+      ),
+    });
+  }
+
   private updateHeight(): void {
     const container = this.shadowRoot?.getElementById('editor-container');
     if (container) {
@@ -215,7 +303,12 @@ export class VertexEditorLiteElement extends HTMLElement {
 
   // Public API
   getValue(): string {
-    return this.editorView?.state.doc.toString() ?? '';
+    return (
+      this.editorView?.state.doc.toString() ??
+      this._pendingValue ??
+      this.getAttribute('value') ??
+      ''
+    );
   }
 
   setValue(value: string): void {

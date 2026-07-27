@@ -1,339 +1,120 @@
-# Vertex Editor
+# @vertex/web-editor
 
-Standalone code editor Web Components built with Angular Elements and CodeMirror 6.
+Framework-agnostic custom elements for embedding the Vertex code editor in
+another product.
 
-Two variants are available:
+This package is intentionally an editor, not an IDE. It has no filesystem, Git,
+terminal, build, preview, deployment, workbench UI, or Vertex application
+service dependency.
 
-- **`<vertex-editor>`** — Full editable code editor with history, search, autocomplete, and editing support. (~1.1 MB minified, Angular Elements)
-- **`<vertex-editor-lite>`** — Read-only, lightweight display variant built as a native Web Component without Angular. (~450 KB minified)
+## Elements
 
-## Features
+| Element | Purpose | Size budget |
+| --- | --- | --- |
+| `<vertex-editor>` | Full editable Angular Elements + CodeMirror editor | 1250 KiB minified |
+| `<vertex-editor-lite>` | Native, read-only CodeMirror display | 500 KiB minified |
 
-- 📦 **Standalone Web Components** — Single JS file each, no build step required in your project
-- 🎨 **Multiple themes** — Dark and light modes
-- 🔤 **Language support** — TypeScript, JavaScript, HTML, CSS, JSON, Markdown
-- 📱 **Responsive** — Adapts to container size
-- ⚡ **Lazy loading** — Languages load on demand
-- 🔧 **Customizable** — Line numbers, read-only mode, word wrap, and more
-- 🎯 **Zoneless Angular** — Uses signals, no zone.js overhead
+Both use the compact web language profile: JavaScript, TypeScript, HTML, CSS,
+and JSON. Languages load lazily and are cached.
 
-> **Note:** For read-only display, prefer `<vertex-editor-lite>` over `<vertex-editor readonly>` — it ships a smaller bundle.
-
-## Installation
-
-### Option 1: One-liner with curl (Recommended)
+## Install
 
 ```bash
-# Installs the full editable editor from GitHub Releases to ./public
+npx vertex-editor ./public
+```
+
+Read-only lite bundle:
+
+```bash
+npx vertex-editor ./public --lite
+```
+
+Or stream the installer:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public
-
-# Install the read-only lite variant
-curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./public --lite
-
-# Custom directory
-curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs | node - ./static
 ```
 
-### Option 2: Direct download from GitHub Releases
-
-```bash
-# Download just the file (no examples)
-curl -L -o ./public/web-editor.min.js \
-  https://github.com/Andersseen/vertex/releases/download/web-editor-latest/web-editor.min.js
-```
-
-### Option 3: Download installer and run
-
-```bash
-# Download the installer
-curl -O https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/install.mjs
-
-# Run it
-node install.mjs ./public
-```
-
-### Option 4: npm script in your project
-
-Add to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "setup:editor": "curl -fsSL https://raw.githubusercontent.com/andersseen/vertex/main/scripts/install.mjs | node - ./public"
-  }
-}
-```
-
-Then run:
-
-```bash
-npm run setup:editor
-```
-
-## Quick Start
-
-After installation, include the script in your HTML:
+## Plain HTML
 
 ```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="web-editor.min.js"></script>
-</head>
-<body>
-  <vertex-editor
-    value="console.log('Hello World!');"
-    language="javascript"
-    theme="dark"
-    height="300px"
-  ></vertex-editor>
-</body>
-</html>
-```
-
-## Lite Variant
-
-For read-only code display, use `<vertex-editor-lite>`:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="web-editor-lite.min.js"></script>
-</head>
-<body>
-  <vertex-editor-lite
-    value="console.log('Hello World!');"
-    language="javascript"
-    theme="dark"
-    height="300px"
-  ></vertex-editor-lite>
-</body>
-</html>
-```
-
-The lite variant keeps the same attribute API for `value`, `language`, `theme`, `line-numbers`, `height`, and `font-size`, but removes editing, search, and autocomplete to reduce bundle size.
-
-## API Reference
-
-See [API.md](./API.md) for the complete attribute, method, event, and framework integration reference.
-
-## Quick Demo
-
-After building, open `demo.html` in a browser:
-
-```bash
-cd packages/frontend/web-editor
-bun run demo
-# open http://localhost:8080/demo.html
-```
-
-## Framework Examples
-
-### React
-
-```jsx
-import { useEffect, useRef } from 'react';
-import './web-editor.min.js';
-
-function CodeEditor({ code, language = 'typescript' }) {
-  const editorRef = useRef(null);
-
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (editor) {
-      editor.setValue(code);
-    }
-  }, [code]);
-
-  return (
-    <vertex-editor
-      ref={editorRef}
-      language={language}
-      theme="dark"
-      lineNumbers="true"
-      height="400px"
-      style={{ display: 'block' }}
-    />
-  );
-}
-
-export default CodeEditor;
-```
-
-### Vue 3
-
-```vue
-<template>
-  <vertex-editor
-    ref="editor"
-    :value="code"
-    language="typescript"
-    theme="dark"
-    lineNumbers="true"
-    height="400px"
-  />
-</template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import './web-editor.min.js';
-
-const props = defineProps({
-  code: String
-});
-
-const editor = ref(null);
-
-onMounted(() => {
-  console.log(editor.value.getValue());
-});
-</script>
-```
-
-### Angular
-
-```typescript
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import './web-editor.min.js';
-
-@Component({
-  selector: 'app-code-display',
-  standalone: true,
-  template: `
-    <vertex-editor
-      #editor
-      [attr.value]="code"
-      language="typescript"
-      theme="dark"
-      lineNumbers="true"
-      readonly="true"
-      height="400px"
-    />
-  `,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
-})
-export class CodeDisplayComponent implements AfterViewInit {
-  @ViewChild('editor') editorRef!: ElementRef;
-  code = `const greeting = 'Hello World!';`;
-
-  ngAfterViewInit() {
-    const editor = this.editorRef.nativeElement;
-    console.log('Editor value:', editor.getValue());
-  }
-}
-```
-
-### Astro
-
-```astro
----
-const code = `const sum = (a, b) => a + b;`;
----
-
-<script>
-  import './web-editor.min.js';
-</script>
+<script src="/web-editor.min.js"></script>
 
 <vertex-editor
-  value={code}
-  language="javascript"
+  value="const answer: number = 42;"
+  language="typescript"
   theme="dark"
-  lineNumbers="true"
-  height="300px"
-/>
+  line-numbers="true"
+  height="360px"
+  aria-label="TypeScript editor"
+></vertex-editor>
 ```
 
-## API Reference
+For read-only display:
 
-### Attributes
+```html
+<script src="/web-editor-lite.min.js"></script>
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | string | `""` | Editor content |
-| `language` | string | `"typescript"` | Language mode (javascript, typescript, html, css, json, markdown) |
-| `theme` | string | `"dark"` | Editor theme (`dark` or `light`) |
-| `lineNumbers` | boolean | `true` | Show line numbers |
-| `readonly` | boolean | `false` | Read-only mode |
-| `wordWrap` | boolean | `false` | Enable word wrapping |
-| `height` | string | `"300px"` | Editor height |
-| `fontSize` | string | `"14"` | Font size in pixels |
-| `tabSize` | number | `2` | Tab size |
-| `placeholder` | string | `""` | Placeholder text |
+<vertex-editor-lite
+  value="console.log('Hello Vertex');"
+  language="javascript"
+  theme="dark"
+  height="240px"
+  aria-label="JavaScript example"
+></vertex-editor-lite>
+```
 
-### Methods
+## Public contract
 
-| Method | Description |
-|--------|-------------|
-| `getValue()` | Returns the current editor content |
-| `setValue(value: string)` | Sets the editor content |
-| `insertText(text: string)` | Inserts text at cursor position |
-| `focus()` | Focuses the editor |
+The canonical API source is
+[`apps/docs/src/content/docs/editor/api.md`](../../../apps/docs/src/content/docs/editor/api.md).
+It documents:
 
-### Events
+- attributes and matching JavaScript properties;
+- `getValue`, `setValue`, `insertText`, and `focus`;
+- `ready`, `valueChange`, and `cursorActivity` events;
+- the smaller lite-element contract;
+- supported language identifiers.
 
-| Event | Description |
-|-------|-------------|
-| `ready` | Fired when the editor is initialized and ready |
+TypeScript declarations are copied to `dist/index.d.ts` during the package
+build and add both public tags to `HTMLElementTagNameMap`.
 
 ## Styling
 
-The editor exposes CSS custom properties for customization:
+Host-level custom properties are stable:
 
 ```css
-vertex-editor {
-  --vertex-editor-font-size: 16px;
+vertex-editor,
+vertex-editor-lite {
+  --vertex-editor-font-size: 15px;
   --vertex-editor-line-height: 1.6;
-  border-radius: 8px;
-  border: 1px solid #333;
-}
-
-/* Dark theme (default) */
-vertex-editor[theme="dark"] {
-  border-color: #444;
-}
-
-/* Light theme */
-vertex-editor[theme="light"] {
-  border-color: #ddd;
+  --vertex-editor-touch-font-size: 16px;
 }
 ```
 
-## Browser Support
-
-- Chrome/Edge 80+
-- Firefox 75+
-- Safari 13.1+
+Use `theme="dark"` or `theme="light"` for editor colors. Internal CodeMirror
+selectors are not a public API.
 
 ## Development
 
-If you want to modify the web component:
+From the repository root:
 
 ```bash
-# Clone the repo
-git clone https://github.com/andersseen/vertex.git
-cd vertex/packages/frontend/web-editor
-
-# Install and build
-npm install
-npm run build
-
-# Install locally to another project
-node ../../scripts/install.mjs ~/my-project/public --local
+bun web-editor:build
+bun web-editor-demo:start
 ```
 
-The CI automatically builds and publishes to GitHub Releases on every push to main.
+The build produces:
 
-## More Examples
+- `dist/web-editor.min.js`;
+- `dist/web-editor-lite.min.js`;
+- source maps and AOT aliases;
+- `dist/index.d.ts`.
 
-See [EXAMPLES.md](./EXAMPLES.md) for more detailed examples including:
-- Code display with copy button
-- Interactive playground
-- Documentation with tabs
-- Code diff viewer
-- Collaborative editor
+Bundle budgets and required declaration artifacts are checked by the build.
 
-## License
+## Architecture rule
 
-MIT
+This package may depend on `@vertex/editor-core`. It must not import
+`@vertex/runtime`, `@vertex/core`, `@vertex/ui`, or `@vertex/ide-ui`.
+`bun run check:boundaries` enforces this rule.

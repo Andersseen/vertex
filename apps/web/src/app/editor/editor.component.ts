@@ -13,7 +13,7 @@ import { SidebarComponent } from '@vertex/ui';
 import { BottomPanelComponent } from '@vertex/ui';
 import { TabsComponent } from '@vertex/ui';
 import { IdeSplitterComponent } from '@vertex/ide-ui';
-import { tsLspExtensions } from '@vertex/ui';
+import { tsLspExtensions } from '@vertex/ui/lsp';
 import { VertexFile, VertexFolder } from '@vertex/types';
 import { FileService } from '@vertex/core';
 import { RuntimeService } from '@vertex/core/web';

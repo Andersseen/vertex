@@ -96,3 +96,6 @@ yarn-error.log*
 # Playwright
 playwright-report/
 test-results/
+
+# Generated docs assets
+apps/docs/public/vendor/

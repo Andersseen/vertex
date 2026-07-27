@@ -4,8 +4,14 @@
 :host {
   display: block;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  box-sizing: border-box;
 }
 
 .vx-layout {
@@ -310,4 +316,57 @@
   height: 1rem;
   background-color: var(--ide-border-strong);
   margin: 0 1rem;
+}
+
+// Tablet baseline: preserve the complete workbench while removing desktop-only
+// chrome. Structural mobile navigation belongs to the app, not this layout.
+@media (max-width: 1024px) {
+  .vx-header-menu v-ide-button:nth-child(n + 3) {
+    display: none;
+  }
+
+  .vx-search-wrapper {
+    max-width: 280px;
+  }
+
+  .vx-status-item {
+    padding-inline: 0.375rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .vx-app-title,
+  .vx-header-divider,
+  .vx-user-avatar {
+    display: none;
+  }
+
+  .vx-header-center {
+    flex: 3 1 auto;
+  }
+
+  .vx-search-kbd {
+    display: none;
+  }
+
+  .vx-statusbar > :first-child .vx-status-item:nth-of-type(n + 3),
+  .vx-statusbar > :last-child .vx-status-item:not(:last-child),
+  .vx-statusbar .vx-divider {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .vx-header-menu v-ide-button,
+  .vx-icon-btn,
+  .vx-user-avatar,
+  .vx-status-item,
+  .vx-status-badge {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .vx-search-input {
+    font-size: 16px;
+  }
 }

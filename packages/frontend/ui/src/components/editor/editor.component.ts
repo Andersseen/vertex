@@ -9,46 +9,19 @@ import {
   ElementRef,
   SimpleChanges,
   ChangeDetectionStrategy,
+  computed,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { EditorState, Extension, Compartment } from "@codemirror/state";
-import { EditorView, basicSetup } from "codemirror";
-import { keymap } from "@codemirror/view";
-import { searchKeymap } from "@codemirror/search";
-import { javascript } from "@codemirror/lang-javascript";
-import { html } from "@codemirror/lang-html";
-import { css } from "@codemirror/lang-css";
-import { json } from "@codemirror/lang-json";
-import { rust } from "@codemirror/lang-rust";
-import { python } from "@codemirror/lang-python";
-import { markdown } from "@codemirror/lang-markdown";
-import { oneDark } from "@codemirror/theme-one-dark";
+import type { Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
+import { EditorConfigurator } from "@vertex/editor-core";
+import { createWorkbenchLanguageRegistry } from "@vertex/editor-core/languages/workbench";
 import { VertexFile } from "@vertex/types";
 import { PluginRegistry } from "@vertex/runtime/plugins";
 
-type Language =
-  | "javascript"
-  | "typescript"
-  | "html"
-  | "css"
-  | "json"
-  | "rust"
-  | "python"
-  | "markdown"
-  | "ts"
-  | "js"
-  | "md"
-  | "tsx"
-  | "jsx"
-  | "scss"
-  | "sass"
-  | "less"
-  | "rs"
-  | "py";
+const languageRegistry = createWorkbenchLanguageRegistry();
 
 @Component({
   selector: "v-editor",
-  imports: [CommonModule],
   templateUrl: "./editor.component.html",
   styleUrls: ["./editor.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,8 +47,9 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
   // State
   private editorView: EditorView | null = null;
   private _suppressEmit = false;
-  protected readonly isDirty = false;
-  private readonly languageCompartment = new Compartment();
+  protected readonly isDirty = computed(() => this.file()?.isDirty ?? false);
+  private readonly configurator = new EditorConfigurator();
+  private languageRequest = 0;
 
   async ngAfterViewInit(): Promise<void> {
     await this.initializeEditor();
@@ -90,18 +64,20 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
 
       if (prev?.id !== curr?.id) {
         this._suppressEmit = true;
-        this.switchLanguage(curr?.language);
+        void this.switchLanguage(curr?.language);
         this.updateContent(curr?.content ?? "");
         this._suppressEmit = false;
       }
     }
   }
 
-  private switchLanguage(language?: string): void {
+  private async switchLanguage(language?: string): Promise<void> {
     if (!this.editorView) return;
-    const ext = this.getLanguageExtension(language);
+    const request = ++this.languageRequest;
+    const extension = language ? await languageRegistry.load(language) : null;
+    if (!this.editorView || request !== this.languageRequest) return;
     this.editorView.dispatch({
-      effects: this.languageCompartment.reconfigure(ext),
+      effects: this.configurator.languageCompartment.reconfigure(extension ?? []),
     });
   }
 
@@ -109,72 +85,23 @@ export class EditorComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.destroyEditor();
   }
 
-  private getLanguageExtension(lang?: string): Extension {
-    const language = lang?.toLowerCase() as Language | undefined;
-    if (!language) return [];
-
-    switch (language) {
-      case "javascript":
-      case "typescript":
-      case "ts":
-      case "js":
-        return javascript({ typescript: true });
-      case "tsx":
-      case "jsx":
-        return javascript({ typescript: language === "tsx", jsx: true });
-      case "html":
-        return html();
-      case "css":
-      case "scss":
-      case "sass":
-      case "less":
-        return css();
-      case "json":
-        return json();
-      case "rust":
-      case "rs":
-        return rust();
-      case "python":
-      case "py":
-        return python();
-      case "markdown":
-      case "md":
-        return markdown();
-      default:
-        return [];
-    }
-  }
-
   private async initializeEditor(): Promise<void> {
     const currentFile = this.file();
     const editorHost = this.editorHost();
 
     const pluginExtensions = await this.plugins()?.resolveEditorExtensions() ?? [];
-
-    const startState = EditorState.create({
-      doc: currentFile?.content ?? "",
-      extensions: [
-        basicSetup,
-        oneDark,
-        this.languageCompartment.of(this.getLanguageExtension(currentFile?.language)),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged && !this._suppressEmit) {
-            this.contentChange.emit(update.state.doc.toString());
-          }
-        }),
-        keymap.of([
-          {
-            key: "Mod-s",
-            run: () => {
-              this.save.emit();
-              return true;
-            },
-          },
-          ...searchKeymap,
-        ]),
-        ...this.extensions(),
-        ...pluginExtensions,
-      ],
+    const language = currentFile?.language
+      ? await languageRegistry.load(currentFile.language)
+      : null;
+    const startState = this.configurator.createState({
+      value: currentFile?.content ?? "",
+      language,
+      theme: "dark",
+      extensions: [...this.extensions(), ...pluginExtensions],
+      onChange: (value) => {
+        if (!this._suppressEmit) this.contentChange.emit(value);
+      },
+      onSave: () => this.save.emit(),
     });
 
     this.editorView = new EditorView({

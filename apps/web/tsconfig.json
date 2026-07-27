@@ -17,8 +17,11 @@
     "baseUrl": ".",
     "paths": {
       "@vertex/ui": ["../../packages/frontend/ui/src/index.ts"],
+      "@vertex/ui/lsp": ["../../packages/frontend/ui/src/lib/lsp/ts-lsp-extension.ts"],
       "@vertex/core": ["../../packages/frontend/core/src/index.ts"],
       "@vertex/core/web": ["../../packages/frontend/core/src/web/index.ts"],
+      "@vertex/editor-core": ["../../packages/frontend/editor-core/src/index.ts"],
+      "@vertex/editor-core/*": ["../../packages/frontend/editor-core/src/*"],
       "@vertex/types": ["../../packages/frontend/types/src/index.ts"],
       "@vertex/runtime": ["../../packages/frontend/runtime/src/index.ts"],
       "@vertex/runtime/lsp": ["../../packages/frontend/runtime/src/lsp/index.ts"],

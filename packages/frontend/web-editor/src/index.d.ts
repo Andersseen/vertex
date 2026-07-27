@@ -1,40 +1,30 @@
-// Type definitions for @vertex/web-editor
-
 export type SupportedLanguage =
-  | 'javascript' | 'js'
-  | 'typescript' | 'ts'
-  | 'tsx'
-  | 'jsx'
-  | 'html'
-  | 'angular'
-  | 'astro'
-  | 'css'
-  | 'json'
-  | 'markdown' | 'md';
+  | "javascript"
+  | "js"
+  | "typescript"
+  | "ts"
+  | "html"
+  | "css"
+  | "json";
 
-export type EditorTheme = 'light' | 'dark';
+export type EditorTheme = "light" | "dark";
 
 export interface CursorPosition {
   line: number;
   column: number;
+  index: number;
 }
 
-export interface ValueChangeEvent extends CustomEvent {
-  detail: {
-    value: string;
-  };
-}
+export type ValueChangeEvent = CustomEvent<string>;
 
-export interface CursorActivityEvent extends CustomEvent {
-  detail: CursorPosition;
-}
+export type CursorActivityEvent = CustomEvent<CursorPosition>;
 
 /**
- * Web Editor HTML Element
+ * Full editable `<vertex-editor>` custom element.
  *
  * Usage:
  * ```html
- * <web-editor
+ * <vertex-editor
  *   language="typescript"
  *   theme="dark"
  *   value="console.log('hello')"
@@ -42,17 +32,10 @@ export interface CursorActivityEvent extends CustomEvent {
  *   line-numbers="true"
  *   height="400px"
  *   font-size="14">
- * </web-editor>
+ * </vertex-editor>
  * ```
  */
-declare global {
-  interface HTMLElementTagNameMap {
-    'web-editor': WebEditorElement;
-  }
-}
-
-export interface WebEditorElement extends HTMLElement {
-  // Properties
+export interface VertexEditorElement extends HTMLElement {
   value: string;
   language: SupportedLanguage;
   theme: EditorTheme;
@@ -63,37 +46,90 @@ export interface WebEditorElement extends HTMLElement {
   placeholder: string;
   tabSize: number;
   wordWrap: boolean;
+  enableSearch: boolean;
+  enableAutocomplete: boolean;
 
-  // Methods
   getValue(): string;
   setValue(value: string): void;
   insertText(text: string): void;
   focus(): void;
-  format(): Promise<void>;
 
-  // Events
-  addEventListener<K extends keyof WebEditorElementEventMap>(
+  addEventListener<K extends keyof VertexEditorElementEventMap>(
     type: K,
-    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => unknown,
-    options?: boolean | AddEventListenerOptions
+    listener: (
+      this: VertexEditorElement,
+      ev: VertexEditorElementEventMap[K],
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions,
   ): void;
 
-  removeEventListener<K extends keyof WebEditorElementEventMap>(
+  removeEventListener<K extends keyof VertexEditorElementEventMap>(
     type: K,
-    listener: (this: WebEditorElement, ev: WebEditorElementEventMap[K]) => unknown,
-    options?: boolean | EventListenerOptions
+    listener: (
+      this: VertexEditorElement,
+      ev: VertexEditorElementEventMap[K],
+    ) => unknown,
+    options?: boolean | EventListenerOptions,
   ): void;
 }
 
-export interface WebEditorElementEventMap extends HTMLElementEventMap {
-  'value-change': ValueChangeEvent;
-  'cursor-activity': CursorActivityEvent;
-  'ready': Event;
-  'focus': FocusEvent;
-  'blur': FocusEvent;
+export interface VertexEditorElementEventMap extends HTMLElementEventMap {
+  valueChange: ValueChangeEvent;
+  cursorActivity: CursorActivityEvent;
+  ready: CustomEvent<void>;
 }
 
-// Utility functions
+/**
+ * Read-only `<vertex-editor-lite>` custom element.
+ */
+export interface VertexEditorLiteElement extends HTMLElement {
+  value: string;
+  language: SupportedLanguage;
+  theme: EditorTheme;
+  lineNumbers: boolean;
+  height: string;
+  fontSize: string;
+  wordWrap: boolean;
+
+  getValue(): string;
+  setValue(value: string): void;
+  focus(): void;
+
+  addEventListener<K extends keyof VertexEditorLiteElementEventMap>(
+    type: K,
+    listener: (
+      this: VertexEditorLiteElement,
+      ev: VertexEditorLiteElementEventMap[K],
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+
+  removeEventListener<K extends keyof VertexEditorLiteElementEventMap>(
+    type: K,
+    listener: (
+      this: VertexEditorLiteElement,
+      ev: VertexEditorLiteElementEventMap[K],
+    ) => unknown,
+    options?: boolean | EventListenerOptions,
+  ): void;
+}
+
+export interface VertexEditorLiteElementEventMap extends HTMLElementEventMap {
+  ready: CustomEvent<void>;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "vertex-editor": VertexEditorElement;
+    "vertex-editor-lite": VertexEditorLiteElement;
+  }
+}
+
 export function getLanguageSupport(lang: string): Promise<unknown>;
 export function isLanguageSupported(lang: string): boolean;
 export function getSupportedLanguages(): string[];
+export function registerLanguage(
+  name: string,
+  loader: () => Promise<unknown>,
+  aliases?: readonly string[],
+): void;

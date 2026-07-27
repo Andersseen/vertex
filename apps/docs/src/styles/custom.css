@@ -1,0 +1,44 @@
+:root {
+  --sl-color-accent-low: #20204a;
+  --sl-color-accent: #7c7cff;
+  --sl-color-accent-high: #dadaff;
+  --sl-color-white: #f8f9ff;
+  --sl-color-gray-1: #e8eaf6;
+  --sl-color-gray-2: #bcc1d6;
+  --sl-color-gray-3: #7d849f;
+  --sl-color-gray-4: #4c536d;
+  --sl-color-gray-5: #2f354c;
+  --sl-color-gray-6: #1e2336;
+  --sl-color-black: #121522;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #e8e8ff;
+  --sl-color-accent: #4f46e5;
+  --sl-color-accent-high: #29235f;
+  --sl-color-white: #171a28;
+  --sl-color-gray-1: #272b3d;
+  --sl-color-gray-2: #4d5369;
+  --sl-color-gray-3: #747b91;
+  --sl-color-gray-4: #aeb3c4;
+  --sl-color-gray-5: #d8dae3;
+  --sl-color-gray-6: #eef0f5;
+  --sl-color-gray-7: #f7f8fb;
+  --sl-color-black: #ffffff;
+}
+
+.hero .tagline {
+  max-width: 58rem;
+}
+
+.vertex-editor-demo {
+  overflow: hidden;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.75rem;
+  background: #282c34;
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 18%);
+}
+
+.vertex-editor-demo vertex-editor-lite {
+  min-height: 18rem;
+}
