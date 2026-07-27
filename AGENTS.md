@@ -11,6 +11,7 @@ apps/
   web/          → Angular 21 + Analog.js + Vite main app (→ localhost:5173)
   desktop/      → Tauri + Rust
   web-editor-demo/ → standalone web component demo
+  docs/         → Astro Starlight public documentation
 packages/
   frontend/
     ide-ui/     → @vertex/ide-ui — IDE components (headless + CSS custom props)
@@ -58,6 +59,10 @@ bun web:deploy                       # vite build + wrangler pages deploy → Cl
 
 # Web editor demo
 bun web-editor-demo:start            # build web-component + serve demo
+
+# Documentation
+bun docs:dev                         # build editor bundles + start Starlight
+bun docs:build                       # production documentation build
 ```
 
 ---

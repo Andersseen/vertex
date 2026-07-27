@@ -1,5 +1,7 @@
 import { stat } from 'node:fs/promises';
 
+await stat(new URL('../dist/index.d.ts', import.meta.url));
+
 const budgets = [
   {
     file: new URL('../dist/web-editor.min.js', import.meta.url),

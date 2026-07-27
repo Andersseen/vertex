@@ -1,0 +1,24 @@
+{
+  "name": "@vertex/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Public documentation site for the Vertex product family.",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run sync:editor && astro dev",
+    "build": "bun run sync:editor && astro build",
+    "preview": "astro preview",
+    "lint": "astro check",
+    "check-types": "astro check",
+    "sync:editor": "node scripts/sync-editor.mjs"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.41.4",
+    "@vertex/web-editor": "workspace:*",
+    "astro": "^7.1.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "~5.9.2"
+  }
+}

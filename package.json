@@ -36,6 +36,9 @@
     "web-editor-demo:dev": "cd apps/web-editor-demo && bun run dev",
     "web-editor-demo:build": "cd apps/web-editor-demo && bun run build",
     "web-editor-demo:start": "bun run web-editor:build && cd apps/web-editor-demo && bun run dev",
+    "docs:dev": "bun run web-editor:build && cd apps/docs && bun run dev",
+    "docs:build": "bun run web-editor:build && cd apps/docs && bun run build",
+    "docs:preview": "cd apps/docs && bun run preview",
     "dev": "turbo run dev",
     "dev:web-editor": "cd packages/frontend/web-editor && bun run watch",
     "lint": "turbo run lint",
@@ -84,7 +87,7 @@
     "vertex-editor": "./packages/frontend/web-editor/bin/install.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12"
   },
   "packageManager": "bun@1.3.11",
   "workspaces": [

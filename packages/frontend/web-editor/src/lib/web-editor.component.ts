@@ -4,9 +4,11 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  booleanAttribute,
   effect,
   inject,
   input,
+  numberAttribute,
   output,
   viewChild,
 } from "@angular/core";
@@ -97,15 +99,15 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   readonly value = input<string>("");
   readonly language = input<SupportedLanguage>("typescript");
   readonly theme = input<EditorTheme>("dark");
-  readonly lineNumbers = input<boolean>(true);
+  readonly lineNumbers = input(true, { transform: booleanAttribute });
   readonly height = input<string>("100%");
   readonly fontSize = input<string>("14");
-  readonly tabSize = input<number>(2);
-  readonly readonly = input<boolean>(false);
-  readonly wordWrap = input<boolean>(false);
+  readonly tabSize = input(2, { transform: numberAttribute });
+  readonly readonly = input(false, { transform: booleanAttribute });
+  readonly wordWrap = input(false, { transform: booleanAttribute });
   readonly placeholder = input<string>("");
-  readonly enableSearch = input<boolean>(true);
-  readonly enableAutocomplete = input<boolean>(true);
+  readonly enableSearch = input(true, { transform: booleanAttribute });
+  readonly enableAutocomplete = input(true, { transform: booleanAttribute });
 
   // Outputs
   readonly valueChange = output<string>();

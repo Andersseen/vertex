@@ -25,10 +25,10 @@ Scope: display or edit code inside another product.
 - [x] Programmatic `getValue`, `setValue`, and `focus`.
 - [x] Ready, value-change, and cursor events.
 - [x] Accessible CodeMirror label and readonly state.
-- [ ] One canonical API contract shared by full and lite distributions.
+- [x] One canonical documented and typed API contract covering full and lite distributions.
 - [ ] Browser integration tests in plain HTML, Angular, React, and Vue.
 - [x] Explicit full/lite bundle budgets checked by the package build.
-- [ ] CSS custom-property reference and stable theming contract.
+- [x] CSS custom-property reference and stable theming contract.
 - [ ] Decide whether full/lite remain separate distributions after measuring them.
 
 The web editor must never acquire imports from `@vertex/runtime`,
@@ -75,3 +75,12 @@ A product surface is not called stable until:
 3. its public capability claims match integrated UI;
 4. it handles unavailable platform capabilities without losing edits;
 5. bundle and interaction budgets are measured, not assumed.
+
+## Documentation
+
+- [x] Separate Starlight application for public product and API documentation.
+- [x] Repository, app, and package READMEs state ownership and dependency boundaries.
+- [x] Docs build consumes the generated web-editor bundle.
+- [x] Docs build runs in CI.
+- [ ] Choose the production docs hostname and Cloudflare Pages release policy.
+- [ ] Add automated link checking and a browser smoke test for the interactive editor example.

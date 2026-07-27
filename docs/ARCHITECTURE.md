@@ -3,6 +3,10 @@
 Vertex is a family of editor products. They share editing primitives, but they
 do not share the same product scope.
 
+`apps/docs` documents these products but is not itself a product/runtime
+surface. It may consume published artifacts for examples; production packages
+must never depend on it.
+
 ## Product boundaries
 
 ### `@vertex/web-editor`
@@ -91,6 +95,8 @@ Important invariants:
 3. `@vertex/web-editor` never imports workbench or runtime packages.
 4. `@vertex/types` stays implementation-independent.
 5. Apps compose packages; packages do not import apps.
+6. Documentation may consume public artifacts; runtime packages do not import
+   documentation source.
 
 `bun run check:boundaries` enforces the first four invariants in CI.
 

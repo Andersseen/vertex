@@ -24,7 +24,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "bun run clean && bun run build:aot && bun run build:lite:aot && bun run check:size",
+    "build": "bun run clean && bun run build:aot && bun run build:lite:aot && bun run copy:types && bun run check:size",
     "build:aot": "ng build --project web-editor --configuration production && bun run bundle:aot",
     "build:lite:aot": "bun run bundle:lite:native",
     "build:lite:angular": "ng build --project web-editor-lite --configuration production && bun run bundle:lite:aot",
@@ -33,6 +33,7 @@
     "bundle:lite:aot": "echo 'import \"./web-editor-lite/browser/main.js\";' > dist/entry-lite.js && npx esbuild dist/entry-lite.js --bundle --outfile=dist/web-editor-lite.min.js --format=iife --global-name=WebEditorLite --minify --sourcemap --platform=browser && cp dist/web-editor-lite.min.js dist/web-editor-lite-aot.min.js && cp dist/web-editor-lite.min.js.map dist/web-editor-lite-aot.min.js.map",
     "bundle:lite:native": "npx esbuild src/native/main.ts --bundle --outfile=dist/web-editor-lite.min.js --format=iife --global-name=WebEditorLite --minify --sourcemap --platform=browser && cp dist/web-editor-lite.min.js dist/web-editor-lite-aot.min.js && cp dist/web-editor-lite.min.js.map dist/web-editor-lite-aot.min.js.map",
     "bundle:jit": "esbuild dist/main.js --bundle --outfile=dist/web-editor.min.js --format=iife --global-name=WebEditor --minify --sourcemap --platform=browser --external:fs --external:path --external:os",
+    "copy:types": "node scripts/copy-types.mjs",
     "demo": "bun run build && python3 -m http.server 8080",
     "clean": "rm -rf dist",
     "compile": "tsc --project tsconfig.build.json",

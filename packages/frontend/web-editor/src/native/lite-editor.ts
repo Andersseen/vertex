@@ -48,6 +48,62 @@ export class VertexEditorLiteElement extends HTMLElement {
     this.attachShadow({ mode: 'open' });
   }
 
+  get value(): string {
+    return this.getValue();
+  }
+
+  set value(value: string) {
+    this.setAttribute('value', value);
+  }
+
+  get language(): SupportedLanguage {
+    return (this.getAttribute('language') ?? 'javascript') as SupportedLanguage;
+  }
+
+  set language(value: SupportedLanguage) {
+    this.setAttribute('language', value);
+  }
+
+  get theme(): EditorTheme {
+    return (this.getAttribute('theme') ?? 'dark') as EditorTheme;
+  }
+
+  set theme(value: EditorTheme) {
+    this.setAttribute('theme', value);
+  }
+
+  get lineNumbers(): boolean {
+    return this.getAttribute('line-numbers') !== 'false';
+  }
+
+  set lineNumbers(value: boolean) {
+    this.setAttribute('line-numbers', String(value));
+  }
+
+  get wordWrap(): boolean {
+    return this.getAttribute('word-wrap') === 'true';
+  }
+
+  set wordWrap(value: boolean) {
+    this.setAttribute('word-wrap', String(value));
+  }
+
+  get height(): string {
+    return this.getAttribute('height') ?? '100%';
+  }
+
+  set height(value: string) {
+    this.setAttribute('height', value);
+  }
+
+  get fontSize(): string {
+    return this.getAttribute('font-size') ?? '14';
+  }
+
+  set fontSize(value: string) {
+    this.setAttribute('font-size', value);
+  }
+
   connectedCallback(): void {
     this.renderContainer();
     void this.initializeEditor();
@@ -247,7 +303,12 @@ export class VertexEditorLiteElement extends HTMLElement {
 
   // Public API
   getValue(): string {
-    return this.editorView?.state.doc.toString() ?? '';
+    return (
+      this.editorView?.state.doc.toString() ??
+      this._pendingValue ??
+      this.getAttribute('value') ??
+      ''
+    );
   }
 
   setValue(value: string): void {

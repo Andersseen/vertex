@@ -34,7 +34,7 @@ dependency.
 
 <br/>
 
-[**🚀 Try it live**](https://vertex.andersseen.dev) · [**⚡ Quick start**](#-quick-start) · [**🧩 Features**](#-what-you-get) · [**🏗️ Architecture**](#️-architecture) · [**📦 Web component**](#-embed-the-editor-anywhere) · [**☁️ Deployment**](docs/DEPLOYMENT.md) · [**🤝 Contributing**](CONTRIBUTING.md)
+[**🚀 Try it live**](https://vertex.andersseen.dev) · [**⚡ Quick start**](#-quick-start) · [**🧩 Products**](#-product-surfaces) · [**🏗️ Architecture**](#️-architecture) · [**📦 Web component**](#-embed-the-editor-anywhere) · [**📚 Docs source**](apps/docs/README.md) · [**🤝 Contributing**](CONTRIBUTING.md)
 
 </div>
 
@@ -50,9 +50,26 @@ Cloud IDEs put your code on someone else's machine. Local IDEs need an install, 
                               isomorphic-git          CodeMirror 6   esbuild-wasm   WebContainers   Cloudflare
 ```
 
-There is no Vertex backend. The web app is static files on Cloudflare Pages; your repository is
-cloned straight from GitHub into your browser's **OPFS** and stays there. No account, no upload,
-no telemetry — because there is nowhere for it to go.
+The hosted browser workbench does not require a Vertex application backend. It
+is static output on Cloudflare Pages; repositories are cloned into browser
+storage rather than uploaded to a Vertex server. Optional local sidecars exist
+for installed/native development workflows.
+
+---
+
+## 🧭 Product surfaces
+
+Vertex is not one application stretched across every environment:
+
+| Surface | Job | Owns |
+| :-- | :-- | :-- |
+| `apps/web` | Complete browser workbench | OPFS, browser Git, build, WebContainer preview, deploy |
+| `apps/desktop` | Installed Tauri workbench | Native filesystem/process/terminal adapters and lifecycle |
+| `<vertex-editor>` | Editor embedded in another product | Editing API, language loading, themes, events |
+| `<vertex-editor-lite>` | Read-only code display | Small native custom element and syntax highlighting |
+
+The custom elements do not include filesystems, Git, terminals, preview, or
+deployment. Preview is a workbench capability, not an editor capability.
 
 ---
 
@@ -141,7 +158,7 @@ Signals everywhere, `OnPush` everywhere, no Zone.js, no Tailwind, no component f
 
 ## ⚡ Quick start
 
-> **Requirements** — [Bun](https://bun.sh) `1.3.11+`, Node.js `18+`, and a Rust toolchain *(desktop only)*.
+> **Requirements** — [Bun](https://bun.sh) `1.3.11+`, Node.js `22.12+`, and a Rust toolchain *(desktop only)*.
 
 ```bash
 git clone https://github.com/Andersseen/vertex.git
@@ -167,6 +184,7 @@ bun web:dev            # → http://localhost:5173
 | 🎭 | `bun test:e2e` | Playwright end-to-end suite |
 | 📦 | `bun web-editor:build` | Bundle the `<vertex-editor>` web component |
 | 🎬 | `bun web-editor-demo:start` | Build the component and serve its demo app |
+| 📚 | `bun docs:dev` · `bun docs:build` | Develop or build the Starlight documentation |
 | ☁️ | `bun run deploy` | Build + publish to Cloudflare Pages |
 
 </details>
@@ -216,6 +234,7 @@ apps/
   web/                  🌐 Angular 21 + Analog.js + Vite — the main IDE
   desktop/              🖥️ Tauri 2 shell around the same app
   web-editor-demo/      🎬 Playground for the standalone web component
+  docs/                 📚 Starlight documentation for every product surface
 packages/
   frontend/
     core/               🧠 Angular services, Dexie DB, terminal adapter token
@@ -230,7 +249,7 @@ packages/
     terminal/           📟 Node.js + node-pty terminal sidecar
     core/               🧪 Experimental shared terminal types
 scripts/                🔧 Install & release helpers
-docs/                   📚 Deployment, preview-WC design notes
+docs/                   🧭 Repository architecture, deployment, and design notes
 ```
 
 </details>
@@ -283,16 +302,21 @@ curl -fsSL https://raw.githubusercontent.com/Andersseen/vertex/main/scripts/inst
 
 ## 🗺️ Status
 
-Vertex is in **active development**. Phase 2 — *run code in the browser* — is where the work is.
+Vertex is in active development. The current target is a dependable editor and
+browser/tablet MVP, not VS Code feature parity.
 
-| Phase | Capability | State |
-| :-- | :-- | :-- |
-| 1 | Virtual filesystem · in-browser git · editor · terminal | ✅ Done |
-| 2A | Bundling with `esbuild-wasm` | ✅ Done |
-| 2B | Live preview via WebContainers | ✅ Done |
-| 2C | Full Node.js runtime (headless WebContainer runner) | 🔄 In progress |
-| 2D | Deploy to Cloudflare Pages / Workers from the IDE | ✅ Done |
-| 3 | Language server protocol, richer intellisense | 🧭 Planned |
+| Priority | Current state |
+| :-- | :-- |
+| Shared editor core, language profiles, package boundaries | ✅ Established |
+| Full and lite custom elements with enforced bundle budgets | ✅ Established |
+| Public docs and canonical custom-element API | 🔄 In progress |
+| Capability fallback, recovery UX, blocking persistence E2E | 🧭 Next |
+| Project search, command palette, Git status/diff | 🧭 MVP |
+| Physical tablet keyboard/touch/lifecycle validation | 🧭 MVP |
+| Broad VS Code extension compatibility | 🔭 Later research |
+
+See the [foundation checklist](docs/EDITOR_FOUNDATION.md) and the
+[public roadmap source](apps/docs/src/content/docs/project/roadmap.md).
 
 ---
 
@@ -342,6 +366,9 @@ with Angular and Analog specifics in [ANGULAR_USAGE.md](ANGULAR_USAGE.md) and
 | Doc | About |
 | :-- | :-- |
 | [AGENTS.md](AGENTS.md) | Architecture, conventions, commands — the authoritative guide |
+| [apps/docs](apps/docs/README.md) | Public Starlight documentation application |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Product ownership and package boundaries |
+| [docs/EDITOR_FOUNDATION.md](docs/EDITOR_FOUNDATION.md) | Stability checklist and MVP gaps |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Cloudflare pipeline, secrets, environments |
 | [apps/web/README.md](apps/web/README.md) | Web application |
 | [apps/desktop/README.md](apps/desktop/README.md) | Tauri desktop application |

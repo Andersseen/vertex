@@ -1,15 +1,21 @@
-# terminal
+# @vertex/terminal-sidecar
 
-To install dependencies:
+Local Node.js terminal sidecar backed by `node-pty`.
+
+It exposes native pseudo-terminal capabilities to an installed or local Vertex
+workbench. It is not required by the hosted browser workbench and must not
+become a dependency of `<vertex-editor>`.
+
+## Development
 
 ```bash
-bun install
+npm install
+bun terminal:dev
 ```
 
-To run:
+The workbench consumes terminal behavior through the
+`TERMINAL_BACKEND_ADAPTER` contract. New UI code should depend on that contract,
+not directly on this process.
 
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.11. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+The terminal adapter migration is still in progress. Remove older duplicate
+implementations only after the typed platform adapter is integrated and tested.

@@ -50,6 +50,9 @@ jobs:
       - name: Unit tests
         run: bun test
 
+      - name: Build documentation
+        run: bun run docs:build
+
   e2e:
     name: E2E · Playwright
     needs: quality
