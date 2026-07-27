@@ -1,4 +1,4 @@
 /assets/* /assets/:splat 200
 /favicon.svg /favicon.svg 200
-/vertex-sw.js /vertex-sw.js 200
+/sw.js /sw.js 200
 /* /index.html 200

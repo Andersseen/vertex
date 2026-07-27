@@ -20,7 +20,7 @@
   display: flex !important;
   flex-direction: column !important;
   background-color: var(--ide-bg-base);
-  color: var(--ide-text-inverse);
+  color: var(--ide-text-primary);
   font-family: $font-sans;
   overflow: hidden;
 }
@@ -53,7 +53,7 @@
 .vx-logo-text {
   font-size: 14px;
   font-weight: 800;
-  color: var(--ide-text-inverse);
+  color: var(--ide-text-primary);
   letter-spacing: -0.02em;
   line-height: 1;
 }

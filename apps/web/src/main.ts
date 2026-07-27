@@ -5,13 +5,12 @@ import './styles.scss';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
+import { markShellHealthy, setupPwa } from './pwa';
 
-bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+bootstrapApplication(App, appConfig)
+  .then(markShellHealthy)
+  .catch((err) => console.error(err));
 
-if ('serviceWorker' in navigator && import.meta.env['PROD']) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('[PWA] Service worker registration failed:', err);
-    });
-  });
+if (import.meta.env['PROD']) {
+  setupPwa();
 }

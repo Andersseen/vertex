@@ -7,8 +7,11 @@
 // Kept for backward compatibility with legacy components and landing pages.
 // Prefer using var(--ide-*) directly in new code.
 // ============================================
-$surface-0: var(--ide-text-inverse);
-$surface-50: var(--ide-text-inverse);
+// $surface-0/-50 are the *brightest* foreground of the legacy light→dark ramp,
+// so they map to the primary text token. They are never the inverse token —
+// --ide-text-inverse is near-black and only legible on accent/light backgrounds.
+$surface-0: var(--ide-text-primary);
+$surface-50: var(--ide-text-primary);
 $surface-100: var(--ide-text-primary);
 $surface-200: var(--ide-text-primary);
 $surface-300: var(--ide-text-secondary);
@@ -320,7 +323,7 @@ $spacing-12: var(--ide-space-12);
 
   &:hover {
     background: var(--ide-bg-elevated);
-    color: var(--ide-text-inverse);
+    color: var(--ide-text-primary);
   }
 
   &:focus-visible {
