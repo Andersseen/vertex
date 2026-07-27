@@ -11,9 +11,11 @@
 
 ### Clone any GitHub repo, edit it, build it, preview it, ship it — **without installing anything.**
 
-**Vertex is an open-source IDE that runs entirely inside a browser tab.**
-Real git, a real filesystem, a real bundler, a real Node runtime — all client-side.
-The same codebase also ships as a **Tauri desktop app** and as a **drop-in `<vertex-editor>` web component**.
+**Vertex is an open-source family of code-editing products.** The browser
+workbench combines Git, a virtual filesystem, build, and a Node-compatible
+runtime client-side. The Tauri app adds installed-platform adapters, while the
+drop-in `<vertex-editor>` remains a focused editor with no IDE/runtime
+dependency.
 
 <br/>
 
@@ -175,14 +177,16 @@ bun web:dev            # → http://localhost:5173
 
 ```mermaid
 flowchart TB
-  subgraph SURFACES["🖼️ Surfaces — one codebase, three shells"]
+  subgraph SURFACES["🖼️ Products — shared editor, separate responsibilities"]
     direction LR
     W["🌐 apps/web<br/>Angular 21 · Analog.js"]
     D["🖥️ apps/desktop<br/>Tauri 2 · Rust"]
-    E["🧩 @vertex/web-editor<br/>&lt;vertex-editor&gt;"]
+    E["🧩 @vertex/web-editor<br/>&lt;vertex-editor&gt; · editor only"]
   end
 
-  subgraph ANGULAR["🅰️ Angular layer"]
+  EDITOR["@vertex/editor-core<br/>CodeMirror engine · language profiles"]
+
+  subgraph ANGULAR["🅰️ Workbench layer"]
     direction LR
     UI["@vertex/ui<br/>layouts · editor · sidebar"]
     IDEUI["@vertex/ide-ui<br/>21 headless components"]
@@ -196,7 +200,8 @@ flowchart TB
 
   W --> ANGULAR
   D --> ANGULAR
-  E --> IDEUI
+  E --> EDITOR
+  UI --> EDITOR
   ANGULAR --> RUNTIME
   RUNTIME --> STORE[("💾 OPFS + IndexedDB<br/>your files never leave the browser")]
 ```
@@ -214,6 +219,7 @@ apps/
 packages/
   frontend/
     core/               🧠 Angular services, Dexie DB, terminal adapter token
+    editor-core/        ✏️ Framework-free CodeMirror engine and language profiles
     ide-ui/             🧩 @vertex/ide-ui — headless IDE components (CSS custom props)
     runtime/            ⚙️ VirtualFS · GitClient · Bundler · Preview · Deploy
     types/              📐 Shared TypeScript contracts
@@ -228,6 +234,11 @@ docs/                   📚 Deployment, preview-WC design notes
 ```
 
 </details>
+
+The products intentionally have different scopes. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for dependency rules and product
+boundaries, and [`docs/EDITOR_FOUNDATION.md`](docs/EDITOR_FOUNDATION.md) for the
+stability checklist.
 
 <details>
 <summary><b>Where state lives</b></summary>

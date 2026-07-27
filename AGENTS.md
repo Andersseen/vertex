@@ -16,6 +16,7 @@ packages/
     ide-ui/     → @vertex/ide-ui — IDE components (headless + CSS custom props)
     ui/         → @vertex/ui — layouts, CodeMirror editor, sidebar
     runtime/    → @vertex/runtime — VirtualFS + GitClient + Build + Preview + Deploy (browser)
+    editor-core/→ @vertex/editor-core — framework-free CodeMirror configuration + language profiles
     core/       → @vertex/core — Angular services (RuntimeService, PreferencesService, Dexie DB)
     types/      → @vertex/types — shared types
     web-editor/ → @vertex/web-editor — Angular Element standalone (publishable web component)
@@ -36,7 +37,7 @@ bun dev:all                          # web + terminal sidecar + rust sidecar in 
 bun desktop:dev                      # Tauri desktop (requires Rust + Cargo)
 
 # Build
-bun build                            # full build via Turbo (respects dependencies)
+bun run build                        # full build via Turbo (respects dependencies)
 bun web:build                        # Analog/Vite web app only
 bun web-editor:build                 # web component (esbuild bundle → dist/web-editor.min.js)
 
@@ -124,6 +125,9 @@ To add Dexie tables: `db.version(2).stores({...})` in `packages/frontend/core/sr
 apps/web (Angular app)
   └── uses @vertex/core, @vertex/ide-ui, @vertex/runtime, @vertex/ui
 
+@vertex/editor-core
+  └── shared CodeMirror engine primitives; no Angular, runtime, Git, preview, or workbench dependencies
+
 @vertex/core
   ├── db/vertex.db.ts         → VertexDatabase (Dexie), SessionRecord, PreferenceRecord
   ├── services/               → WorkspaceService, PreferencesService, ConfigService
@@ -148,6 +152,10 @@ apps/web (Angular app)
   ├── web-editor.component.ts      → <vertex-editor> (full web component)
   └── web-editor-lite.component.ts → display-only, ~500KB vs ~1.6MB
 ```
+
+Product boundaries and allowed dependency direction are defined in
+[`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md). Run `bun run check:boundaries`
+after changing package imports.
 
 The terminal uses **dependency injection** via `TERMINAL_BACKEND_ADAPTER`. In web: `VirtualTerminalService`; in desktop: can connect to node-pty or WebContainers.
 

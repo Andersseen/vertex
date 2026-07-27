@@ -1,6 +1,6 @@
 import { Component, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { EditorComponent } from '@vertex/ui';
-import { tsLspExtensions, warmupTsLsp } from '@vertex/ui';
+import { tsLspExtensions, warmupTsLsp } from '@vertex/ui/lsp';
 import { tsLanguageService, type LspStatus } from '@vertex/runtime/lsp';
 import { VertexFile } from '@vertex/types';
 

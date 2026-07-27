@@ -49,4 +49,5 @@ export {
   getLanguageSupport,
   isLanguageSupported,
   getSupportedLanguages,
+  registerLanguage,
 } from "./lib/language-support";

@@ -9,8 +9,11 @@
     "paths": {
       "@vertex/types": ["../types/src/index.ts"],
       "@vertex/core": ["../core/src/index.ts"],
+      "@vertex/editor-core": ["../editor-core/src/index.ts"],
+      "@vertex/editor-core/*": ["../editor-core/src/*"],
       "@vertex/runtime": ["../runtime/src/index.ts"],
-      "@vertex/runtime/lsp": ["../runtime/src/lsp/index.ts"]
+      "@vertex/runtime/lsp": ["../runtime/src/lsp/index.ts"],
+      "@vertex/ui/lsp": ["src/lib/lsp/ts-lsp-extension.ts"]
     }
   },
   "include": ["src/**/*"],

@@ -2,6 +2,10 @@
 
 Desktop application for Vertex IDE. Built with **Angular 21**, **Tauri**, and **Rust**, managed with **Bun**.
 
+This is the installed product surface. It shares the editor and workbench UI,
+then supplies native filesystem, process, and terminal adapters. Preview is an
+optional product feature, not part of the shared editor contract.
+
 ## Development
 
 Requirements: Rust + Cargo installed.
@@ -35,8 +39,10 @@ apps/desktop/
 
 ## Notes
 
-- The desktop app shares frontend packages (`@vertex/core`, `@vertex/ui`, `@vertex/ide-ui`, `@vertex/runtime`).
+- The desktop app shares frontend packages (`@vertex/core`, `@vertex/ui`,
+  `@vertex/ide-ui`, `@vertex/editor-core` transitively through `@vertex/ui`).
 - The terminal backend connects via WebSocket to `packages/backend/terminal`.
 - The filesystem sidecar connects to `packages/backend/sidecar`.
 
 See [`AGENTS.md`](../../AGENTS.md) for project conventions.
+See [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) for product boundaries.

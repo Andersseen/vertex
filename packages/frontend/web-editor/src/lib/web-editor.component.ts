@@ -21,6 +21,7 @@ export type EditorTheme = "light" | "dark";
 export interface CursorPosition {
   line: number;
   column: number;
+  index: number;
 }
 
 /**
@@ -46,6 +47,8 @@ export interface CursorPosition {
     .vertex-editor-container {
       width: 100%;
       height: 100%;
+      min-width: 0;
+      min-height: 0;
       overflow: hidden;
       font-family:
         "JetBrains Mono", "Fira Code", "Source Code Pro", "Monaco", "Consolas",
@@ -68,11 +71,19 @@ export interface CursorPosition {
 
     .cm-scroller {
       font-family: inherit !important;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .cm-gutters {
       font-family: inherit !important;
       font-size: 0.9em;
+    }
+
+    @media (pointer: coarse) {
+      .vertex-editor-container {
+        font-size: var(--vertex-editor-touch-font-size, 16px);
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -106,6 +117,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   private configurator = new EditorConfigurator();
   private attributeObserver: AttributeObserver | null = null;
   private _isInitialized = false;
+  private languageRequest = 0;
 
   get isInitialized(): boolean {
     return this._isInitialized;
@@ -183,6 +195,10 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
             ),
           ],
         });
+        this.editorView.contentDOM.setAttribute(
+          "aria-readonly",
+          String(isReadonly),
+        );
       }
     });
 
@@ -255,6 +271,7 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
       state,
       parent: this.editorContainer()?.nativeElement,
     });
+    this.applyAccessibilityAttributes();
 
     const container = this.editorContainer();
     if (container?.nativeElement.style) {
@@ -303,13 +320,14 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
   private async updateLanguage(): Promise<void> {
     if (!this.editorView) return;
 
+    const request = ++this.languageRequest;
     const languageSupport = await getLanguageSupport(this.language());
-    if (languageSupport) {
-      this.editorView.dispatch({
-        effects:
-          this.configurator.languageCompartment.reconfigure(languageSupport),
-      });
-    }
+    if (!this.editorView || request !== this.languageRequest) return;
+    this.editorView.dispatch({
+      effects: this.configurator.languageCompartment.reconfigure(
+        languageSupport ?? [],
+      ),
+    });
   }
 
   private updateTheme(theme?: EditorTheme): void {
@@ -358,5 +376,15 @@ export class WebEditorComponent implements AfterViewInit, OnDestroy {
    */
   focus(): void {
     this.editorView?.focus();
+  }
+
+  private applyAccessibilityAttributes(): void {
+    if (!this.editorView) return;
+    const label = this.hostElement.getAttribute("aria-label") ?? "Code editor";
+    this.editorView.contentDOM.setAttribute("aria-label", label);
+    this.editorView.contentDOM.setAttribute(
+      "aria-readonly",
+      String(this.readonly()),
+    );
   }
 }

@@ -21,6 +21,7 @@ const OBSERVED_ATTRIBUTES = [
   'language',
   'theme',
   'line-numbers',
+  'word-wrap',
   'height',
   'font-size',
 ] as const;
@@ -37,6 +38,7 @@ export class VertexEditorLiteElement extends HTMLElement {
   private languageCompartment = new Compartment();
   private themeCompartment = new Compartment();
   private lineNumbersCompartment = new Compartment();
+  private wordWrapCompartment = new Compartment();
 
   private _ready = false;
   private _pendingValue: string | null = null;
@@ -76,6 +78,9 @@ export class VertexEditorLiteElement extends HTMLElement {
       case 'line-numbers':
         this.updateLineNumbers();
         break;
+      case 'word-wrap':
+        this.updateWordWrap();
+        break;
       case 'height':
         this.updateHeight();
         break;
@@ -96,6 +101,8 @@ export class VertexEditorLiteElement extends HTMLElement {
       .container {
         width: 100%;
         height: 100%;
+        min-width: 0;
+        min-height: 0;
         overflow: auto;
         font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", "Monaco", "Consolas", monospace;
         font-size: var(--vertex-editor-font-size, 14px);
@@ -106,6 +113,8 @@ export class VertexEditorLiteElement extends HTMLElement {
       }
       .cm-scroller {
         font-family: inherit !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
       .cm-gutters {
         font-family: inherit !important;
@@ -113,6 +122,11 @@ export class VertexEditorLiteElement extends HTMLElement {
       }
       .cm-cursor {
         display: none !important;
+      }
+      @media (pointer: coarse) {
+        .container {
+          font-size: var(--vertex-editor-touch-font-size, 16px);
+        }
       }
     `;
 
@@ -147,6 +161,9 @@ export class VertexEditorLiteElement extends HTMLElement {
         this.themeCompartment.of(this.getThemeExtension(theme)),
         this.languageCompartment.of(langSupport ? [langSupport] : []),
         this.lineNumbersCompartment.of(showLineNumbers ? lineNumbers() : []),
+        this.wordWrapCompartment.of(
+          this.getAttribute('word-wrap') === 'true' ? EditorView.lineWrapping : [],
+        ),
       ],
     });
 
@@ -154,6 +171,11 @@ export class VertexEditorLiteElement extends HTMLElement {
       state,
       parent: container,
     });
+    this.editorView.contentDOM.setAttribute(
+      'aria-label',
+      this.getAttribute('aria-label') ?? 'Code viewer',
+    );
+    this.editorView.contentDOM.setAttribute('aria-readonly', 'true');
 
     this.updateHeight();
     this.updateFontSize();
@@ -193,6 +215,16 @@ export class VertexEditorLiteElement extends HTMLElement {
     const show = this.getAttribute('line-numbers') !== 'false';
     this.editorView.dispatch({
       effects: this.lineNumbersCompartment.reconfigure(show ? lineNumbers() : []),
+    });
+  }
+
+  private updateWordWrap(): void {
+    if (!this.editorView) return;
+    const wrap = this.getAttribute('word-wrap') === 'true';
+    this.editorView.dispatch({
+      effects: this.wordWrapCompartment.reconfigure(
+        wrap ? EditorView.lineWrapping : [],
+      ),
     });
   }
 

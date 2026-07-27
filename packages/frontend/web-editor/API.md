@@ -46,7 +46,7 @@ Include the script once in your HTML:
 | Attribute | Type | Default | Description |
 |---|---|---|---|
 | `value` | string | `""` | Editor content |
-| `language` | string | `"typescript"` | `typescript`, `javascript`, `html`, `css`, `json`, `markdown`, `rust`, `python` |
+| `language` | string | `"typescript"` | `typescript`, `javascript`, `html`, `css`, `json` |
 | `theme` | string | `"dark"` | `dark` or `light` |
 | `line-numbers` | boolean | `true` | Show line numbers |
 | `readonly` | boolean | `false` | Read-only mode |
@@ -77,7 +77,7 @@ customEvent<void>('ready')
 customEvent<string>('valueChange')
 
 // Fired when cursor/selection moves
-customEvent<{ line: number; column: number }>('cursorActivity')
+customEvent<{ line: number; column: number; index: number }>('cursorActivity')
 ```
 
 ### Vanilla HTML example
@@ -110,6 +110,7 @@ customEvent<{ line: number; column: number }>('cursorActivity')
 | `language` | string | `"javascript"` | `javascript`, `typescript`, `html`, `css`, `json` |
 | `theme` | string | `"dark"` | `dark` or `light` |
 | `line-numbers` | boolean | `true` | Show line numbers |
+| `word-wrap` | boolean | `false` | Enable word wrapping |
 | `height` | string | `"100%"` | Container height |
 | `font-size` | string | `"14"` | Font size in pixels |
 

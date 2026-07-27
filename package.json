@@ -30,7 +30,7 @@
     "url": "https://github.com/Andersseen/vertex/issues"
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=2",
     "web-editor:build": "cd packages/frontend/web-editor && bun run build",
     "web-editor:serve": "bun run web-editor:build && bun packages/frontend/web-editor/server.ts",
     "web-editor-demo:dev": "cd apps/web-editor-demo && bun run dev",
@@ -42,6 +42,7 @@
     "lint:fix": "turbo run lint -- --fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
     "typecheck": "turbo run check-types",
     "test": "bun test",
     "test:e2e": "cd apps/web && bun run test:e2e",

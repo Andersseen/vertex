@@ -2,6 +2,10 @@
 
 Standalone code editor Web Components built with Angular Elements and CodeMirror 6.
 
+This package is intentionally an editor, not an IDE. It has no filesystem,
+Git, terminal, build, preview, or deployment dependency. Those capabilities
+belong to product workbenches such as `apps/web`.
+
 Two variants are available:
 
 - **`<vertex-editor>`** — Full editable code editor with history, search, autocomplete, and editing support. (~1.1 MB minified, Angular Elements)
@@ -11,11 +15,12 @@ Two variants are available:
 
 - 📦 **Standalone Web Components** — Single JS file each, no build step required in your project
 - 🎨 **Multiple themes** — Dark and light modes
-- 🔤 **Language support** — TypeScript, JavaScript, HTML, CSS, JSON, Markdown
+- 🔤 **Language support** — TypeScript, JavaScript, HTML, CSS, and JSON
 - 📱 **Responsive** — Adapts to container size
 - ⚡ **Lazy loading** — Languages load on demand
 - 🔧 **Customizable** — Line numbers, read-only mode, word wrap, and more
 - 🎯 **Zoneless Angular** — Uses signals, no zone.js overhead
+- ⌨️ **Keyboard and touch** — External-keyboard shortcuts, touch scrolling, and responsive sizing
 
 > **Note:** For read-only display, prefer `<vertex-editor-lite>` over `<vertex-editor readonly>` — it ships a smaller bundle.
 

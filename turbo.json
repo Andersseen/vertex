@@ -18,11 +18,9 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"],
       "outputs": []
     },
     "check-types": {
-      "dependsOn": ["^build"],
       "outputs": []
     },
     "test:e2e": {

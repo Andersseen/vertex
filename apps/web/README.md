@@ -2,6 +2,10 @@
 
 Main web application for Vertex IDE. Built with **Angular 21**, **Analog.js**, and **Vite**, managed with **Bun**.
 
+This is the complete browser workbench. Unlike `@vertex/web-editor`, it owns
+workspace persistence, Git, build, WebContainer preview, and application
+session flows.
+
 ## Development
 
 ```bash

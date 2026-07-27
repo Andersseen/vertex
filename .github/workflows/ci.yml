@@ -41,6 +41,9 @@ jobs:
       - name: Lint
         run: bun run lint
 
+      - name: Package boundaries
+        run: bun run check:boundaries
+
       - name: Typecheck
         run: bun run check-types
 

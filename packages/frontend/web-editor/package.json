@@ -24,7 +24,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "bun run clean && bun run build:aot && bun run build:lite:aot",
+    "build": "bun run clean && bun run build:aot && bun run build:lite:aot && bun run check:size",
     "build:aot": "ng build --project web-editor --configuration production && bun run bundle:aot",
     "build:lite:aot": "bun run bundle:lite:native",
     "build:lite:angular": "ng build --project web-editor-lite --configuration production && bun run bundle:lite:aot",
@@ -39,6 +39,7 @@
     "watch": "ng build --watch --configuration development",
     "lint": "eslint src",
     "check-types": "tsc --noEmit",
+    "check:size": "node scripts/check-bundle-size.mjs",
     "prepublishOnly": "bun run build"
   },
   "keywords": [
@@ -85,6 +86,7 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.40.0",
+    "@vertex/editor-core": "workspace:*",
     "rxjs": "~7.8.0",
     "tslib": "^2.8.1"
   },
