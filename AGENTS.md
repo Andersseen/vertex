@@ -63,6 +63,7 @@ bun web-editor-demo:start            # build web-component + serve demo
 # Documentation
 bun docs:dev                         # build editor bundles + start Starlight
 bun docs:build                       # production documentation build
+bun docs:deploy                      # build + deploy to Cloudflare Pages vertex-docs
 ```
 
 ---
@@ -70,9 +71,11 @@ bun docs:build                       # production documentation build
 ## CI/CD
 
 One pipeline, one platform. `.github/workflows/ci.yml` runs `quality` (lint → types → unit),
-then `e2e` (Playwright, non-blocking) and `deploy` in parallel. `deploy` only runs for pushes to
-`main`, targets the GitHub `production` environment, and publishes `apps/web/dist/client` to the
-Cloudflare Pages project `vertex-web`. Shared setup lives in `.github/actions/setup`.
+then `e2e` (Playwright, non-blocking), `deploy`, and `deploy-docs` in parallel.
+Production deploys only run for pushes to `main`. The web job publishes
+`apps/web/dist/client` to `vertex-web`; the docs job publishes the tested
+`apps/docs/dist` artifact to `vertex-docs`. Shared setup lives in
+`.github/actions/setup`.
 
 `.github/workflows/release-web-editor.yml` publishes the web-component bundles to the rolling
 `web-editor-latest` GitHub Release when `packages/frontend/web-editor/**` changes.

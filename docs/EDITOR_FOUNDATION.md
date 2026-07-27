@@ -82,5 +82,7 @@ A product surface is not called stable until:
 - [x] Repository, app, and package READMEs state ownership and dependency boundaries.
 - [x] Docs build consumes the generated web-editor bundle.
 - [x] Docs build runs in CI.
-- [ ] Choose the production docs hostname and Cloudflare Pages release policy.
+- [x] Cloudflare Pages Direct Upload deployment from the tested CI artifact.
+- [x] Initial production URL and release policy (`vertex-docs.pages.dev`, `main`).
+- [ ] Connect `docs.vertex.andersseen.dev` and update canonical URLs.
 - [ ] Add automated link checking and a browser smoke test for the interactive editor example.

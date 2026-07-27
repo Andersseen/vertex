@@ -29,6 +29,24 @@ bun docs:build
 
 Output is written to `apps/docs/dist`.
 
-The docs are static and can be deployed to Cloudflare Pages. Deployment is not
-wired yet because the production hostname and release policy are still an
-explicit product decision.
+## Deploy
+
+The `main` branch is deployed by the shared GitHub Actions pipeline to the
+Cloudflare Pages project `vertex-docs`:
+
+<https://vertex-docs.pages.dev>
+
+Local deployment uses the same Wrangler command:
+
+```bash
+bun docs:deploy
+```
+
+The Pages project must be created once before the first CI deployment:
+
+```bash
+bunx wrangler pages project create vertex-docs --production-branch main
+```
+
+See [`docs/DEPLOYMENT.md`](../../docs/DEPLOYMENT.md) for credentials, pipeline,
+and custom-domain setup.

@@ -184,7 +184,7 @@ bun web:dev            # → http://localhost:5173
 | 🎭 | `bun test:e2e` | Playwright end-to-end suite |
 | 📦 | `bun web-editor:build` | Bundle the `<vertex-editor>` web component |
 | 🎬 | `bun web-editor-demo:start` | Build the component and serve its demo app |
-| 📚 | `bun docs:dev` · `bun docs:build` | Develop or build the Starlight documentation |
+| 📚 | `bun docs:dev` · `bun docs:build` · `bun docs:deploy` | Develop, build, or publish the Starlight documentation |
 | ☁️ | `bun run deploy` | Build + publish to Cloudflare Pages |
 
 </details>

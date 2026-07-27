@@ -8,6 +8,7 @@
     "dev": "bun run sync:editor && astro dev",
     "build": "bun run sync:editor && astro build",
     "preview": "astro preview",
+    "deploy": "wrangler pages deploy dist --project-name=vertex-docs --branch=main",
     "lint": "astro check",
     "check-types": "astro check",
     "sync:editor": "node scripts/sync-editor.mjs"

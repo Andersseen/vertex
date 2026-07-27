@@ -39,6 +39,7 @@
     "docs:dev": "bun run web-editor:build && cd apps/docs && bun run dev",
     "docs:build": "bun run web-editor:build && cd apps/docs && bun run build",
     "docs:preview": "cd apps/docs && bun run preview",
+    "docs:deploy": "bun run docs:build && cd apps/docs && bun run deploy",
     "dev": "turbo run dev",
     "dev:web-editor": "cd packages/frontend/web-editor && bun run watch",
     "lint": "turbo run lint",
@@ -80,7 +81,8 @@
     "rxjs": "~7.8.0",
     "turbo": "^2.8.20",
     "typescript": "5.9.2",
-    "typescript-eslint": "^8.57.2"
+    "typescript-eslint": "^8.57.2",
+    "wrangler": "4.114.0"
   },
   "bin": {
     "vertex": "./packages/frontend/web-editor/bin/install.mjs",

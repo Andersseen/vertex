@@ -13,6 +13,7 @@ Run commands from the repository root unless noted otherwise.
 | `bun web-editor-demo:start` | Build and demonstrate the custom elements |
 | `bun run build` | Build every workspace through Turborepo |
 | `bun docs:build` | Build the editor dependency and static docs |
+| `bun docs:deploy` | Build and deploy docs to the `vertex-docs` Pages project |
 | `bun lint` | Run workspace lint tasks |
 | `bun check-types` | Run workspace type checks |
 | `bun test` | Run unit tests |
@@ -20,6 +21,5 @@ Run commands from the repository root unless noted otherwise.
 | `bun run check:boundaries` | Enforce package dependency rules |
 | `bun web:deploy` | Deploy the web workbench to Cloudflare Pages |
 
-There is intentionally no docs deploy command yet. The docs build is static and
-Cloudflare-compatible, but its production hostname and release policy should be
-chosen before adding a second Pages project.
+Documentation from `main` is also deployed automatically by GitHub Actions to
+`https://vertex-docs.pages.dev`.
