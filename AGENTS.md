@@ -31,6 +31,12 @@ packages/
 
 ## Commands
 
+For planned product work, start with [`docs/ROADMAP.md`](./docs/ROADMAP.md) and
+[`docs/roadmap/EXECUTION.md`](./docs/roadmap/EXECUTION.md). Assign one task ID at a
+time, follow its dependencies and shared contracts, and record acceptance evidence.
+Roadmap milestones are planned work, not claims about currently implemented features.
+Write repository documentation and implementation handoffs in English.
+
 ```bash
 # Development
 bun web:dev                          # Vite dev server → localhost:5173

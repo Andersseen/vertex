@@ -1,7 +1,13 @@
 # Vertex product architecture
 
-Vertex is a family of editor products. They share editing primitives, but they
-do not share the same product scope.
+Vertex is one code editor with IDE capabilities, delivered through browser,
+installed, and embeddable surfaces. These share editing primitives while retaining
+different platform capabilities and integration scopes.
+
+The [version 1.0 roadmap](ROADMAP.md) defines the planned JS/TS scope, macOS-first
+desktop delivery, physical iPad validation, and ordered implementation tasks.
+Its [design contracts](roadmap/CONTRACTS.md) describe incremental changes to build;
+they are not claims that every planned controller or adapter already exists.
 
 `apps/docs` documents these products but is not itself a product/runtime
 surface. It may consume published artifacts for examples; production packages
@@ -32,16 +38,16 @@ services, and browser runtime.
 It owns:
 
 - repository and workspace flows;
-- OPFS persistence;
+- browser filesystem persistence (currently LightningFS/IndexedDB);
 - browser Git;
 - build and WebContainer preview;
 - full-workbench routing and session UX.
 
 ### `apps/desktop`
 
-The installed Tauri surface for desktop and, as platform support is developed,
-tablet/mobile. It composes the shared editor and workbench UI with native
-adapters.
+The installed Tauri surface, targeting macOS first for version 1.0. It composes
+the shared editor and workbench UI with native adapters. Installed Windows/Linux
+and native tablet/mobile delivery follow later; the 1.0 iPad target is the browser.
 
 It owns:
 

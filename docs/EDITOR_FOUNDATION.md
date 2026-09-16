@@ -1,7 +1,11 @@
 # Editor foundation
 
-This document is the delivery checklist for a useful, stable editor family.
+This document is the foundation checklist for Vertex's editor surfaces.
 It deliberately separates editor quality from workbench/runtime features.
+
+For future delivery order and task acceptance, use the [version 1.0 roadmap](ROADMAP.md).
+Checked foundation items indicate existing building blocks, not completion of the
+roadmap's stronger end-to-end release gates.
 
 ## Shared editor baseline
 
@@ -39,7 +43,8 @@ The web editor must never acquire imports from `@vertex/runtime`,
 Scope: complete project workflows in a browser.
 
 - [x] Workspace tree, tabs, editing, autosave, and session restoration.
-- [x] OPFS repository persistence.
+- [x] Browser repository persistence through LightningFS/IndexedDB. The `OPFSFS`
+      adapter name is legacy; native OPFS storage is not currently implemented.
 - [x] WebContainer preview foundation.
 - [ ] Capability detection with graceful fallback for filesystem, Git, build,
       and WebContainers.
