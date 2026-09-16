@@ -1,7 +1,11 @@
 ---
 title: Choose a surface
-description: Vertex products share editing primitives but solve different jobs.
+description: One Vertex editor, delivered through surfaces with different capabilities.
 ---
+
+Vertex is one code editor with IDE capabilities, expressed through several surfaces.
+The [1.0 roadmap](/project/roadmap/) targets JS/TS projects, macOS first for desktop,
+and a physically validated iPad browser experience.
 
 | Surface | Primary job | Includes preview? | Native access? |
 | --- | --- | --- | --- |

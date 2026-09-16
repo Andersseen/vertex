@@ -11,7 +11,7 @@
 
 ### Clone any GitHub repo, edit it, build it, preview it, ship it — **without installing anything.**
 
-**Vertex is an open-source family of code-editing products.** The browser
+**Vertex is an open-source code editor with IDE capabilities across several surfaces.** The browser
 workbench combines Git, a virtual filesystem, build, and a Node-compatible
 runtime client-side. The Tauri app adds installed-platform adapters, while the
 drop-in `<vertex-editor>` remains a focused editor with no IDE/runtime
@@ -63,7 +63,7 @@ Vertex is not one application stretched across every environment:
 
 | Surface | Job | Owns |
 | :-- | :-- | :-- |
-| `apps/web` | Complete browser workbench | OPFS, browser Git, build, WebContainer preview, deploy |
+| `apps/web` | Complete browser workbench | Browser storage, Git, build, WebContainer preview, deploy |
 | `apps/desktop` | Installed Tauri workbench | Native filesystem/process/terminal adapters and lifecycle |
 | `<vertex-editor>` | Editor embedded in another product | Editing API, language loading, themes, events |
 | `<vertex-editor-lite>` | Read-only code display | Small native custom element and syntax highlighting |
@@ -86,7 +86,7 @@ deployment. Preview is a workbench capability, not an editor capability.
 <td width="33%" valign="top">
 
 ### 💾 Storage that survives
-**OPFS + IndexedDB** via Lightning FS. Close the tab, come back, your working tree is still there.
+**IndexedDB** via Lightning FS. Close the tab, come back, your working tree is still there.
 
 </td>
 <td width="33%" valign="top">
@@ -213,7 +213,7 @@ flowchart TB
 
   subgraph RUNTIME["⚙️ @vertex/runtime — browser-native, zero Angular"]
     direction LR
-    FS["fs/<br/>OPFS · MemoryFS"] --> GIT["git/<br/>isomorphic-git"] --> BUILD["build/<br/>esbuild-wasm"] --> PREVIEW["preview/<br/>WebContainers"] --> DEPLOY["deploy/<br/>Cloudflare"]
+    FS["fs/<br/>IndexedDB · MemoryFS"] --> GIT["git/<br/>isomorphic-git"] --> BUILD["build/<br/>esbuild-wasm"] --> PREVIEW["preview/<br/>WebContainers"] --> DEPLOY["deploy/<br/>Cloudflare"]
   end
 
   W --> ANGULAR
@@ -221,7 +221,7 @@ flowchart TB
   E --> EDITOR
   UI --> EDITOR
   ANGULAR --> RUNTIME
-  RUNTIME --> STORE[("💾 OPFS + IndexedDB<br/>your files never leave the browser")]
+  RUNTIME --> STORE[("💾 Browser storage<br/>local working copies")]
 ```
 
 <details>
@@ -269,7 +269,7 @@ stability checklist.
 | `localStorage` | Splitter positions | Synchronous read, no layout flash on boot |
 | `sessionStorage` | Open tabs (`vertex:editor`) | Intentionally volatile |
 | Dexie v4 (`vertex-ide`) | Active session, preferences | Structured and extensible |
-| OPFS + IndexedDB | Cloned repository files | Browser-native filesystem, survives reloads |
+| IndexedDB (Lightning FS) | Cloned repository files | Browser-native filesystem, survives reloads |
 
 </details>
 
@@ -315,7 +315,13 @@ browser/tablet MVP, not VS Code feature parity.
 | Physical tablet keyboard/touch/lifecycle validation | 🧭 MVP |
 | Broad VS Code extension compatibility | 🔭 Later research |
 
-See the [foundation checklist](docs/EDITOR_FOUNDATION.md) and the
+The [version 1.0 execution roadmap](docs/ROADMAP.md) defines 16 minor milestones
+for a usable JS/TS IDE on macOS, in the browser, and on iPad. It includes bounded
+implementation tasks, shared contracts, validation gates, and model handoffs.
+These are planned milestones, not completed releases. VS Code extension compatibility
+belongs to the version 2 investigation.
+
+See also the [foundation checklist](docs/EDITOR_FOUNDATION.md) and the
 [public roadmap source](apps/docs/src/content/docs/project/roadmap.md).
 
 ---
@@ -350,7 +356,7 @@ Full details — secrets, environments, headers, the Workers migration path — 
 | **Meta-framework** | Analog.js — file-based routing in `apps/web/src/app/routes/` |
 | **Build** | Vite 8 · Turborepo · Bun workspaces |
 | **Editor / terminal** | CodeMirror 6 · xterm.js |
-| **In-browser runtime** | Lightning FS (OPFS) · isomorphic-git · esbuild-wasm · WebContainers |
+| **In-browser runtime** | Lightning FS (IndexedDB) · isomorphic-git · esbuild-wasm · WebContainers |
 | **Desktop** | Tauri 2 + Rust sidecar |
 | **Styling** | Pure CSS custom properties (`--ide-*`). No Tailwind, no PrimeNG, no CSS-in-JS |
 | **Headless logic** | [`quartz-headless`](https://www.npmjs.com/package/quartz-headless) · `@andersseen/headless-components` |
@@ -368,6 +374,7 @@ with Angular and Analog specifics in [ANGULAR_USAGE.md](ANGULAR_USAGE.md) and
 | [AGENTS.md](AGENTS.md) | Architecture, conventions, commands — the authoritative guide |
 | [apps/docs](apps/docs/README.md) | Public Starlight documentation application |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Product ownership and package boundaries |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Version 1.0 scope, minor milestones, and implementation tasks |
 | [docs/EDITOR_FOUNDATION.md](docs/EDITOR_FOUNDATION.md) | Stability checklist and MVP gaps |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Cloudflare pipeline, secrets, environments |
 | [apps/web/README.md](apps/web/README.md) | Web application |

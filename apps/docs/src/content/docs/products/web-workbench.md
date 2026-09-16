@@ -9,7 +9,7 @@ capabilities.
 It owns:
 
 - repository and workspace flows;
-- OPFS and IndexedDB persistence;
+- browser filesystem persistence through LightningFS/IndexedDB;
 - browser Git;
 - build and WebContainer preview;
 - session restoration and application routing;

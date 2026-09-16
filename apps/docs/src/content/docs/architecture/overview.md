@@ -1,6 +1,6 @@
 ---
 title: System overview
-description: How Vertex shares an editor without collapsing its products into one application.
+description: How Vertex shares editing behavior across browser, native, and embeddable surfaces.
 ---
 
 ```text
